@@ -87,8 +87,8 @@ const Form = () => {
                 <ContentLayout
                     header={
                         <Header
-                            variant="awsui-h1-sticky"
-                            description="(alpha version)"
+                            variant="h3"
+                            // description="(alpha version)"
                         >
                             Postgres explain
                         </Header>

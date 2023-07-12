@@ -1,11 +1,10 @@
-import logo from './logo.svg';
 import './App.css';
-import PostgresExplain from "./components/postgres-explain";
+import Form from "./components/Form";
 
 function App() {
   return (
     <div className="App">
-      <PostgresExplain />
+      <Form />
     </div>
   );
 }

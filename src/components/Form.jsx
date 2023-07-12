@@ -9,7 +9,7 @@ import {
     Header,
     SpaceBetween,
 } from '@cloudscape-design/components'
-import {SummaryTable, SummaryDiagram} from 'postgres-explain'
+import {SummaryTable, SummaryDiagram, PlanService} from 'postgres-explain'
 import {MainInfo} from './Info'
 import {ErrorAlert} from './ErrorReporting'
 
@@ -39,9 +39,13 @@ const QUERY_PLAN_EXAMPLE_PLACEHOLDER = `[
 ]`
 
 
-const PostgresExplain = () => {
+const planService = new PlanService();
+
+const Form = () => {
     function onClick(queryPlan) {
         if (!queryPlan) return
+
+        const plan = planService.fromSource(queryPlan);
 
         try {
             // eslint-disable-next-line
@@ -49,8 +53,10 @@ const PostgresExplain = () => {
 
             WebAssembly.instantiateStreaming(fetch('/main.wasm'), go.importObject).then(res => {
                 go.run(res.instance)
-                const out = global.explain(queryPlan)
+                const out = global.explain(plan)
+
                 console.log(out)
+
                 if (out.error) {
                     console.error(`${out.error}: ${out.error_details}`)
 
@@ -112,14 +118,15 @@ const PostgresExplain = () => {
                                         New explain
                                     </Button>
 
+                                    <Header variant="h2">Diagram</Header>
+                                    <SummaryDiagram summary={explained.summary} stats={explained.stats}/>
+
                                     <Header variant="h2">Summary</Header>
                                     <SummaryTable
                                         summary={explained.summary}
                                         stats={explained.stats}
                                     />
 
-                                    <Header variant="h2">Diagram</Header>
-                                    <SummaryDiagram summary={explained.summary} stats={explained.stats}/>
                                 </>
 
                             )
@@ -139,4 +146,4 @@ const PostgresExplain = () => {
     )
 }
 
-export default PostgresExplain
+export default Form

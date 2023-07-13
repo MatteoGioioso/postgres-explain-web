@@ -5,7 +5,20 @@ import {SummaryTableProps} from './interfaces'
 import Highlight from 'react-highlight'
 import {betterNumbers, getCellWarningColor} from './utils'
 import {useTheme} from "@mui/material/styles";
-import {Box, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Popover, TableCellProps} from '@mui/material';
+import {
+    Box,
+    Link,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Popover,
+    TableCellProps,
+    Grid, Typography
+} from '@mui/material';
 
 const GenericDetailsPopover = (props: { name: string, content: any, children: string }) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -221,21 +234,25 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
                                         <GenericDetailsPopover name={'Loops'}
                                                                content={row.loops}>{betterNumbers(row.loops)}</GenericDetailsPopover>
                                     </TableCell>
-                                    <TableCell align="right">
-                                        <div>
-                                            {'└' + '──'.repeat(row.node.level) + '->'}
-                                            <div>
+                                    <TableCell align="left">
+                                        <Grid container>
+                                            <Grid>
+                                                {'└' + '──'.repeat(row.node.level) + '->'}
+                                            </Grid>
+                                            <Grid>
                                                 <div>
-                                                    <Box>{row.node.operation} {row.node.scope && `on`} {row.node.scope}</Box>
+                                                    <div>
+                                                        <Box><Typography variant="h5" color='bold'>{row.node.operation}</Typography> {row.node.scope && `on`} {row.node.scope}</Box>
+                                                    </div>
+                                                    <div>
+                                                        <div>{row.node.costs}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div>{row.node.buffers}</div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div>{row.node.costs}</div>
-                                                </div>
-                                                <div>
-                                                    <div>{row.node.buffers}</div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            </Grid>
+                                        </Grid>
                                     </TableCell>
                                 </TableRow>
                             );

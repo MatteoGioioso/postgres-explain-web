@@ -1,22 +1,15 @@
 // project import
-import NavCard from './NavCard';
-import Navigation from './Navigation';
-import SimpleBar from 'components/third-party/SimpleBar';
+import {Box, List, ListItemButton, ListItemIcon, ListItemText, Typography} from "@mui/material";
+import { InfoCircleFilled } from '@ant-design/icons';
+import React from "react";
 
 // ==============================|| DRAWER CONTENT ||============================== //
 
 const DrawerContent = () => (
-  <SimpleBar
-    sx={{
-      '& .simplebar-content': {
-        display: 'flex',
-        flexDirection: 'column'
-      }
-    }}
-  >
-    <Navigation />
-    <NavCard />
-  </SimpleBar>
+    <List
+        sx={{mb: 1.5, py: 0, zIndex: 0}}
+    >
+    </List>
 );
 
 export default DrawerContent;

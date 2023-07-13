@@ -1,174 +1,248 @@
-import React from 'react'
-import { Box, Button, ColumnLayout, Popover, SpaceBetween, Table, TableProps } from '@cloudscape-design/components'
-import { PlanRow } from './types'
-import { SummaryTableProps } from './interfaces'
+import React, {useState} from 'react'
+import {PlanRow} from './types'
+import {SummaryTableProps} from './interfaces'
 // @ts-ignore
 import Highlight from 'react-highlight'
-import { betterNumbers, getCellWarningColor } from './utils'
+import {betterNumbers, getCellWarningColor} from './utils'
+import {useTheme} from "@mui/material/styles";
+import {Box, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Popover, TableCellProps} from '@mui/material';
 
 const GenericDetailsPopover = (props: { name: string, content: any, children: string }) => {
-  return (
-    <Popover
-      dismissAriaLabel="Close"
-      header={props.name}
-      content={props.content}
-      triggerType="custom"
-      dismissButton={false}
-      position="top"
-      size="large"
-    >
-      {props.children}
-    </Popover>
-  )
+    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+    const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handlePopoverClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+
+    return (
+        <>
+            {props.children}
+            <Popover
+                id="mouse-over-popover"
+                sx={{
+                    pointerEvents: 'none',
+                }}
+                open={open}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                onClose={handlePopoverClose}
+                disableRestoreFocus
+            >
+                {props.content}
+            </Popover>
+        </>
+    )
 }
 
 const getRowEstimateDirectionSymbol = (direction: string): string => {
-  switch (direction) {
-    case 'over':
-      return '↑'
-    case 'under':
-      return '↓'
-    default:
-      return ''
-  }
+    switch (direction) {
+        case 'over':
+            return '↑'
+        case 'under':
+            return '↓'
+        default:
+            return ''
+    }
 }
 
-// Cloudscape does not allow for cell background to be set:
-// https://github.com/cloudscape-design/components/discussions/718
-const ComparatorCell = ({ prop, totalProp, name }: { prop: number, totalProp: number, name?: string }) => {
-  return (
-    <Popover
-      dismissAriaLabel="Close"
-      header={name}
-      content={prop}
-      triggerType="custom"
-      dismissButton={false}
-      position="top"
-    >
-      <div style={{
-        fontSize: '20px',
-        display: 'inline',
-        color: getCellWarningColor(prop, totalProp),
-      }}>&#9632;</div>
-      <div style={{ color: '#2f2f2f', display: 'inline', marginLeft: '5px' }}>{betterNumbers(prop)}</div>
-    </Popover>
-  )
+const ComparatorCell = ({prop, totalProp, name}: { prop: number, totalProp: number, name?: string }) => {
+    const theme = useTheme();
+    return (
+        <TableCell
+            component="th"
+            style={{
+                color: '#2f2f2f',
+                backgroundColor: getCellWarningColor(prop, totalProp, theme)
+            }}>
+            {betterNumbers(prop)}
+        </TableCell>
+    )
 }
 
-const explainerColumns: Array<TableProps.ColumnDefinition<PlanRow>> = [
-  {
-    id: 'exclusive',
-    header: 'Time',
-    cell: (e) => <ComparatorCell prop={e.exclusive} totalProp={e.execution_time} name={'Exclusive time'}/>,
-  },
-  {
-    id: 'inclusive',
-    header: 'Cumulative Time',
-    cell: (e) => <ComparatorCell prop={e.inclusive} totalProp={e.execution_time} name={'Inclusive time'}/>,
-  },
-  {
-    id: 'rows',
-    header: 'Rows',
-    cell: (e) => <GenericDetailsPopover content={e.rows.total}
-                                        name="Rows">{betterNumbers(e.rows.total)}</GenericDetailsPopover>,
-  },
-  {
-    id: 'rows-removed',
-    header: 'Rows Removed',
-    cell: (e) => (
-      <>
-        {
-          e.rows.filters && (
-            <>
-              - {' '}
-              <GenericDetailsPopover
-                content={
-                  <div>
-                    <p>Filters: <Highlight>{e.rows.filters}</Highlight></p>
-                    <p>Removed: {e.rows.removed}</p>
-                  </div>
-                }
-                name="Rows removed by a filter"
-              >
-                {betterNumbers(e.rows.removed)}
-              </GenericDetailsPopover>
-            </>
-          )
-        }
-      </>
-    ),
-  },
-  {
-    id: 'rows_x',
-    header: (
-      <>
-        Rows E
-        <Popover
-          dismissAriaLabel="Close"
-          header={'Rows ES'}
-          content={'Rows estimate factor'}
-          triggerType="custom"
-          dismissButton={false}
-          position="top"
-        >
-          <Button iconName="status-info" variant="icon"/>
-        </Popover>
-      </>
-
-    ),
-    cell: (e) => (
-      <>
-        {getRowEstimateDirectionSymbol(e.rows.estimation_direction) + ' '}
-        <GenericDetailsPopover content={e.rows.estimation_factor}
-                               name="Rows estimate factor">{betterNumbers(e.rows.estimation_factor)}</GenericDetailsPopover>
-      </>
-    ),
-  },
-  {
-    id: 'loops',
-    header: 'Loops',
-    cell: (e) => <GenericDetailsPopover name={'Loops'}
-                                        content={e.loops}>{betterNumbers(e.loops)}</GenericDetailsPopover>,
-  },
-  {
-    id: 'node',
-    header: 'Node',
-    cell: (e) => (
-      <ColumnLayout columns={1} variant="text-grid">
-        <SpaceBetween size="l" direction="horizontal">
-          {'└' + '──'.repeat(e.node.level) + '->'}
-          <SpaceBetween size="xxxs">
-            <div>
-              <Box variant="awsui-key-label">{e.node.operation} {e.node.scope && `on`} {e.node.scope}</Box>
-            </div>
-            <div>
-              <div>{e.node.costs}</div>
-            </div>
-            <div>
-              <div>{e.node.buffers}</div>
-            </div>
-          </SpaceBetween>
-        </SpaceBetween>
-      </ColumnLayout>
-    ),
-    minWidth: 1100,
-  },
+const headCells = [
+    {
+        id: 'exclusive',
+        label: 'Time',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'inclusive',
+        label: 'Cumulative Time',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'rows',
+        label: 'Rows',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'rows-removed',
+        label: 'Rows Removed',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'rows_x',
+        label: 'Rows E',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'loops',
+        label: 'Loops',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'node',
+        label: 'Node',
+        align: 'left',
+        disablePadding: false,
+    },
 ]
 
-export const SummaryTable = ({ summary, stats }: SummaryTableProps) => {
-  return (
-    <Table
-      items={summary}
-      columnDefinitions={explainerColumns}
-      variant="embedded"
-      footer={
-        <Box textAlign="left">
-          <h3>Planning time
-            time: {stats.planning_time} ms</h3>
-          <h2>Execution
-            time: <b>{stats.execution_time} ms</b></h2>
-        </Box>
-      }
-    />
-  )
+
+function OrderTableHead({order, orderBy}) {
+    return (
+        <TableHead>
+            <TableRow>
+                {headCells.map((headCell) => (
+                    <TableCell
+                        key={headCell.id}
+                        padding={headCell.disablePadding ? 'none' : 'normal'}
+                        sortDirection={orderBy === headCell.id ? order : false}
+                    >
+                        {headCell.label}
+                    </TableCell>
+                ))}
+            </TableRow>
+        </TableHead>
+    );
+}
+
+
+export function SummaryTable({summary, stats}: SummaryTableProps) {
+    const [order] = useState('asc');
+    const [orderBy] = useState('trackingNo');
+    const [selected] = useState([]);
+
+    const isSelected = (trackingNo) => selected.indexOf(trackingNo) !== -1;
+
+    return (
+        <>
+            <TableContainer
+                sx={{
+                    width: '100vw',
+                    overflowX: 'auto',
+                    position: 'relative',
+                    display: 'block',
+                    maxWidth: '100%',
+                    '& td, & th': {whiteSpace: 'nowrap'}
+                }}
+            >
+                <Table
+                    aria-labelledby="tableTitle"
+                    sx={{
+                        '& .MuiTableCell-root:first-of-type': {
+                            pl: 2
+                        },
+                        '& .MuiTableCell-root:last-of-type': {
+                            pr: 3
+                        }
+                    }}
+                >
+                    <OrderTableHead order={order} orderBy={orderBy}/>
+                    <TableBody>
+                        {summary.map((row, index) => {
+                            const labelId = `enhanced-table-checkbox-${index}`;
+
+                            return (
+                                <TableRow
+                                    hover
+                                    role="checkbox"
+                                    sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                                    tabIndex={-1}
+                                    key={row.node_id}
+                                >
+                                    <ComparatorCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'}/>
+                                    <ComparatorCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'}/>
+                                    <TableCell align="right">
+                                        <GenericDetailsPopover content={row.rows.total}
+                                                               name="Rows">{betterNumbers(row.rows.total)}</GenericDetailsPopover>
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <>
+                                            {
+                                                row.rows.filters && (
+                                                    <>
+                                                        - {' '}
+                                                        <GenericDetailsPopover
+                                                            content={
+                                                                <div>
+                                                                    <p>Filters: <Highlight>{row.rows.filters}</Highlight></p>
+                                                                    <p>Removed: {row.rows.removed}</p>
+                                                                </div>
+                                                            }
+                                                            name="Rows removed by a filter"
+                                                        >
+                                                            {betterNumbers(row.rows.removed)}
+                                                        </GenericDetailsPopover>
+                                                    </>
+                                                )
+                                            }
+                                        </>
+
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <>
+                                            {getRowEstimateDirectionSymbol(row.rows.estimation_direction) + ' '}
+                                            <GenericDetailsPopover content={row.rows.estimation_factor}
+                                                                   name="Rows estimate factor">{betterNumbers(row.rows.estimation_factor)}</GenericDetailsPopover>
+                                        </>
+
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <GenericDetailsPopover name={'Loops'}
+                                                               content={row.loops}>{betterNumbers(row.loops)}</GenericDetailsPopover>
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <div>
+                                            {'└' + '──'.repeat(row.node.level) + '->'}
+                                            <div>
+                                                <div>
+                                                    <Box>{row.node.operation} {row.node.scope && `on`} {row.node.scope}</Box>
+                                                </div>
+                                                <div>
+                                                    <div>{row.node.costs}</div>
+                                                </div>
+                                                <div>
+                                                    <div>{row.node.buffers}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </>
+    );
 }

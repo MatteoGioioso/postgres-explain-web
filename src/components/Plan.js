@@ -2,6 +2,7 @@ import {useContext, useEffect, useState} from 'react';
 
 // material-ui
 import {
+    Box,
     Grid,
     Typography
 } from '@mui/material';
@@ -10,6 +11,8 @@ import {
 import {PlanContext} from "../MainContext";
 import {SummaryDiagram} from "./Plan/SummaryDiagram";
 import {PlanService} from "./Plan/parser";
+import {SummaryTable} from "./Plan/SummaryTable";
+import MainCard from "./MainCard";
 
 
 const planService = new PlanService();
@@ -72,6 +75,26 @@ const DashboardDefault = () => {
                     />)
                 }
             </Grid>
+            <Grid>
+                <Box sx={{m: 10}} />
+            </Grid>
+            <Grid container>
+                <Grid container alignItems="center" justifyContent="space-between">
+                    <Grid item>
+                        <Typography variant="h5">Table</Typography>
+                    </Grid>
+                    <Grid item/>
+                </Grid>
+                <MainCard sx={{mt: 2}} content={false}>
+                    {Object.keys(explained).length !== 0 && (
+                        <SummaryTable
+                            summary={explained.summary}
+                            stats={explained.stats}
+                        />)
+                    }
+                </MainCard>
+            </Grid>
+
         </Grid>
     );
 };

@@ -4,7 +4,7 @@ import {PlanRow} from '../types'
 // @ts-ignore
 import Highlight from 'react-highlight'
 import {betterNumbers, getCellWarningColor, truncateText} from '../utils'
-import AnalyticEcommerce from "../AnalyticEcommerce";
+import Node from "./Node";
 import {useTheme} from "@mui/material/styles";
 
 // @ts-ignore
@@ -18,7 +18,7 @@ export const NodeWidget = memo(({data, isConnectable}: { data: PlanRow }) => {
                 isConnectable={false}
                 style={{backgroundColor: 'transparent', color: 'transparent'}}
             />
-            <AnalyticEcommerce
+            <Node
                 title={data.node.operation}
                 count={truncateText(data.node.scope, 25)}
                 percentage={betterNumbers(data.exclusive)}

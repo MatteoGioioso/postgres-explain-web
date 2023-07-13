@@ -1,8 +1,9 @@
+// @ts-nocheck
 // material-ui
 import { Box, Chip, Grid, Stack, Typography } from '@mui/material';
 
 // project import
-import MainCard from './MainCard';
+import MainCard from '../MainCard';
 
 // assets
 import { RiseOutlined, FallOutlined } from '@ant-design/icons';
@@ -10,29 +11,30 @@ import { RiseOutlined, FallOutlined } from '@ant-design/icons';
 // ==============================|| STATISTICS - ECOMMERCE CARD  ||============================== //
 
 const AnalyticEcommerce = ({ color, title, count, percentage, isLoss, extra }) => (
-    <MainCard contentSX={{ p: 2.25 }}>
+    <MainCard contentSX={{ p: 2.25 }} sx={{width: '350px'}}>
         <Stack spacing={0.5}>
-            <Typography variant="h6" color="textSecondary">
-                {title}
-            </Typography>
+
             <Grid container alignItems="center">
-                <Grid item>
-                    <Typography variant="h4" color="inherit">
-                        {count}
-                    </Typography>
-                </Grid>
+                {/*<Grid item>*/}
+                {/*    <Typography variant="p" color="inherit">*/}
+                {/*        {count}*/}
+                {/*    </Typography>*/}
+                {/*</Grid>*/}
+                <Typography variant="h5" color="bold">
+                    {title}
+                </Typography>
                 {percentage && (
                     <Grid item>
                         <Chip
                             variant="combined"
-                            color={color}
+                            style={{backgroundColor: color}}
                             icon={
                                 <>
                                     {!isLoss && <RiseOutlined style={{ fontSize: '0.75rem', color: 'inherit' }} />}
                                     {isLoss && <FallOutlined style={{ fontSize: '0.75rem', color: 'inherit' }} />}
                                 </>
                             }
-                            label={`${percentage}%`}
+                            label={`${percentage} ms`}
                             sx={{ ml: 1.25, pl: 1 }}
                             size="small"
                         />
@@ -42,11 +44,9 @@ const AnalyticEcommerce = ({ color, title, count, percentage, isLoss, extra }) =
         </Stack>
         <Box sx={{ pt: 2.25 }}>
             <Typography variant="caption" color="textSecondary">
-                You made an extra{' '}
                 <Typography component="span" variant="caption" sx={{ color: `${color || 'primary'}.main` }}>
                     {extra}
                 </Typography>{' '}
-                this year
             </Typography>
         </Box>
     </MainCard>

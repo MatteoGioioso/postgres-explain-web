@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react';
-import {Link as RouterLink} from 'react-router-dom';
+import {useContext} from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import {
@@ -17,6 +17,7 @@ import {QUERY_PLAN_EXAMPLE_PLACEHOLDER} from "./utils";
 
 // project import
 import MainCard from './MainCard';
+import {PlanContext} from "../MainContext";
 
 // ==============================|| AUTHENTICATION - WRAPPER ||============================== //
 
@@ -46,6 +47,8 @@ const AuthCard = ({children, ...other}) => (
 // ============================|| FIREBASE - REGISTER ||============================ //
 
 const FormPlan = () => {
+    const {setPlan} = useContext(PlanContext);
+    const navigate = useNavigate();
 
     return (
         <AuthWrapper>
@@ -54,15 +57,8 @@ const FormPlan = () => {
                     plan: ''
                 }}
                 onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
-                    try {
-                        setStatus({success: false});
-                        setSubmitting(false);
-                    } catch (err) {
-                        console.error(err);
-                        setStatus({success: false});
-                        setErrors({submit: err.message});
-                        setSubmitting(false);
-                    }
+                    setPlan(values.plan)
+                    navigate('/plan')
                 }}
             >
                 {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (

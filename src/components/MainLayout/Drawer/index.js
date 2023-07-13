@@ -3,10 +3,6 @@ import { useMemo } from 'react';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import { Box, Drawer, useMediaQuery } from '@mui/material';
-
-// project import
-// import DrawerHeader from './DrawerHeader';
-// import DrawerContent from './DrawerContent';
 import MiniDrawerStyled from './MiniDrawerStyled';
 import { drawerWidth } from '../../../config';
 
@@ -16,12 +12,7 @@ const MainDrawer = ({ open, handleDrawerToggle, window }) => {
   const theme = useTheme();
   const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'));
 
-  // responsive drawer container
   const container = window !== undefined ? () => window().document.body : undefined;
-
-  // header content
-  // const drawerContent = useMemo(() => <DrawerContent />, []);
-  // const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open]);
 
   return (
     <Box component="nav" sx={{ flexShrink: { md: 0 }, zIndex: 1300 }} aria-label="mailbox folders">

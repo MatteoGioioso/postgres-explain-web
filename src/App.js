@@ -1,12 +1,16 @@
-import './App.css';
-import Form from "./components/Form";
+// import Form from "./components/Form";
+import ThemeCustomization from './themes';
+import Router from "./Router";
+import {PlanProvider} from "./MainContext";
 
 function App() {
-  return (
-    <div className="App">
-      <Form />
-    </div>
-  );
+    return (
+        <ThemeCustomization>
+            <PlanProvider>
+                <Router/>
+            </PlanProvider>
+        </ThemeCustomization>
+    );
 }
 
 export default App;

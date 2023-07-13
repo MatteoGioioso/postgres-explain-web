@@ -1,12 +1,13 @@
-import './App.css';
-import Form from "./components/Form";
+// import Form from "./components/Form";
+import ThemeCustomization from './themes';
+import Router from "./Router";
 
 function App() {
-  return (
-    <div className="App">
-      <Form />
-    </div>
-  );
+    return (
+        <ThemeCustomization>
+            <Router/>
+        </ThemeCustomization>
+    );
 }
 
 export default App;

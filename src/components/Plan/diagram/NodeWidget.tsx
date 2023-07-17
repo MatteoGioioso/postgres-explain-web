@@ -3,7 +3,7 @@ import {Handle, NodeToolbar, Position} from 'reactflow'
 import {PlanRow} from '../types'
 // @ts-ignore
 import Highlight from 'react-highlight'
-import {betterNumbers, getCellWarningColor, truncateText} from '../utils'
+import {betterNumbers, getPercentageColor, truncateText} from '../utils'
 import Node from "./Node";
 import {useTheme} from "@mui/material/styles";
 
@@ -19,13 +19,9 @@ export const NodeWidget = memo(({data, isConnectable}: { data: PlanRow }) => {
                 style={{backgroundColor: 'transparent', color: 'transparent'}}
             />
             <Node
-                title={data.node.operation}
-                count={truncateText(data.node.scope, 25)}
-                percentage={betterNumbers(data.exclusive)}
-                extra={`Rows returned: ${betterNumbers(data.rows.total)}`}
-                color={getCellWarningColor(data.exclusive, data.execution_time, theme)}
-                isLoss={false}/>
-
+                data={data}
+                theme={theme}
+            />
             <Handle
                 type="source"
                 position={Position.Bottom}

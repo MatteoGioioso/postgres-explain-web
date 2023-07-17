@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { forwardRef } from 'react';
 
 // material-ui
@@ -31,7 +30,7 @@ const MainCard = forwardRef(
             style,
             codeHighlight,
             ...others
-        },
+        }: any,
         ref
     ) => {
         const theme = useTheme();
@@ -45,9 +44,12 @@ const MainCard = forwardRef(
                 sx={{
                     border: border ? '1px solid' : 'none',
                     borderRadius: 2,
+                    // @ts-ignore
                     borderColor: theme.palette.mode === 'dark' ? theme.palette.divider : theme.palette.grey.A800,
+                    // @ts-ignore
                     boxShadow: boxShadow && (!border || theme.palette.mode === 'dark') ? shadow || theme.customShadows.z1 : 'inherit',
                     ':hover': {
+                        // @ts-ignore
                         boxShadow: boxShadow ? shadow || theme.customShadows.z1 : 'inherit'
                     },
                     '& pre': {

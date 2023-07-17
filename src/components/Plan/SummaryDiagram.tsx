@@ -1,4 +1,4 @@
-import React, {useMemo, useEffect} from 'react'
+import React, {useMemo, useEffect, useCallback} from 'react'
 import ReactFlow, {
     Controls,
     Edge,
@@ -10,7 +10,7 @@ import ReactFlow, {
     useEdgesState,
     useNodesState,
     useReactFlow,
-    ReactFlowProvider
+    ReactFlowProvider, applyNodeChanges
 } from 'reactflow'
 import {SummaryTableProps} from './interfaces'
 import {PlanRow} from './types'
@@ -23,7 +23,7 @@ import {useTheme} from "@mui/material/styles";
 // @ts-ignore
 const elk = new ELK();
 
-const getLayoutedElements = (nodes, edges, options = {}) => {
+const getLayoutedElements = (nodes, edges, options = {}, theme) => {
     const graph = {
         id: 'root',
         layoutOptions: options,
@@ -31,8 +31,8 @@ const getLayoutedElements = (nodes, edges, options = {}) => {
             ...node,
             targetPosition: 'top',
             sourcePosition: 'bottom',
-            width: 350,
-            height: 100,
+            width: theme.diagram.node.width,
+            height: theme.diagram.node.height,
         })),
         edges: edges,
     };
@@ -52,11 +52,15 @@ const getLayoutedElements = (nodes, edges, options = {}) => {
 
 export const Diagram = ({summary, stats}: SummaryTableProps) => {
     const theme = useTheme();
-    const { fitView } = useReactFlow()
-    const [nodes, setNodes, onNodesChange] = useNodesState([])
+    const {fitView} = useReactFlow()
+    const [nodes, setNodes] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const nodeTypes = useMemo(() => ({special: NodeWidget}), [])
     const edgeTypes = useMemo(() => ({special: EdgeWidget}), [])
+    const onNodesChange = useCallback(
+        (x) => setNodes((newNode) => applyNodeChanges(x, newNode)),
+        [setNodes]
+    );
 
     // Elk has a *huge* amount of options to configure. To see everything you can
     // tweak check out:
@@ -85,7 +89,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                 sourcePosition: Position.Bottom,
                 type: 'special',
                 draggable: true,
-                position: {x: 0, y:0},
+                position: {x: 0, y: 0},
             }
 
             initialNodes.push(node)
@@ -116,10 +120,9 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
 
         const opts = {'elk.direction': 'DOWN', ...elkOptions};
 
-        getLayoutedElements(initialNodes, initialEdges, opts).then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
+        getLayoutedElements(initialNodes, initialEdges, opts, theme).then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
             setNodes(layoutedNodes);
             setEdges(layoutedEdges);
-
             window.requestAnimationFrame(() => fitView());
         });
     }, [])

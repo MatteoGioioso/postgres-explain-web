@@ -254,7 +254,7 @@ export class PlanService {
     source = source.replace(/^╔(═)+╗\r?\n/gm, "")
 
     // Remove quotes around lines, both ' and "
-    source = source.replace(/^(["'])(.*)\1\r?\n/gm, "$2\n")
+    source = source.replace(/^(["'])(.*)(\1[\r\n]?|\1$)/gm, "$2\n")
 
     // Remove "+" line continuations
     source = source.replace(/\s*\+\r?\n/g, "\n")

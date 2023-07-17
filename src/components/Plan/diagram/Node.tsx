@@ -8,7 +8,7 @@ import {
     Divider,
     Grid,
     IconButton,
-    IconButtonProps, LinearProgress,
+    IconButtonProps, LinearProgress, LinearProgressProps,
     Stack,
     styled,
     Typography
@@ -30,6 +30,8 @@ import {
 } from "../utils";
 import NodeTable from "./NodeTable";
 import {PlanRow} from "../types";
+import NodeTabs from "./NodeTabs";
+import NodePopover from "./NodePopover";
 
 interface ExpandMoreProps extends IconButtonProps {
     expand: boolean;
@@ -38,6 +40,26 @@ interface ExpandMoreProps extends IconButtonProps {
 interface NodeProps {
     data: PlanRow
     theme: any
+}
+
+function LinearProgressWithLabel(props: LinearProgressProps & { value: number, theme: any, cellWarningColor: string }) {
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+            <Box sx={{width: '100%', mr: 1}}>
+                <LinearProgress variant="determinate" {...props} sx={{
+                    backgroundColor: props.theme.palette.secondary.lighter,
+                    '& .MuiLinearProgress-bar': {
+                        backgroundColor: props.cellWarningColor
+                    }
+                }}/>
+            </Box>
+            <Box sx={{minWidth: 35}}>
+                <Typography variant="body2" color="text.secondary">{`${Math.round(
+                    props.value,
+                )}%`}</Typography>
+            </Box>
+        </Box>
+    );
 }
 
 const ExpandMore = styled((props: ExpandMoreProps) => {
@@ -116,35 +138,64 @@ const Node = ({data, theme}: NodeProps) => {
             </Stack>
             {showTimingChip(perc) && (
                 <Box sx={{pt: 1, pb: 1}}>
-                    <LinearProgress sx={{
-                        backgroundColor: theme.palette.secondary.lighter,
-                        '& .MuiLinearProgress-bar': {
-                            backgroundColor: cellWarningColor
-                        }
-                    }} variant="determinate" value={perc}/>
+                    <LinearProgressWithLabel cellWarningColor={cellWarningColor} theme={theme} value={perc}/>
                 </Box>
             )}
 
             <Box sx={{pt: 1}}>
-                <Typography variant="caption">
-                    <Typography variant="caption" sx={{color: `${cellWarningColor || 'primary'}.main`}}>
-                        Rows returned: {` `}
-                        <b>{betterNumbers(data.rows.total)}</b>
-                    </Typography>{' '}
-                </Typography>
+                <Typography sx={{color: `${cellWarningColor || 'primary'}.main`}}>
+                    Rows returned: {` `}
+                    <b>{betterNumbers(data.rows.total)}</b>
+                </Typography>{' '}
             </Box>
             <Box sx={{pt: 1, pb: 0}}>
                 <Divider/>
             </Box>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent sx={{p: 0.2}}>
-                    <Typography paragraph>
-                        {data.node.scope && (<p style={{margin: 0}}><b>on </b><code>{truncateText(data.node.scope, 10000)}</code></p>)}
-                        {data.node.index && (<p style={{margin: 0}}><b>by </b><code>{truncateText(data.node.index, 10000)}</code></p>)}
+                    <Box sx={{pt: 1}}>
+                        {data.node.scope && (
+                            <NodePopover
+                                component={
+                                    <Typography><b>on </b><code>{truncateText(data.node.scope, theme.diagram.text.maxChars)}</code></Typography>
+                                }
+                                text={data.node.scope}
+                            >
+                                <Typography><b>on </b><code>{data.node.scope}</code></Typography>
+                            </NodePopover>
+                        )}
+                        {data.node.index && (
+                            <NodePopover
+                                component={
+                                    <Typography><b>by </b><code>{truncateText(data.node.index, theme.diagram.text.maxChars)}</code></Typography>
+                                }
+                                text={data.node.index}
+                            >
+                                <Typography><b>by </b><code>{data.node.index}</code></Typography>
+                            </NodePopover>
+                        )}
                         {data.node.filters && (
-                            <p style={{margin: 0}}><b>filter by </b><code>{truncateText(data.node.filters, 10000)}</code></p>)}
-                    </Typography>
-                    <NodeTable buffers={data.buffers}/>
+                            <NodePopover
+                                component={<Typography><b>filter
+                                    by </b><code>{truncateText(data.node.filters, theme.diagram.text.maxChars)}</code></Typography>
+                                }
+                                text={data.node.index}
+                            >
+                                <Typography><b>filter by </b><code>{data.node.filters}</code></Typography>
+                            </NodePopover>
+                        )}
+                        {data.node.filters && (
+                            <p style={{margin: 0}}><b>rows removed by filters: </b>{betterNumbers(data.rows.removed)},
+                                ({Math.round(getPercentage(data.rows.removed, data.rows.total))} %)</p>
+                        )}
+                    </Box>
+                    <Box sx={{pt: 1, pb: 0}}>
+                        <Divider/>
+                    </Box>
+                    {/*<NodeTabs/>*/}
+                    <Box sx={{pt: 1}}>
+                        <NodeTable buffers={data.buffers}/>
+                    </Box>
                 </CardContent>
             </Collapse>
         </MainCard>

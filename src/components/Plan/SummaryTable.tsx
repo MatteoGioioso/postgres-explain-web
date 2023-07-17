@@ -5,6 +5,7 @@ import Highlight from 'react-highlight'
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import {headCells} from "./table/Cells";
 import {Row} from "./table/Row";
+import MainCard from "./MainCard";
 
 
 function OrderTableHead({order, orderBy}) {
@@ -57,7 +58,7 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
                     <OrderTableHead order={order} orderBy={orderBy}/>
                     <TableBody>
                         {summary.map((row, index) => {
-                            return Row(row);
+                            return <Row {...row}/>;
                         })}
                     </TableBody>
                 </Table>

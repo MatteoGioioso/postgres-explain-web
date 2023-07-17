@@ -20,17 +20,28 @@ export default function NodeTable({buffers}) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                        <TableRow
-                            key={'buffers'}
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                            <TableCell sx={{p: 0.2, fontSize: 12}} component="th" scope="row">
-                                Blocks:
-                            </TableCell>
-                            <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.reads)}</TableCell>
-                            <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.written)}</TableCell>
-                            <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.hits)}</TableCell>
-                        </TableRow>
+                    <TableRow
+                        key={'buffers'}
+                        sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                    >
+                        <TableCell sx={{p: 0.2, fontSize: 12}} component="th" scope="row">
+                            Shared:
+                        </TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.reads)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.written)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.hits)}</TableCell>
+                    </TableRow>
+                    <TableRow
+                        key={'buffers'}
+                        sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                    >
+                        <TableCell sx={{p: 0.2, fontSize: 12}} component="th" scope="row">
+                            Temp:
+                        </TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.temp_reads)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.temp_written)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.temp_hits)}</TableCell>
+                    </TableRow>
                 </TableBody>
             </Table>
         </TableContainer>

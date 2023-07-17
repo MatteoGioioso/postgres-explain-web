@@ -63,8 +63,9 @@ export function Row(row: PlanRow) {
                     <Grid>
                         <div>
                             <div>
-                                <Box><Typography variant="h5"
-                                                 color='bold'>{row.node.operation}</Typography> {row.node.scope && `on`} {row.node.scope}
+                                <Box sx={{pl: 1.5}}>
+                                    <Typography variant="h5" color='bold'>{row.node.operation}</Typography>
+                                    {row.node.scope && `on`} {row.node.scope}
                                 </Box>
                             </div>
                             <div>

@@ -12,7 +12,10 @@ import {PlanContext} from "../MainContext";
 import {SummaryDiagram} from "./Plan/SummaryDiagram";
 import {PlanService} from "./Plan/parser";
 import {SummaryTable} from "./Plan/SummaryTable";
-import MainCard from "./MainCard";
+import MainCard from "./Plan/MainCard";
+import {ErrorAlert} from "./ErrorReporting";
+import {useNavigate} from "react-router-dom";
+import {OverallStats} from "./Plan/OverallStats";
 
 
 const planService = new PlanService();
@@ -21,12 +24,13 @@ const DashboardDefault = () => {
     const {plan} = useContext(PlanContext);
     const [error, setError] = useState()
     const [explained, setExplained] = useState({})
+    const navigate = useNavigate();
 
     function fetchQueryPlan(queryPlan) {
         if (!queryPlan) return
 
         const plan = planService.fromSource(queryPlan);
-
+        console.log(JSON.parse(plan))
         try {
             // eslint-disable-next-line
             const go = new Go()
@@ -34,8 +38,6 @@ const DashboardDefault = () => {
             WebAssembly.instantiateStreaming(fetch('/main.wasm'), go.importObject).then(res => {
                 go.run(res.instance)
                 const out = global.explain(plan)
-
-                console.log(out)
 
                 if (out.error) {
                     console.error(`${out.error}: ${out.error_details}`)
@@ -46,7 +48,9 @@ const DashboardDefault = () => {
                         stackTrace: out.error_stack,
                     })
                 } else {
-                    setExplained(JSON.parse(out.explained))
+                    const parsedExplained = JSON.parse(out.explained);
+                    console.log(parsedExplained)
+                    setExplained(parsedExplained)
                 }
             })
 
@@ -59,11 +63,26 @@ const DashboardDefault = () => {
 
 
     useEffect(() => {
-        fetchQueryPlan(plan)
-    }, [plan])
+        if (plan) {
+            fetchQueryPlan(plan)
+        } else {
+            navigate('/')
+        }
+    }, [])
 
     return (
         <Grid container>
+            {error && <ErrorAlert error={error}/>}
+            <Grid container alignItems="center" justifyContent="space-between">
+                <Grid item>
+                    <Typography variant="h5">Overall statistics</Typography>
+                </Grid>
+            </Grid>
+            <MainCard sx={{mt: 2, mb: 2}} content={false}>
+                {Object.keys(explained).length !== 0 && (
+                    <OverallStats stats={explained.stats}/>
+                )}
+            </MainCard>
             <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
                     <Typography variant="h5">Diagram</Typography>
@@ -76,14 +95,13 @@ const DashboardDefault = () => {
                 }
             </Grid>
             <Grid>
-                <Box sx={{m: 10}} />
+                <Box sx={{m: 10}}/>
             </Grid>
             <Grid container>
                 <Grid container alignItems="center" justifyContent="space-between">
                     <Grid item>
                         <Typography variant="h5">Table</Typography>
                     </Grid>
-                    <Grid item/>
                 </Grid>
                 <MainCard sx={{mt: 2}} content={false}>
                     {Object.keys(explained).length !== 0 && (

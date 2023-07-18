@@ -1,31 +1,28 @@
 import React from 'react'
-import { Alert, Button, SpaceBetween } from '@cloudscape-design/components'
+import {Alert, AlertTitle, Box, Button, Divider, Link, Typography} from "@mui/material";
 
-export const ErrorAlert = ({ error, onDismiss }) => {
-  const {message, error_details, stackTrace} = error
-  return (
-    <Alert
-      dismissAriaLabel="Close alert"
-      dismissible
-      statusIconAriaLabel="Error"
-      type="error"
-      onDismiss={onDismiss}
-    >
-      <SpaceBetween size="xxs">
+export const ErrorAlert = ({error}) => {
+    const {message, error_details, stackTrace} = error
+    return (
         <div>
-          <div>Message: {message}</div>
-          <div>Details: {error_details}</div>
-          <div>Stack: {stackTrace ? stackTrace.split("\n\t").map(line => <p style={{margin: "1px", fontSize: "12px"}}>{line}</p>) : '-'}</div>
-        </div>
-        <Button
-          href={`https://github.com/MatteoGioioso/postgres-explain/issues/new?title=[Explain web]: add your title&body=${JSON.stringify(error, null, 2)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="link">
-          Report issue
-        </Button>
+            <Alert severity="error" action={
+                <Button
+                    color="inherit"
+                    size="small"
+                    component={Link}
+                    href={`https://github.com/MatteoGioioso/postgres-explain-web/issues/new?title=[Explain web]: add your title (Please attach also the full query plan)&body=${JSON.stringify(error, null, 2)}`}
+                >
+                    REPORT ISSUE
+                </Button>
+            }>
+                <AlertTitle><Typography variant='h5'>{message}</Typography></AlertTitle>
+                <Typography variant='h6'>{error_details}</Typography>
 
-      </SpaceBetween>
-    </Alert>
-  )
+                <Box pt={3}>
+                    <Typography variant='h6'>Stack: </Typography>
+                    <div>{stackTrace ? stackTrace.split("\n\t").map((line, i) => <p style={{margin: "1px", fontSize: "12px"}}>{`.`.repeat(i)}{line}</p>) : '-'}</div>
+                </Box>
+            </Alert>
+        </div>
+    )
 }

@@ -1,5 +1,5 @@
 // material-ui
-import {Box, ButtonBase, IconButton, Stack, Link, Typography, useMediaQuery, Button} from '@mui/material';
+import {Box, IconButton, Stack, Link, Typography, useMediaQuery, Button} from '@mui/material';
 import {GithubOutlined} from '@ant-design/icons';
 import {Link as RouterLink} from 'react-router-dom';
 
@@ -13,27 +13,12 @@ const HeaderContent = () => {
 
     return (
         <>
-            {/*<Box sx={{flexShrink: 0, ml: 0.75}}>*/}
-            {/*    <ButtonBase*/}
-            {/*        sx={{*/}
-            {/*            p: 0.25,*/}
-            {/*            // bgcolor: 'transparent',*/}
-            {/*            borderRadius: 1,*/}
-            {/*            '&:hover': {bgcolor: 'secondary.lighter'}*/}
-            {/*        }}*/}
-            {/*    >*/}
-            {/*        <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>*/}
-            {/*            <Typography variant="subtitle1">Home</Typography>*/}
-            {/*        </Stack>*/}
-            {/*    </ButtonBase>*/}
-            {/*</Box>*/}
             {!matchesXs && <Search/>}
 
             {matchesXs && <Box sx={{width: '100%', ml: 1}}/>}
 
-
             <Button component={RouterLink} to={'/'}>
-                <Box sx={{flexShrink: 0, ml: 0.75}}>
+                <Box sx={{flexShrink: 0, ml: 0.75, pr: 1.5}}>
                     <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>
                         <Typography variant="subtitle1">Postgres Explain</Typography>
                     </Stack>

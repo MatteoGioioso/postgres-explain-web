@@ -31,6 +31,7 @@ export const SORT_KEY_PROP = "Sort Key";
 export const JOIN_TYPE_PROP = "Join Type";
 export const INDEX_NAME_PROP = "Index Name";
 export const HASH_CONDITION_PROP = "Hash Cond";
+export const INDEX_CONDITION = "Index Cond";
 export const EXECUTION_TIME_PROP = "Execution Time";
 export const TOTAL_RUNTIME = "Total Runtime";
 /**
@@ -137,6 +138,7 @@ export const HASH_JOIN = "Hash Join";
 export const HASH_AGGREGATE = "HashAggregate";
 export const SORT = "Sort";
 export const FUNCTION_SCAN = "Function Scan";
+export const GROUP_AGGREGATE = "GroupAggregate";
 export const X_POSITION_FACTOR = "*X Position Factor";
 export const Y_POSITION_FACTOR = "*Y Position Factor";
 
@@ -159,6 +161,8 @@ export interface Stats {
   execution_time: number /* float64 */;
   planning_time: number /* float64 */;
   max_rows: number /* float64 */;
+  max_duration: number /* float64 */;
+  max_cost: number /* float64 */;
 }
 export type Plans = {
     Plan: { [key: string]: any};
@@ -171,18 +175,22 @@ export interface Position {
   x_factor: number /* float64 */;
   y_factor: number /* float64 */;
 }
-export interface NodeSummary {
-  operation: string;
-  scope: string;
-  level: number /* int */;
-  costs: string;
-  buffers: string;
-  relation: string;
+export interface NodeScopes {
+  table: string;
   filters: string;
   index: string;
+  key: string;
+  method: string;
+  condition: string;
+}
+export interface Costs {
+  startup_cost: number /* float64 */;
+  total_cost: number /* float64 */;
+  plan_width: number /* float64 */;
 }
 export interface Rows {
   total: number /* float64 */;
+  planned_rows: number /* float64 */;
   removed: number /* float64 */;
   filters: string;
   estimation_factor: number /* float64 */;
@@ -199,20 +207,28 @@ export interface Buffers {
 export interface PlanRow {
   node_id: string;
   node_parent_id: string;
+  operation: string;
   level: number /* int */;
   branch: string;
-  node: NodeSummary;
+  scopes: NodeScopes;
   inclusive: number /* float64 */;
   loops: number /* float64 */;
   rows: Rows;
+  costs: Costs;
   exclusive: number /* float64 */;
   execution_time: number /* float64 */;
   buffers: Buffers;
   sub_plan_of: string;
-  position: Position;
 }
 export interface Operation {
-  scope: string;
+  relation_name: string;
   index: string;
   filter: string;
+  key: string;
+  method: string;
+  condition: string;
+}
+export interface Scope {
+  name: string;
+  prepend: string;
 }

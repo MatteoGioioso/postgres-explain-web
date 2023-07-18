@@ -4,7 +4,7 @@ import {Box, Grid, Table, TableBody, TableCell, TableContainer, TableRow, Typogr
 import {betterNumbers, betterTiming} from "./utils";
 import {Row} from "./table/Row";
 import React from "react";
-import {ComparatorCell, GenericDetailsPopover, getRowEstimateDirectionSymbol} from "./table/Cells";
+import {TimingCell, GenericDetailsPopover, getRowEstimateDirectionSymbol} from "./table/Cells";
 
 interface OverallStatsProps {
     stats: Stats

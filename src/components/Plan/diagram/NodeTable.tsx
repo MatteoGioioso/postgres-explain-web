@@ -21,7 +21,7 @@ export default function NodeTable({buffers}) {
                 </TableHead>
                 <TableBody>
                     <TableRow
-                        key={'buffers'}
+                        key={'shared'}
                         sx={{'&:last-child td, &:last-child th': {border: 0}}}
                     >
                         <TableCell sx={{p: 0.2, fontSize: 12}} component="th" scope="row">
@@ -32,7 +32,7 @@ export default function NodeTable({buffers}) {
                         <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.hits)}</TableCell>
                     </TableRow>
                     <TableRow
-                        key={'buffers'}
+                        key={'temp'}
                         sx={{'&:last-child td, &:last-child th': {border: 0}}}
                     >
                         <TableCell sx={{p: 0.2, fontSize: 12}} component="th" scope="row">

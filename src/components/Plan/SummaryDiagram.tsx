@@ -125,7 +125,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
             setEdges(layoutedEdges);
             window.requestAnimationFrame(() => fitView());
         });
-    }, [])
+    }, [summary])
 
     return (
         <div style={{height: '80vh', width: '100vw'}}>

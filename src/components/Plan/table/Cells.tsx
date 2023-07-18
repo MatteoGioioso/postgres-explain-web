@@ -1,7 +1,7 @@
 import React from "react";
 import {Popover, TableCell} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {betterNumbers, getPercentageColor} from "../utils";
+import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
 
 export const GenericDetailsPopover = (props: { name: string, content: any, children: string }) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -54,7 +54,7 @@ export const getRowEstimateDirectionSymbol = (direction: string): string => {
     }
 }
 
-export const ComparatorCell = ({prop, totalProp, name}: { prop: number, totalProp: number, name?: string }) => {
+export const TimingCell = ({prop, totalProp, name}: { prop: number, totalProp: number, name?: string }) => {
     const theme = useTheme();
     return (
         <TableCell
@@ -63,7 +63,7 @@ export const ComparatorCell = ({prop, totalProp, name}: { prop: number, totalPro
                 color: '#2f2f2f',
                 backgroundColor: getPercentageColor(prop, totalProp, theme)
             }}>
-            {betterNumbers(prop)}
+            {betterTiming(prop)}
         </TableCell>
     )
 }
@@ -108,6 +108,12 @@ export const headCells = [
     {
         id: 'node',
         label: 'Node',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'actions',
+        label: '',
         align: 'left',
         disablePadding: false,
     },

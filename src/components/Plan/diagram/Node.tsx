@@ -1,41 +1,24 @@
 // material-ui
-import {
-    Box,
-    CardActions,
-    CardContent,
-    Chip,
-    Collapse,
-    Divider,
-    Grid,
-    IconButton,
-    IconButtonProps, LinearProgress, LinearProgressProps,
-    Stack,
-    styled,
-    Typography
-} from '@mui/material';
+import {Box, CardContent, Chip, Collapse, Divider, Grid, LinearProgress, LinearProgressProps, Stack, Typography} from '@mui/material';
 // project import
 import MainCard from '../MainCard';
 
 // assets
-import {RiseOutlined, FallOutlined, DownOutlined, FieldTimeOutlined} from '@ant-design/icons';
+import {DownOutlined, FallOutlined, FieldTimeOutlined, RiseOutlined, SelectOutlined} from '@ant-design/icons';
 import React, {useState} from "react";
 import {
-    betterNumbers,
     areRowsOverEstimated,
-    getPercentageColor,
-    getPercentage,
-    truncateText,
+    betterNumbers,
     betterTiming,
-    getEstimationColor
+    getEstimationColor,
+    getPercentage,
+    getPercentageColor,
+    truncateText
 } from "../utils";
 import NodeTable from "./NodeTable";
-import {PlanRow} from "../types";
-import NodeTabs from "./NodeTabs";
+import {NodeScopes, PlanRow} from "../types";
 import NodePopover from "./NodePopover";
-
-interface ExpandMoreProps extends IconButtonProps {
-    expand: boolean;
-}
+import {ExpandMore} from "../ExpandMore";
 
 interface NodeProps {
     data: PlanRow
@@ -62,16 +45,6 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number, t
     );
 }
 
-const ExpandMore = styled((props: ExpandMoreProps) => {
-    const {expand, ...other} = props;
-    return <IconButton {...other} />;
-})(({theme, expand}) => ({
-    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-    transition: theme.transitions.create('transform', {
-        duration: theme.transitions.duration.shortest,
-    }),
-}));
-
 function showTimingChip(percentage: number): boolean {
     return percentage > 15
 }
@@ -82,10 +55,8 @@ function showRowEstimationChip(factor: number): boolean {
 
 const Node = ({data, theme}: NodeProps) => {
     const [expanded, setExpanded] = useState(false);
-    const cellWarningColor = getPercentageColor(data.exclusive, data.execution_time, theme);
-    const perc = getPercentage(data.exclusive, data.execution_time);
-    const isLoss = areRowsOverEstimated(data.rows.estimation_direction)
-
+    const exclusiveTimeColor = getPercentageColor(data.exclusive, data.execution_time, theme);
+    const exclusiveTimePercentage = getPercentage(data.exclusive, data.execution_time);
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
@@ -104,12 +75,12 @@ const Node = ({data, theme}: NodeProps) => {
                         <DownOutlined style={{fontSize: '10px'}}/>
                     </ExpandMore>
                     <Typography variant="h5" color="bold">
-                        {data.node.operation}
+                        {data.operation}
                     </Typography>
                     <Grid item>
                         {showTimingChip(getPercentage(data.exclusive, data.execution_time)) && (
                             <Chip
-                                style={{backgroundColor: cellWarningColor}}
+                                style={{backgroundColor: exclusiveTimeColor}}
                                 icon={<FieldTimeOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
                                 label={`${betterTiming(data.exclusive)}`}
                                 sx={{ml: 1.25, pl: 1}}
@@ -132,18 +103,25 @@ const Node = ({data, theme}: NodeProps) => {
                                 size="small"
                             />
                         )}
-
+                        <a href={`/plan#${data.node_id}`}>
+                            <Chip
+                                style={{backgroundColor: theme.palette.secondary["A100"]}}
+                                icon={<SelectOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                sx={{ml: 1.25, pl: 1}}
+                                size="medium"
+                            />
+                        </a>
                     </Grid>
                 </Grid>
             </Stack>
-            {showTimingChip(perc) && (
+            {showTimingChip(exclusiveTimePercentage) && (
                 <Box sx={{pt: 1, pb: 1}}>
-                    <LinearProgressWithLabel cellWarningColor={cellWarningColor} theme={theme} value={perc}/>
+                    <LinearProgressWithLabel cellWarningColor={exclusiveTimeColor} theme={theme} value={exclusiveTimePercentage}/>
                 </Box>
             )}
 
             <Box sx={{pt: 1}}>
-                <Typography sx={{color: `${cellWarningColor || 'primary'}.main`}}>
+                <Typography sx={{color: `${exclusiveTimeColor || 'primary'}.main`}}>
                     Rows returned: {` `}
                     <b>{betterNumbers(data.rows.total)}</b>
                 </Typography>{' '}
@@ -154,37 +132,18 @@ const Node = ({data, theme}: NodeProps) => {
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent sx={{p: 0.2}}>
                     <Box sx={{pt: 1}}>
-                        {data.node.scope && (
-                            <NodePopover
+                        {Object.keys(data.scopes).map(scopeName => (
+                            data.scopes[scopeName] && <NodePopover
                                 component={
-                                    <Typography><b>on </b><code>{truncateText(data.node.scope, theme.diagram.text.maxChars)}</code></Typography>
+                                    <Typography><b>{scopeName} </b>{truncateText(data.scopes[scopeName], theme.diagram.text.maxChars)}
+                                    </Typography>
                                 }
-                                text={data.node.scope}
+                                text={data.scopes[scopeName]}
                             >
-                                <Typography><b>on </b><code>{data.node.scope}</code></Typography>
+                                <Typography><b>{scopeName} </b>{data.scopes[scopeName]}</Typography>
                             </NodePopover>
-                        )}
-                        {data.node.index && (
-                            <NodePopover
-                                component={
-                                    <Typography><b>by </b><code>{truncateText(data.node.index, theme.diagram.text.maxChars)}</code></Typography>
-                                }
-                                text={data.node.index}
-                            >
-                                <Typography><b>by </b><code>{data.node.index}</code></Typography>
-                            </NodePopover>
-                        )}
-                        {data.node.filters && (
-                            <NodePopover
-                                component={<Typography><b>filter
-                                    by </b><code>{truncateText(data.node.filters, theme.diagram.text.maxChars)}</code></Typography>
-                                }
-                                text={data.node.index}
-                            >
-                                <Typography><b>filter by </b><code>{data.node.filters}</code></Typography>
-                            </NodePopover>
-                        )}
-                        {data.node.filters && (
+                        ))}
+                        {data.scopes.filters !== "" && (
                             <p style={{margin: 0}}><b>rows removed by filters: </b>{betterNumbers(data.rows.removed)},
                                 ({Math.round(getPercentage(data.rows.removed, data.rows.total))} %)</p>
                         )}
@@ -192,7 +151,7 @@ const Node = ({data, theme}: NodeProps) => {
                     <Box sx={{pt: 1, pb: 0}}>
                         <Divider/>
                     </Box>
-                    {/*<NodeTabs/>*/}
+
                     <Box sx={{pt: 1}}>
                         <NodeTable buffers={data.buffers}/>
                     </Box>

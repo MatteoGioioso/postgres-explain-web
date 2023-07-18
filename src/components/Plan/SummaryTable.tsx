@@ -1,11 +1,8 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {SummaryTableProps} from './interfaces'
-// @ts-ignore
-import Highlight from 'react-highlight'
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import {headCells} from "./table/Cells";
 import {Row} from "./table/Row";
-import MainCard from "./MainCard";
 
 
 function OrderTableHead({order, orderBy}) {
@@ -30,7 +27,6 @@ function OrderTableHead({order, orderBy}) {
 export function SummaryTable({summary, stats}: SummaryTableProps) {
     const [order] = useState('asc');
     const [orderBy] = useState('trackingNo');
-
 
     return (
         <>
@@ -57,8 +53,8 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
                 >
                     <OrderTableHead order={order} orderBy={orderBy}/>
                     <TableBody>
-                        {summary.map((row, index) => {
-                            return <Row {...row}/>;
+                        {summary.map((row) => {
+                            return <Row row={row} stats={stats}/>;
                         })}
                     </TableBody>
                 </Table>

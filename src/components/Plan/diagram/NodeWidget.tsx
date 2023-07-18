@@ -1,14 +1,14 @@
 import React, {memo} from 'react'
-import {Handle, NodeToolbar, Position} from 'reactflow'
+import {Handle, Position} from 'reactflow'
 import {PlanRow} from '../types'
-// @ts-ignore
-import Highlight from 'react-highlight'
-import {betterNumbers, getPercentageColor, truncateText} from '../utils'
 import Node from "./Node";
 import {useTheme} from "@mui/material/styles";
 
-// @ts-ignore
-export const NodeWidget = memo(({data, isConnectable}: { data: PlanRow }) => {
+export interface NodeWidgetProps {
+    data: PlanRow
+}
+
+export const NodeWidget = memo(({data}: NodeWidgetProps) => {
     const theme = useTheme();
     return (
         <>

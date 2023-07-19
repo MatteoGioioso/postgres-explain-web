@@ -52,12 +52,25 @@ export function betterTiming(milliseconds: number): string {
     }
 }
 
+export function betterDiskSize(blocks: number): string {
+    const units = ['B','KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    let size = blocks*8192;
+    let unitIndex = 0;
+
+    while (size >= 1024 && unitIndex < units.length - 1) {
+        size /= 1024;
+        unitIndex++;
+    }
+
+    return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
+
 export function getPercentageColor(reference: number, total: number, theme?: any): string {
     if (total === 0 || total === undefined) return '#fff'
 
     const percentage = getPercentage(reference, total)
     if (percentage <= 10) {
-        return theme.palette.success.lighter
+        return theme.palette.secondary.A100
     }
 
     if (percentage > 10 && percentage < 50) {

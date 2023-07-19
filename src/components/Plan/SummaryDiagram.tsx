@@ -2,22 +2,19 @@ import React, {useMemo, useEffect, useCallback} from 'react'
 import ReactFlow, {
     Controls,
     Edge,
-    MarkerType,
     MiniMap,
     Node,
-    Panel,
     Position,
     useEdgesState,
     useNodesState,
     useReactFlow,
-    ReactFlowProvider, applyNodeChanges
+    applyNodeChanges
 } from 'reactflow'
 import {SummaryTableProps} from './interfaces'
 import {PlanRow} from './types'
 import 'reactflow/dist/style.css'
 import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
-import {Box} from "@cloudscape-design/components";
 import {useTheme} from "@mui/material/styles";
 
 // @ts-ignore
@@ -148,8 +145,6 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
 
 export const SummaryDiagram = ({summary, stats}: SummaryTableProps) => {
     return (
-        <ReactFlowProvider>
-            <Diagram summary={summary} stats={stats}/>
-        </ReactFlowProvider>
+        <Diagram summary={summary} stats={stats}/>
     )
 }

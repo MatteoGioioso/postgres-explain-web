@@ -60,7 +60,6 @@ export const TimingCell = ({prop, totalProp, name}: { prop: number, totalProp: n
         <TableCell
             component="th"
             style={{
-                color: '#2f2f2f',
                 backgroundColor: getPercentageColor(prop, totalProp, theme)
             }}>
             {betterTiming(prop)}
@@ -68,7 +67,7 @@ export const TimingCell = ({prop, totalProp, name}: { prop: number, totalProp: n
     )
 }
 
-export const headCells = [
+export const headCells = (areBuffersPresent?: boolean) => [
     {
         id: 'exclusive',
         label: 'Time',
@@ -91,7 +90,7 @@ export const headCells = [
         id: 'rows-removed',
         label: 'Rows Removed',
         align: 'left',
-        disablePadding: false,
+        disablePadding: true,
     },
     {
         id: 'rows_x',
@@ -102,6 +101,18 @@ export const headCells = [
     {
         id: 'loops',
         label: 'Loops',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'reads',
+        label: 'Reads',
+        align: 'left',
+        disablePadding: false,
+    },
+    {
+        id: 'written',
+        label: 'Written',
         align: 'left',
         disablePadding: false,
     },

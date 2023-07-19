@@ -1,13 +1,13 @@
 import {PlanRow, Stats} from "../types";
-import {Box, Chip, Collapse, Grid, IconButton, styled, TableCell, TableRow, Typography} from "@mui/material";
-import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
+import {Backdrop, Box, Chip, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
+import {betterDiskSize, betterNumbers, getPercentageColor} from "../utils";
 import React, {useEffect, useState} from "react";
 import {TimingCell, GenericDetailsPopover, getRowEstimateDirectionSymbol} from "./Cells";
-import Highlight from 'react-highlight'
 import {useTheme} from "@mui/material/styles";
-import {useLocation} from "react-router-dom";
-import {DollarOutlined, DownOutlined, FieldTimeOutlined, RollbackOutlined} from "@ant-design/icons";
+import {ApartmentOutlined, CloseOutlined, DollarOutlined, DownOutlined, RollbackOutlined, ZoomInOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
+import {useFocus} from "../hooks";
+import {Simulate} from "react-dom/test-utils";
 
 export interface RowProps {
     row: PlanRow
@@ -35,25 +35,30 @@ function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: Plan
     </Collapse>
 }
 
+
 export function Row({row, stats}: RowProps) {
     const theme = useTheme();
-    const location = useLocation();
-    const hashValue = (location.hash || "").replace("#", "")
-    const isFocused = (): boolean => {
-        return hashValue === row.node_id
-    }
-    const [expanded, setExpanded] = useState(isFocused());
+    const {isFocused, switchToNode, isUnfocused, closeFocusNavigation, focus} = useFocus(row.node_id);
+    const [expanded, setExpanded] = useState(isFocused);
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
-    const handleClickBackFocus = () => {
-        window.location.hash = "";
-        window.scrollTo(0, 0);
+    useEffect(() => {
+        setExpanded(isFocused)
+    }, [isFocused])
+
+    const handleRowClick = (nodeId: string) => {
     }
 
-    useEffect(() => {
-        setExpanded(isFocused())
-    }, [location.hash])
+    const getRowStyle = (): {} => {
+        if (isUnfocused()) {
+            return {pointerEvents: 'none'}
+        } else if (isFocused) {
+            return {boxShadow: theme.shadows[23], border: `2px solid ${theme.palette.secondary.main}`}
+        }
+
+        return {}
+    }
 
     return (
         <TableRow
@@ -63,7 +68,8 @@ export function Row({row, stats}: RowProps) {
             tabIndex={-1}
             key={row.node_id}
             id={row.node_id}
-            style={isFocused() ? {boxShadow: theme.shadows[23], border: `2px solid ${theme.palette.secondary.main}`} : {}}
+            style={getRowStyle()}
+            onClick={() => handleRowClick(row.node_id)}
         >
 
             <TimingCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'}/>
@@ -72,27 +78,16 @@ export function Row({row, stats}: RowProps) {
                 <GenericDetailsPopover content={row.rows.total}
                                        name="Rows">{betterNumbers(row.rows.total)}</GenericDetailsPopover>
             </TableCell>
-            <TableCell align="left">
-                <>
-                    {
-                        row.rows.filters && (
-                            <>
-                                - {' '}
-                                <GenericDetailsPopover
-                                    content={
-                                        <div>
-                                            <p>Filters: <Highlight>{row.rows.filters}</Highlight></p>
-                                            <p>Removed: {row.rows.removed}</p>
-                                        </div>
-                                    }
-                                    name="Rows removed by a filter"
-                                >
-                                    {betterNumbers(row.rows.removed)}
-                                </GenericDetailsPopover>
-                            </>
-                        )
-                    }
-                </>
+            <TableCell align="right">
+                {
+                    row.rows.filters && (
+                        <>- {' '}{betterNumbers(row.rows.removed)}
+                            <Collapse in={expanded} timeout="auto" unmountOnExit>
+                                <Typography variant='subtitle2'>Filter: <code>{row.rows.filters}</code></Typography>
+                            </Collapse>
+                        </>
+                    )
+                }
 
             </TableCell>
             <TableCell align="right">
@@ -107,6 +102,29 @@ export function Row({row, stats}: RowProps) {
                 <GenericDetailsPopover name={'Loops'}
                                        content={row.loops}>{betterNumbers(row.loops)}</GenericDetailsPopover>
             </TableCell>
+            <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme)}}>
+                {betterDiskSize(row.buffers.effective_blocks_read)}
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <Typography
+                        variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_reads)}
+                    </Typography>
+                    <Typography
+                        variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_reads)}
+                    </Typography>
+                </Collapse>
+            </TableCell>
+            <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme)}}>
+                {betterDiskSize(row.buffers.effective_blocks_written)}
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <Typography
+                        variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_written)}
+                    </Typography>
+                    <Typography
+                        variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_written)}
+                    </Typography>
+                </Collapse>
+            </TableCell>
+
 
             <TableCell align="left">
                 <Grid container>
@@ -126,17 +144,31 @@ export function Row({row, stats}: RowProps) {
                     </Grid>
                 </Grid>
             </TableCell>
+
             <TableCell>
-                <ExpandMore expand={expanded} onClick={handleExpandClick}>
-                    <DownOutlined style={{fontSize: '10px'}}/>
-                </ExpandMore>
-                {isFocused() && (
-                    <IconButton onClick={handleClickBackFocus}>
-                        <RollbackOutlined style={{fontSize: '10px'}}/>
-                    </IconButton>
+                {!isUnfocused() && (
+                    <>
+                        <ExpandMore expand={expanded} onClick={handleExpandClick}>
+                            <DownOutlined style={{fontSize: '10px'}}/>
+                        </ExpandMore>
+
+                        <IconButton onClick={() => focus(false)}>
+                            <ZoomInOutlined style={{color: 'inherit', fontSize: '10px'}}/>
+                        </IconButton>
+                    </>
+                )}
+
+                {isFocused && (
+                    <>
+                        <IconButton onClick={switchToNode}>
+                            <ApartmentOutlined style={{fontSize: '10px'}}/>
+                        </IconButton>
+                        <IconButton onClick={(e) => closeFocusNavigation(e, false)}>
+                            <CloseOutlined style={{fontSize: '10px', color: 'inherit'}}/>
+                        </IconButton>
+                    </>
                 )}
             </TableCell>
-
         </TableRow>
     );
 }

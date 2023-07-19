@@ -74,7 +74,6 @@ export const SHARED_DIRTIED_BLOCKS = "Shared Dirtied Blocks";
 export const SHARED_WRITTEN_BLOCKS = "Shared Written Blocks";
 export const TEMP_READ_BLOCKS = "Temp Read Blocks";
 export const TEMP_WRITTEN_BLOCKS = "Temp Written Blocks";
-export const TEMP_HIT_BLOCKS = "Temp Hit Blocks";
 export const LOCAL_HIT_BLOCKS = "Local Hit Blocks";
 export const LOCAL_READ_BLOCKS = "Local Read Blocks";
 export const LOCAL_DIRTIED_BLOCKS = "Local Dirtied Blocks";
@@ -141,6 +140,7 @@ export const FUNCTION_SCAN = "Function Scan";
 export const GROUP_AGGREGATE = "GroupAggregate";
 export const X_POSITION_FACTOR = "*X Position Factor";
 export const Y_POSITION_FACTOR = "*Y Position Factor";
+export const EXCLUSIVE = "Exclusive ";
 
 //////////
 // source: types.go
@@ -163,6 +163,8 @@ export interface Stats {
   max_rows: number /* float64 */;
   max_duration: number /* float64 */;
   max_cost: number /* float64 */;
+  max_blocks_read: number /* float64 */;
+  max_blocks_written: number /* float64 */;
 }
 export type Plans = {
     Plan: { [key: string]: any};
@@ -200,9 +202,19 @@ export interface Buffers {
   reads: number /* float64 */;
   written: number /* float64 */;
   hits: number /* float64 */;
+  dirtied: number /* float64 */;
   temp_reads: number /* float64 */;
   temp_written: number /* float64 */;
   temp_hits: number /* float64 */;
+  exclusive_reads: number /* float64 */;
+  exclusive_written: number /* float64 */;
+  exclusive_hits: number /* float64 */;
+  exclusive_dirtied: number /* float64 */;
+  exclusive_temp_reads: number /* float64 */;
+  exclusive_temp_written: number /* float64 */;
+  exclusive_temp_hits: number /* float64 */;
+  effective_blocks_read: number /* float64 */;
+  effective_blocks_written: number /* float64 */;
 }
 export interface PlanRow {
   node_id: string;

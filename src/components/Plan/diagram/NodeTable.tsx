@@ -6,8 +6,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import {betterNumbers} from "../utils";
+import {Buffers} from "../types";
 
-export default function NodeTable({buffers}) {
+export default function NodeTable({buffers}: { buffers: Buffers }) {
     return (
         <TableContainer>
             <Table size="small" aria-label="a dense table">
@@ -27,9 +28,9 @@ export default function NodeTable({buffers}) {
                         <TableCell sx={{p: 0.2, fontSize: 12}} component="th" scope="row">
                             Shared:
                         </TableCell>
-                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.reads)}</TableCell>
-                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.written)}</TableCell>
-                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.hits)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_reads)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_written)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_hits)}</TableCell>
                     </TableRow>
                     <TableRow
                         key={'temp'}
@@ -38,9 +39,9 @@ export default function NodeTable({buffers}) {
                         <TableCell sx={{p: 0.2, fontSize: 12}} component="th" scope="row">
                             Temp:
                         </TableCell>
-                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.temp_reads)}</TableCell>
-                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.temp_written)}</TableCell>
-                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.temp_hits)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_temp_reads)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_temp_written)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_temp_hits)}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>

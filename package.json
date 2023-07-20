@@ -29,9 +29,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build:postgres-explain": "(cd postgres-explain && npm run build)",
-    "link:postgres-explain": "(cd postgres-explain && npm link) && npm link postgres-explain",
-    "wasm": "cd wasm && go mod tidy && GOOS=js GOARCH=wasm go build -o ../public/main.wasm  main.go"
+    "wasm": "(cd wasm && go mod tidy && GOOS=js GOARCH=wasm go build -o ../public/main.wasm main.go) && cd postgres-explain && make generate-types"
   },
   "eslintConfig": {
     "extends": [

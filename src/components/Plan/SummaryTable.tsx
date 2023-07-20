@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {SummaryTableProps} from './interfaces'
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
-import {headCells} from "./table/Cells";
+import {GenericDetailsPopover, headCells} from "./table/Cells";
 import {Row} from "./table/Row";
 
 
@@ -15,7 +15,9 @@ function OrderTableHead({order, orderBy}) {
                         padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
-                        {headCell.label}
+                        <GenericDetailsPopover name={"description"} content={headCell.description}>
+                            {headCell.label}
+                        </GenericDetailsPopover>
                     </TableCell>
                 ))}
             </TableRow>

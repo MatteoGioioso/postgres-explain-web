@@ -36,7 +36,7 @@ export function betterTiming(milliseconds: number): string {
     const seconds = Math.round(milliseconds / 1000);
 
     if (seconds < 1) {
-        return milliseconds + ' ms';
+        return Math.floor(milliseconds * 1000) / 1000 + ' ms';
     } else if (seconds < 60) {
         const secs = milliseconds / 1000
         return Math.round(secs * 100) / 100 + ' s';

@@ -16,6 +16,7 @@ import 'reactflow/dist/style.css'
 import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
+import {getPercentage} from "./utils";
 
 // @ts-ignore
 const elk = new ELK();
@@ -80,7 +81,8 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
             const node: Node = {
                 id: row.node_id,
                 data: {
-                    ...row,
+                    row,
+                    stats,
                 },
                 targetPosition: Position.Top,
                 sourcePosition: Position.Bottom,
@@ -97,7 +99,10 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                 id: `${row.node_id}-${row.node_parent_id}`,
                 source: row.node_id,
                 target: row.node_parent_id,
-                style: {strokeWidth: Math.log((row.rows.total / stats.max_rows) * 100) * 10, stroke: theme.palette.primary[200]},
+                style: {
+                    strokeWidth: Math.max(getPercentage(row.rows.total * row.workers.launched, stats.max_rows) / 3, 2),
+                    stroke: theme.palette.primary[200]
+                },
                 data: {
                     rows: row.rows.total,
                 },

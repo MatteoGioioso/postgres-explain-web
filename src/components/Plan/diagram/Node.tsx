@@ -15,26 +15,30 @@ import {
 import MainCard from '../MainCard';
 
 // assets
-import {DownOutlined, FallOutlined, FieldTimeOutlined, RiseOutlined, SelectOutlined, ZoomInOutlined} from '@ant-design/icons';
+import {
+    DollarOutlined,
+    DownOutlined,
+    FallOutlined,
+    FieldTimeOutlined, ForkOutlined,
+    RiseOutlined,
+    ZoomInOutlined
+} from '@ant-design/icons';
 import React, {useState} from "react";
 import {
     areRowsOverEstimated,
     betterNumbers,
-    betterTiming,
     getEstimationColor,
     getPercentage,
     getPercentageColor,
-    truncateText
 } from "../utils";
-import NodeTable from "./NodeTable";
-import {PlanRow} from "../types";
-import NodePopover from "./NodePopover";
+import {PlanRow, Stats} from "../types";
 import {ExpandMore} from "../ExpandMore";
 import {useFocus} from "../hooks";
 
 interface NodeProps {
     data: PlanRow
     theme: any
+    stats: Stats
 }
 
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number, theme: any, cellWarningColor: string }) {
@@ -49,15 +53,15 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number, t
                 }}/>
             </Box>
             <Box sx={{minWidth: 35}}>
-                <Typography variant="body2" color="text.secondary">{`${Math.round(
-                    props.value,
-                )}%`}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                    {`${Math.round(props.value)}%`}
+                </Typography>
             </Box>
         </Box>
     );
 }
 
-function showTimingChip(percentage: number): boolean {
+function showChipsBasedOnPercentage(percentage: number): boolean {
     return percentage > 15
 }
 
@@ -65,7 +69,7 @@ function showRowEstimationChip(factor: number): boolean {
     return factor > 10
 }
 
-const Node = ({data, theme}: NodeProps) => {
+const Node = ({data, stats, theme}: NodeProps) => {
     const {isFocused, focus} = useFocus(data.node_id);
     const [expanded, setExpanded] = useState(false);
     const exclusiveTimeColor = getPercentageColor(data.exclusive, data.execution_time, theme);
@@ -76,7 +80,7 @@ const Node = ({data, theme}: NodeProps) => {
     };
 
     const onClickFocus = (e) => {
-        focus(true)
+        focus()
     }
 
     return (
@@ -109,11 +113,27 @@ const Node = ({data, theme}: NodeProps) => {
                             {data.operation}
                         </Typography>
                         <Grid item>
-                            {showTimingChip(getPercentage(data.exclusive, data.execution_time)) && (
+                            {Boolean(data.workers.launched) && (
+                                <Chip
+                                    style={{backgroundColor: theme.palette.primary['100']}}
+                                    icon={<ForkOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                    sx={{ml: 1.25, pl: 1}}
+                                    label={data.workers.launched+1}
+                                    size="small"
+                                />
+                            )}
+                            {showChipsBasedOnPercentage(getPercentage(data.exclusive, data.execution_time)) && (
                                 <Chip
                                     style={{backgroundColor: exclusiveTimeColor}}
                                     icon={<FieldTimeOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                                    label={`${betterTiming(data.exclusive)}`}
+                                    sx={{ml: 1.25, pl: 1}}
+                                    size="small"
+                                />
+                            )}
+                            {showChipsBasedOnPercentage(getPercentage(data.costs.total_cost, stats.max_cost)) && (
+                                <Chip
+                                    style={{backgroundColor: getPercentageColor(data.costs.total_cost, stats.max_cost, theme)}}
+                                    icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
                                     sx={{ml: 1.25, pl: 1}}
                                     size="small"
                                 />
@@ -129,9 +149,17 @@ const Node = ({data, theme}: NodeProps) => {
                                             }
                                         </>
                                     }
-                                    label={`${betterNumbers(data.rows.estimation_factor)}`}
                                     sx={{ml: 1.25, pl: 1}}
                                     size="small"
+                                />
+                            )}
+                            {data.sub_plan_of && (
+                                <Chip
+                                    style={{backgroundColor: theme.palette.secondary.light}}
+                                    sx={{ml: 1.25}}
+                                    size="small"
+                                    label="CTE"
+                                    onClick={onClickFocus}
                                 />
                             )}
                             <Chip
@@ -144,16 +172,15 @@ const Node = ({data, theme}: NodeProps) => {
                         </Grid>
                     </Grid>
                 </Stack>
-                {showTimingChip(exclusiveTimePercentage) && (
+                {showChipsBasedOnPercentage(exclusiveTimePercentage) && (
                     <Box sx={{pt: 1, pb: 1}}>
                         <LinearProgressWithLabel cellWarningColor={exclusiveTimeColor} theme={theme} value={exclusiveTimePercentage}/>
                     </Box>
                 )}
-
                 <Box sx={{pt: 1}}>
                     <Typography sx={{color: `${exclusiveTimeColor || 'primary'}.main`}}>
                         Rows returned: {` `}
-                        <b>{betterNumbers(data.rows.total)}</b>
+                        <b>{betterNumbers(data.rows.total * (data.workers.launched + 1))}</b>
                     </Typography>{' '}
                 </Box>
                 <Box sx={{pt: 1, pb: 0}}>
@@ -161,30 +188,6 @@ const Node = ({data, theme}: NodeProps) => {
                 </Box>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <CardContent sx={{p: 0.2}}>
-                        <Box sx={{pt: 1}}>
-                            {Object.keys(data.scopes).map(scopeName => (
-                                data.scopes[scopeName] && <NodePopover
-                                    component={
-                                        <Typography><b>{scopeName} </b>{truncateText(data.scopes[scopeName], theme.diagram.text.maxChars)}
-                                        </Typography>
-                                    }
-                                    text={data.scopes[scopeName]}
-                                >
-                                    <Typography><b>{scopeName} </b>{data.scopes[scopeName]}</Typography>
-                                </NodePopover>
-                            ))}
-                            {data.scopes.filters !== "" && (
-                                <p style={{margin: 0}}><b>rows removed by filters: </b>{betterNumbers(data.rows.removed)},
-                                    ({Math.round(getPercentage(data.rows.removed, data.rows.total))} %)</p>
-                            )}
-                        </Box>
-                        <Box sx={{pt: 1, pb: 0}}>
-                            <Divider/>
-                        </Box>
-
-                        <Box sx={{pt: 1}}>
-                            <NodeTable buffers={data.buffers}/>
-                        </Box>
                     </CardContent>
                 </Collapse>
             </MainCard>

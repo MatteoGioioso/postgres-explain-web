@@ -1,40 +1,45 @@
 import {useLocation} from "react-router-dom";
 import {useReactFlow} from "reactflow";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
+import {NodeContext} from "./Contexts";
 
 export const useFocus = (nodeId: string) => {
+    const {focusedNodeId, setFocusedNodeId} = useContext(NodeContext);
     const [isFocused, setIsFocused] = useState<boolean>(false);
     const [nodeIdFromHash, setNodeIdFromHash] = useState<string>();
-    const location = useLocation();
     const {getNode, fitView} = useReactFlow();
 
     useEffect(() => {
-        const nodeIdFH = (location.hash || "").replace("#", "")
-        setNodeIdFromHash(nodeIdFH)
+        setNodeIdFromHash(focusedNodeId)
 
-        if (nodeIdFH == nodeId) {
+        if (focusedNodeId == nodeId) {
             setIsFocused(true)
         } else {
             setIsFocused(false)
         }
-    }, [location.hash])
+    }, [focusedNodeId])
 
-    const focusInternal = (isNode: boolean) => {
-        window.location.hash = nodeId
-        if (isNode) {
-            window.scrollTo(0, 0);
-        }
+    const focusInternal = () => {
+        setFocusedNodeId(nodeId)
         const node = getNode(nodeId);
         fitView({nodes: [node], duration: 800, maxZoom: 1.5})
     }
 
+    const scrollToElement = (id: string): void => {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.scrollIntoView({behavior: 'smooth'});
+        }
+    }
+
     return {
         isFocused,
-        focus: (isNode: boolean): void => {
-            focusInternal(isNode)
+        focus: (): void => {
+            focusInternal()
         },
         isUnfocused: (): boolean => {
-            if (location.hash !== "#" && location.hash !== "") {
+            if (nodeIdFromHash) {
                 return nodeIdFromHash !== nodeId
             } else {
                 return false
@@ -42,8 +47,8 @@ export const useFocus = (nodeId: string) => {
         },
         goToParentNode: (parendNodeId: string): void => {
             if (parendNodeId) {
+                setFocusedNodeId(parendNodeId)
                 const parentNode = getNode(parendNodeId);
-                window.location.hash = parendNodeId
                 window.scrollTo(0, 0);
                 fitView({nodes: [parentNode], duration: 800, maxZoom: 1.5})
             }
@@ -51,14 +56,8 @@ export const useFocus = (nodeId: string) => {
         goUpRow: (): void => {
             const node = getNode(nodeId);
         },
-        closeFocusNavigation: (event, isNode: boolean) => {
-            const element = document.getElementById(nodeId);
-            window.location.hash = "";
-
-            if (element && !isNode) {
-                element.scrollIntoView();
-                event.preventDefault();
-            }
+        closeFocusNavigation: () => {
+            setFocusedNodeId('')
             fitView({duration: 800})
         },
         switchToNode: (e) => {
@@ -71,11 +70,7 @@ export const useFocus = (nodeId: string) => {
             fitView({nodes: [node], duration: 800, maxZoom: 1.5})
         },
         switchToRow: (e) => {
-            const element = document.getElementById(nodeId);
-
-            if (element) {
-                element.scrollIntoView({behavior: 'smooth'});
-            }
+            scrollToElement(nodeId)
         }
     }
 }

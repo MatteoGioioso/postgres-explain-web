@@ -13,26 +13,18 @@ export interface Layout {
 /**
  * plan property keys
  */
-export const NODE_TYPE_PROP = "Node Type";
-export const ACTUAL_ROWS_PROP = "Actual Rows";
-export const PLAN_ROWS_PROP = "Plan Rows";
-export const ACTUAL_TOTAL_TIME_PROP = "Actual Total Time";
-export const ACTUAL_LOOPS_PROP = "Actual Loops";
+export const NODE_TYPE = "Node Type";
+export const ACTUAL_ROWS = "Actual Rows";
+export const PLAN_ROWS = "Plan Rows";
+export const ACTUAL_TOTAL_TIME = "Actual Total Time";
+export const ACTUAL_LOOPS = "Actual Loops";
 export const TOTAL_COST_PROP = "Total Cost";
 export const PLANS_PROP = "Plans";
 export const STARTUP_COST = "Startup Cost";
 export const PLAN_WIDTH = "Plan Width";
-export const ACTUAL_STARTUP_TIME_PROP = "Actual Startup Time";
-export const RELATION_NAME_PROP = "Relation Name";
-export const SCHEMA_PROP = "Schema";
-export const ALIAS_PROP = "Alias";
-export const GROUP_KEY_PROP = "Group Key";
-export const SORT_KEY_PROP = "Sort Key";
-export const JOIN_TYPE_PROP = "Join Type";
-export const INDEX_NAME_PROP = "Index Name";
+export const ACTUAL_STARTUP_TIME = "Actual Startup Time";
 export const HASH_CONDITION_PROP = "Hash Cond";
 export const INDEX_CONDITION = "Index Cond";
-export const EXECUTION_TIME_PROP = "Execution Time";
 export const TOTAL_RUNTIME = "Total Runtime";
 /**
  * computed
@@ -44,7 +36,7 @@ export const SLOWEST_NODE_PROP = "*Slowest Node (by duration)";
 export const MAXIMUM_COSTS_PROP = "*Most Expensive Node (cost)";
 export const MAXIMUM_ROWS_PROP = "*Largest Node (rows)";
 export const MAXIMUM_DURATION_PROP = "*Slowest Node (time)";
-export const ACTUAL_DURATION_PROP = "*Actual Duration";
+export const ACTUAL_DURATION = "*Actual Duration";
 export const ACTUAL_COST_PROP = "*Actual Cost";
 export const PLANNER_ESTIMATE_FACTOR = "*Planner Row Estimate Factor";
 export const PLANNER_ESTIMATE_DIRECTION = "*Planner Row Estimate Direction";
@@ -141,6 +133,9 @@ export const GROUP_AGGREGATE = "GroupAggregate";
 export const X_POSITION_FACTOR = "*X Position Factor";
 export const Y_POSITION_FACTOR = "*Y Position Factor";
 export const EXCLUSIVE = "Exclusive ";
+export const PER_WORKER = " Per Worker";
+export const REVISED = " Revised";
+export const DOES_CONTAIN_BUFFERS = "Does contain buffers";
 
 //////////
 // source: types.go
@@ -192,9 +187,9 @@ export interface Costs {
 }
 export interface Rows {
   total: number /* float64 */;
+  total_per_node: number /* float64 */;
   planned_rows: number /* float64 */;
   removed: number /* float64 */;
-  filters: string;
   estimation_factor: number /* float64 */;
   estimation_direction: string;
 }
@@ -212,9 +207,15 @@ export interface Buffers {
   exclusive_dirtied: number /* float64 */;
   exclusive_temp_reads: number /* float64 */;
   exclusive_temp_written: number /* float64 */;
-  exclusive_temp_hits: number /* float64 */;
+  exclusive_local_reads: number /* float64 */;
+  exclusive_local_written: number /* float64 */;
+  exclusive_local_hits: number /* float64 */;
   effective_blocks_read: number /* float64 */;
   effective_blocks_written: number /* float64 */;
+}
+export interface Workers {
+  launched: number /* float64 */;
+  planned: number /* float64 */;
 }
 export interface PlanRow {
   node_id: string;
@@ -231,6 +232,9 @@ export interface PlanRow {
   execution_time: number /* float64 */;
   buffers: Buffers;
   sub_plan_of: string;
+  parent_plan_id: string;
+  does_contain_buffers: boolean;
+  workers: Workers;
 }
 export interface Operation {
   relation_name: string;

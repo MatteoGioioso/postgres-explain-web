@@ -1,13 +1,12 @@
 import {PlanRow, Stats} from "../types";
-import {Backdrop, Box, Chip, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
-import {betterDiskSize, betterNumbers, getPercentageColor} from "../utils";
+import {Box, Chip, Collapse, Divider, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
+import {betterDiskSize, betterNumbers, betterTiming, getEstimationColor, getPercentageColor, truncateText} from "../utils";
 import React, {useEffect, useState} from "react";
-import {TimingCell, GenericDetailsPopover, getRowEstimateDirectionSymbol} from "./Cells";
+import {TimingCell, GenericDetailsPopover, getRowEstimateDirectionSymbol, RowCell, BufferReadsCell, BufferWrittenCell} from "./Cells";
 import {useTheme} from "@mui/material/styles";
-import {ApartmentOutlined, CloseOutlined, DollarOutlined, DownOutlined, RollbackOutlined, ZoomInOutlined} from "@ant-design/icons";
+import {ApartmentOutlined, CloseOutlined, DollarOutlined, DownOutlined, ZoomInOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
 import {useFocus} from "../hooks";
-import {Simulate} from "react-dom/test-utils";
 
 export interface RowProps {
     row: PlanRow
@@ -15,24 +14,50 @@ export interface RowProps {
 }
 
 function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: PlanRow, stats: Stats, theme: any }) {
-    return <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <div>
-            Total cost:
-            <Chip
-                style={{backgroundColor: getPercentageColor(row.costs.total_cost, stats.max_cost, theme)}}
-                icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                label={`${row.costs.total_cost}`}
-                sx={{ml: 1.25, pl: 1}}
-                size="small"
-            />
-        </div>
-        <div>
-            Startup cost: {row.costs.startup_cost}
-        </div>
-        <div>
-            Plan width: {row.costs.plan_width}
-        </div>
-    </Collapse>
+    return (
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+            <Box sx={{pt: 1, pb: 1}}>
+                <Divider/>
+            </Box>
+            {Object.keys(row.scopes).map(scopeName => (
+                row.scopes[scopeName] && (
+                    <GenericDetailsPopover
+                        style={{width: '1500px'}}
+                        keepCloseCondition={row.scopes[scopeName].length <= theme.diagram.text.maxChars}
+                        name={scopeName}
+                        content={
+                            <Typography>
+                                <b>{scopeName} </b><code>{row.scopes[scopeName]}</code>
+                            </Typography>
+                        }
+                    >
+                        <Typography><b>{scopeName} </b><code>{truncateText(row.scopes[scopeName], theme.diagram.text.maxChars)}</code></Typography>
+                    </GenericDetailsPopover>
+                )
+            ))}
+
+            <Box sx={{pt: 1, pb: 1}}>
+                <Divider/>
+            </Box>
+
+            <div>
+                Total cost:
+                <Chip
+                    style={{backgroundColor: getPercentageColor(row.costs.total_cost, stats.max_cost, theme)}}
+                    icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                    label={`${row.costs.total_cost}`}
+                    sx={{ml: 1.25, pl: 1}}
+                    size="small"
+                />
+            </div>
+            <div>
+                Startup cost: {row.costs.startup_cost}
+            </div>
+            <div>
+                Plan width: {row.costs.plan_width}
+            </div>
+        </Collapse>
+    )
 }
 
 
@@ -46,9 +71,6 @@ export function Row({row, stats}: RowProps) {
     useEffect(() => {
         setExpanded(isFocused)
     }, [isFocused])
-
-    const handleRowClick = (nodeId: string) => {
-    }
 
     const getRowStyle = (): {} => {
         if (isUnfocused()) {
@@ -69,62 +91,49 @@ export function Row({row, stats}: RowProps) {
             key={row.node_id}
             id={row.node_id}
             style={getRowStyle()}
-            onClick={() => handleRowClick(row.node_id)}
         >
+            <TableCell
+                component="th"
+                style={{
+                    backgroundColor: getPercentageColor(row.exclusive, row.execution_time, theme)
+                }}>
+                {betterTiming(row.exclusive)}
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <Typography
+                        variant='subtitle2'>Total: {betterTiming(row.exclusive * (row.workers.launched + 1))} for {row.workers.launched + 1} workers</Typography>
+                </Collapse>
+            </TableCell>
 
-            <TimingCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'}/>
             <TimingCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'}/>
-            <TableCell align="right">
-                <GenericDetailsPopover content={row.rows.total}
-                                       name="Rows">{betterNumbers(row.rows.total)}</GenericDetailsPopover>
-            </TableCell>
-            <TableCell align="right">
-                {
-                    row.rows.filters && (
-                        <>- {' '}{betterNumbers(row.rows.removed)}
-                            <Collapse in={expanded} timeout="auto" unmountOnExit>
-                                <Typography variant='subtitle2'>Filter: <code>{row.rows.filters}</code></Typography>
-                            </Collapse>
-                        </>
-                    )
-                }
 
-            </TableCell>
-            <TableCell align="right">
+            <RowCell row={row} expanded={expanded} stats={stats}/>
+
+            <TableCell align="left" style={{backgroundColor: getEstimationColor(row.rows.estimation_factor, theme)}}>
                 <>
                     {getRowEstimateDirectionSymbol(row.rows.estimation_direction) + ' '}
-                    <GenericDetailsPopover content={row.rows.estimation_factor}
-                                           name="Rows estimate factor">{betterNumbers(row.rows.estimation_factor)}</GenericDetailsPopover>
+                    <GenericDetailsPopover
+                        content={Math.round(row.rows.estimation_factor * 1000) / 1000}
+                        name="Rows estimate factor"
+                    >
+                        {betterNumbers(row.rows.estimation_factor)}
+                    </GenericDetailsPopover>
                 </>
-
             </TableCell>
             <TableCell align="right">
-                <GenericDetailsPopover name={'Loops'}
-                                       content={row.loops}>{betterNumbers(row.loops)}</GenericDetailsPopover>
-            </TableCell>
-            <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme)}}>
-                {betterDiskSize(row.buffers.effective_blocks_read)}
+                {betterNumbers(row.loops)} / {row.workers.launched + 1}
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <Typography
-                        variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_reads)}
+                        variant='subtitle2'>Workers Planned: {row.workers.planned}
                     </Typography>
                     <Typography
-                        variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_reads)}
-                    </Typography>
-                </Collapse>
-            </TableCell>
-            <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme)}}>
-                {betterDiskSize(row.buffers.effective_blocks_written)}
-                <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Typography
-                        variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_written)}
-                    </Typography>
-                    <Typography
-                        variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_written)}
+                        variant='subtitle2'>Workers Launched: {row.workers.launched}
                     </Typography>
                 </Collapse>
             </TableCell>
 
+            <BufferReadsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+
+            <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
             <TableCell align="left">
                 <Grid container>
@@ -152,7 +161,7 @@ export function Row({row, stats}: RowProps) {
                             <DownOutlined style={{fontSize: '10px'}}/>
                         </ExpandMore>
 
-                        <IconButton onClick={() => focus(false)}>
+                        <IconButton onClick={focus}>
                             <ZoomInOutlined style={{color: 'inherit', fontSize: '10px'}}/>
                         </IconButton>
                     </>
@@ -163,7 +172,7 @@ export function Row({row, stats}: RowProps) {
                         <IconButton onClick={switchToNode}>
                             <ApartmentOutlined style={{fontSize: '10px'}}/>
                         </IconButton>
-                        <IconButton onClick={(e) => closeFocusNavigation(e, false)}>
+                        <IconButton onClick={closeFocusNavigation}>
                             <CloseOutlined style={{fontSize: '10px', color: 'inherit'}}/>
                         </IconButton>
                     </>

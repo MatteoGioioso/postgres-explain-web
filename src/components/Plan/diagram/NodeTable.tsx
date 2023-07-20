@@ -41,7 +41,7 @@ export default function NodeTable({buffers}: { buffers: Buffers }) {
                         </TableCell>
                         <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_temp_reads)}</TableCell>
                         <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_temp_written)}</TableCell>
-                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">{betterNumbers(buffers.exclusive_temp_hits)}</TableCell>
+                        <TableCell sx={{p: 0.2, fontSize: 12}} align="right">-</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>

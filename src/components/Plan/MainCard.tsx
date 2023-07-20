@@ -47,11 +47,12 @@ const MainCard = forwardRef(
                     // @ts-ignore
                     borderColor: theme.palette.mode === 'dark' ? theme.palette.divider : theme.palette.grey.A800,
                     // @ts-ignore
-                    boxShadow: boxShadow && (!border || theme.palette.mode === 'dark') ? shadow || theme.customShadows.z1 : 'inherit',
-                    ':hover': {
-                        // @ts-ignore
-                        boxShadow: boxShadow ? shadow || theme.customShadows.z1 : 'inherit'
-                    },
+                    // boxShadow: boxShadow && (!border || theme.palette.mode === 'dark') ? shadow || theme.customShadows.z1 : 'inherit',
+                    boxShadow: theme.customShadows.z1,
+                    // ':hover': {
+                    //     // @ts-ignore
+                    //     boxShadow: boxShadow ? shadow || theme.customShadows.z1 : 'inherit'
+                    // },
                     '& pre': {
                         m: 0,
                         p: '16px !important',

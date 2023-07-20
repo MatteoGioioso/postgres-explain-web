@@ -1,6 +1,3 @@
-import {HASH, HASH_CONDITION, HASH_JOIN, PlanRow, RELATION_NAME, SEQUENTIAL_SCAN} from './types'
-import {useTheme} from "@mui/material/styles";
-
 export const betterNumbers = (num: number): string => {
     const ONE_MILLION = 1000000
     const THOUSAND = 1000
@@ -35,12 +32,45 @@ export const betterNumbers = (num: number): string => {
     return num.toString()
 }
 
-export function getCellWarningColor(reference: number, total: number, theme?: any): string {
+export function betterTiming(milliseconds: number): string {
+    const seconds = Math.round(milliseconds / 1000);
+
+    if (seconds < 1) {
+        return Math.floor(milliseconds * 1000) / 1000 + ' ms';
+    } else if (seconds < 60) {
+        const secs = milliseconds / 1000
+        return Math.round(secs * 100) / 100 + ' s';
+    } else if (seconds < 3600) {
+        const minutes = Math.floor(seconds / 60);
+        return minutes + ' min';
+    } else if (seconds < 86400) {
+        const hours = Math.floor(seconds / 3600);
+        return hours + ' h';
+    } else {
+        const days = Math.floor(seconds / 86400);
+        return days + ' d';
+    }
+}
+
+export function betterDiskSize(blocks: number): string {
+    const units = ['B','KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    let size = blocks*8192;
+    let unitIndex = 0;
+
+    while (size >= 1024 && unitIndex < units.length - 1) {
+        size /= 1024;
+        unitIndex++;
+    }
+
+    return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
+
+export function getPercentageColor(reference: number, total: number, theme?: any): string {
     if (total === 0 || total === undefined) return '#fff'
 
-    const percentage = (reference / total) * 100
+    const percentage = getPercentage(reference, total)
     if (percentage <= 10) {
-        return theme.palette.success.lighter
+        return theme.palette.secondary.A100
     }
 
     if (percentage > 10 && percentage < 50) {
@@ -58,6 +88,38 @@ export function getCellWarningColor(reference: number, total: number, theme?: an
     return '#fff'
 }
 
+export function getEstimationColor(estimationFactor: number, theme?: any): string {
+    if (estimationFactor >= 10 && estimationFactor < 100) {
+        return theme.palette.warning.light
+    }
+
+    if (estimationFactor >= 100 && estimationFactor < 1000) {
+        return theme.palette.warning.main
+    }
+
+    if (estimationFactor >= 1000) {
+        return theme.palette.error.main
+    }
+
+    return '#fff'
+}
+
+export function getPercentage(reference: number, total: number): number {
+    return (reference / total) * 100
+}
+
 export function truncateText(text: string, chars: number): string {
+    if (text.length <= chars) return text;
     return text.slice(0, chars) + '...'
+}
+
+export const areRowsOverEstimated = (direction: string): boolean => {
+    switch (direction) {
+        case 'over':
+            return true
+        case 'under':
+            return false
+        default:
+            return true
+    }
 }

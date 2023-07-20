@@ -2,13 +2,19 @@
 import ThemeCustomization from './themes';
 import Router from "./Router";
 import {PlanProvider} from "./MainContext";
+import {ReactFlowProvider} from "reactflow";
+import {NodeProvider} from "./components/Plan/Contexts";
 
 function App() {
     return (
         <ThemeCustomization>
-            <PlanProvider>
-                <Router/>
-            </PlanProvider>
+            <ReactFlowProvider>
+                <PlanProvider>
+                    <NodeProvider>
+                        <Router/>
+                    </NodeProvider>
+                </PlanProvider>
+            </ReactFlowProvider>
         </ThemeCustomization>
     );
 }

@@ -1,59 +1,198 @@
-// @ts-nocheck
 // material-ui
-import { Box, Chip, Grid, Stack, Typography } from '@mui/material';
-
+import {
+    Box,
+    CardContent,
+    Chip,
+    Collapse,
+    Divider,
+    Grid,
+    LinearProgress,
+    LinearProgressProps,
+    Stack,
+    Typography,
+} from '@mui/material';
 // project import
-import MainCard from '../../MainCard';
+import MainCard from '../MainCard';
 
 // assets
-import { RiseOutlined, FallOutlined } from '@ant-design/icons';
+import {
+    DollarOutlined,
+    DownOutlined,
+    FallOutlined,
+    FieldTimeOutlined, ForkOutlined,
+    RiseOutlined,
+    ZoomInOutlined
+} from '@ant-design/icons';
+import React, {useState} from "react";
+import {
+    areRowsOverEstimated,
+    betterNumbers,
+    getEstimationColor,
+    getPercentage,
+    getPercentageColor,
+} from "../utils";
+import {PlanRow, Stats} from "../types";
+import {ExpandMore} from "../ExpandMore";
+import {useFocus} from "../hooks";
 
-// ==============================|| STATISTICS - ECOMMERCE CARD  ||============================== //
+interface NodeProps {
+    data: PlanRow
+    theme: any
+    stats: Stats
+}
 
-const Node = ({ color, title, count, percentage, isLoss, extra }) => (
-    <MainCard contentSX={{ p: 2.25 }} sx={{width: '350px'}} boxShadow>
-        <Stack spacing={0.5}>
-
-            <Grid container alignItems="center">
-                {/*<Grid item>*/}
-                {/*    <Typography variant="p" color="inherit">*/}
-                {/*        {count}*/}
-                {/*    </Typography>*/}
-                {/*</Grid>*/}
-                <Typography variant="h5" color="bold">
-                    {title}
+function LinearProgressWithLabel(props: LinearProgressProps & { value: number, theme: any, cellWarningColor: string }) {
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+            <Box sx={{width: '100%', mr: 1}}>
+                <LinearProgress variant="determinate" {...props} sx={{
+                    backgroundColor: props.theme.palette.secondary.lighter,
+                    '& .MuiLinearProgress-bar': {
+                        backgroundColor: props.cellWarningColor
+                    }
+                }}/>
+            </Box>
+            <Box sx={{minWidth: 35}}>
+                <Typography variant="body2" color="text.secondary">
+                    {`${Math.round(props.value)}%`}
                 </Typography>
-                {percentage && (
-                    <Grid item>
-                        <Chip
-                            variant="combined"
-                            style={{backgroundColor: color}}
-                            icon={
-                                <>
-                                    {!isLoss && <RiseOutlined style={{ fontSize: '0.75rem', color: 'inherit' }} />}
-                                    {isLoss && <FallOutlined style={{ fontSize: '0.75rem', color: 'inherit' }} />}
-                                </>
-                            }
-                            label={`${percentage} ms`}
-                            sx={{ ml: 1.25, pl: 1 }}
-                            size="small"
-                        />
-                    </Grid>
-                )}
-            </Grid>
-        </Stack>
-        <Box sx={{ pt: 2.25 }}>
-            <Typography variant="caption" color="textSecondary">
-                <Typography component="span" variant="caption" sx={{ color: `${color || 'primary'}.main` }}>
-                    {extra}
-                </Typography>{' '}
-            </Typography>
+            </Box>
         </Box>
-    </MainCard>
-);
+    );
+}
 
-Node.defaultProps = {
-    color: 'primary'
+function showChipsBasedOnPercentage(percentage: number): boolean {
+    return percentage > 15
+}
+
+function showRowEstimationChip(factor: number): boolean {
+    return factor > 10
+}
+
+const Node = ({data, stats, theme}: NodeProps) => {
+    const {isFocused, focus} = useFocus(data.node_id);
+    const [expanded, setExpanded] = useState(false);
+    const exclusiveTimeColor = getPercentageColor(data.exclusive, data.execution_time, theme);
+    const exclusiveTimePercentage = getPercentage(data.exclusive, data.execution_time);
+
+    const handleExpandClick = () => {
+        setExpanded(!expanded);
+    };
+
+    const onClickFocus = (e) => {
+        focus()
+    }
+
+    return (
+        <div id={`node_${data.node_id}`}>
+            <MainCard
+                contentSX={{p: 1.5}}
+                sx={isFocused
+                    ? {
+                        width: 'auto',
+                        minWidth: theme.diagram.node.width,
+                        boxShadow: `0px 0px 60px 25px ${theme.palette.secondary.main}`,
+                        border: `1px solid ${theme.palette.secondary.main} !important`
+                    }
+                    : {width: 'auto', minWidth: theme.diagram.node.width}
+                }
+                boxShadow
+            >
+                <Stack spacing={0.5}>
+
+                    <Grid container alignItems="center">
+                        <ExpandMore
+                            expand={expanded}
+                            onClick={handleExpandClick}
+                            aria-expanded={expanded}
+                            aria-label="show more"
+                        >
+                            <DownOutlined style={{fontSize: '10px'}}/>
+                        </ExpandMore>
+                        <Typography variant="h5" color="bold">
+                            {data.operation}
+                        </Typography>
+                        <Grid item>
+                            {Boolean(data.workers.launched) && (
+                                <Chip
+                                    style={{backgroundColor: theme.palette.primary['100']}}
+                                    icon={<ForkOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                    sx={{ml: 1.25, pl: 1}}
+                                    label={data.workers.launched+1}
+                                    size="small"
+                                />
+                            )}
+                            {showChipsBasedOnPercentage(getPercentage(data.exclusive, data.execution_time)) && (
+                                <Chip
+                                    style={{backgroundColor: exclusiveTimeColor}}
+                                    icon={<FieldTimeOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                    sx={{ml: 1.25, pl: 1}}
+                                    size="small"
+                                />
+                            )}
+                            {showChipsBasedOnPercentage(getPercentage(data.costs.total_cost, stats.max_cost)) && (
+                                <Chip
+                                    style={{backgroundColor: getPercentageColor(data.costs.total_cost, stats.max_cost, theme)}}
+                                    icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                    sx={{ml: 1.25, pl: 1}}
+                                    size="small"
+                                />
+                            )}
+                            {showRowEstimationChip(data.rows.estimation_factor) && (
+                                <Chip
+                                    style={{backgroundColor: getEstimationColor(data.rows.estimation_factor, theme)}}
+                                    icon={
+                                        <>
+                                            {areRowsOverEstimated(data.rows.estimation_direction) ?
+                                                <RiseOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/> :
+                                                <FallOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>
+                                            }
+                                        </>
+                                    }
+                                    sx={{ml: 1.25, pl: 1}}
+                                    size="small"
+                                />
+                            )}
+                            {data.sub_plan_of && (
+                                <Chip
+                                    style={{backgroundColor: theme.palette.secondary.light}}
+                                    sx={{ml: 1.25}}
+                                    size="small"
+                                    label="CTE"
+                                    onClick={onClickFocus}
+                                />
+                            )}
+                            <Chip
+                                style={{backgroundColor: theme.palette.secondary["A100"]}}
+                                icon={<ZoomInOutlined style={{color: 'inherit'}}/>}
+                                sx={{ml: 1.25, pl: 1}}
+                                size="medium"
+                                onClick={onClickFocus}
+                            />
+                        </Grid>
+                    </Grid>
+                </Stack>
+                {showChipsBasedOnPercentage(exclusiveTimePercentage) && (
+                    <Box sx={{pt: 1, pb: 1}}>
+                        <LinearProgressWithLabel cellWarningColor={exclusiveTimeColor} theme={theme} value={exclusiveTimePercentage}/>
+                    </Box>
+                )}
+                <Box sx={{pt: 1}}>
+                    <Typography sx={{color: `${exclusiveTimeColor || 'primary'}.main`}}>
+                        Rows returned: {` `}
+                        <b>{betterNumbers(data.rows.total * (data.workers.launched + 1))}</b>
+                    </Typography>{' '}
+                </Box>
+                <Box sx={{pt: 1, pb: 0}}>
+                    <Divider/>
+                </Box>
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <CardContent sx={{p: 0.2}}>
+                    </CardContent>
+                </Collapse>
+            </MainCard>
+        </div>
+    );
 };
 
 export default Node;

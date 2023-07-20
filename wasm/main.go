@@ -41,9 +41,6 @@ func explain() js.Func {
 			}
 		}
 
-		layout := pkg.NewLayout()
-		layout.PrintTreeHorizontal(node)
-
 		stats, err := pkg.GetStatsFromPlans(plans)
 		if err != nil {
 			return map[string]any{

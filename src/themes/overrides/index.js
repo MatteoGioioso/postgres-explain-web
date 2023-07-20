@@ -1,5 +1,5 @@
 // third-party
-import { merge } from 'lodash';
+import {merge} from 'lodash';
 
 // project import
 import Badge from './Badge';
@@ -17,25 +17,27 @@ import Tab from './Tab';
 import TableCell from './TableCell';
 import Tabs from './Tabs';
 import Typography from './Typography';
+import Alert from "./Alert";
 
 // ==============================|| OVERRIDES - MAIN ||============================== //
 
 export default function ComponentsOverrides(theme) {
-  return merge(
-    Button(theme),
-    Badge(theme),
-    CardContent(),
-    Checkbox(theme),
-    Chip(theme),
-    IconButton(theme),
-    InputLabel(theme),
-    LinearProgress(),
-    Link(),
-    ListItemIcon(),
-    OutlinedInput(theme),
-    Tab(theme),
-    TableCell(theme),
-    Tabs(),
-    Typography()
-  );
+    return merge(
+        Button(theme),
+        Badge(theme),
+        CardContent(),
+        Checkbox(theme),
+        Chip(theme),
+        IconButton(theme),
+        InputLabel(theme),
+        LinearProgress(),
+        Link(),
+        ListItemIcon(),
+        OutlinedInput(theme),
+        Tab(theme),
+        TableCell(theme),
+        Tabs(),
+        Typography(),
+        // Alert()
+    );
 }

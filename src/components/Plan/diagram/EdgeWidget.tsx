@@ -1,5 +1,5 @@
 import React, {FC} from 'react'
-import {EdgeProps, getBezierPath, EdgeLabelRenderer, MarkerType} from 'reactflow'
+import {EdgeProps, getBezierPath} from 'reactflow'
 
 export const EdgeWidget: FC<EdgeProps> = ({
                                               id,

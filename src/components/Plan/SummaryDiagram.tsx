@@ -1,29 +1,27 @@
-import React, {useMemo, useEffect} from 'react'
+import React, {useMemo, useEffect, useCallback} from 'react'
 import ReactFlow, {
     Controls,
     Edge,
-    MarkerType,
     MiniMap,
     Node,
-    Panel,
     Position,
     useEdgesState,
     useNodesState,
     useReactFlow,
-    ReactFlowProvider
+    applyNodeChanges
 } from 'reactflow'
 import {SummaryTableProps} from './interfaces'
 import {PlanRow} from './types'
 import 'reactflow/dist/style.css'
 import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
-import {Box} from "@cloudscape-design/components";
 import {useTheme} from "@mui/material/styles";
+import {getPercentage} from "./utils";
 
 // @ts-ignore
 const elk = new ELK();
 
-const getLayoutedElements = (nodes, edges, options = {}) => {
+const getLayoutedElements = (nodes, edges, options = {}, theme) => {
     const graph = {
         id: 'root',
         layoutOptions: options,
@@ -31,8 +29,8 @@ const getLayoutedElements = (nodes, edges, options = {}) => {
             ...node,
             targetPosition: 'top',
             sourcePosition: 'bottom',
-            width: 350,
-            height: 100,
+            width: theme.diagram.node.width,
+            height: theme.diagram.node.height,
         })),
         edges: edges,
     };
@@ -52,11 +50,15 @@ const getLayoutedElements = (nodes, edges, options = {}) => {
 
 export const Diagram = ({summary, stats}: SummaryTableProps) => {
     const theme = useTheme();
-    const { fitView } = useReactFlow()
-    const [nodes, setNodes, onNodesChange] = useNodesState([])
+    const {fitView} = useReactFlow()
+    const [nodes, setNodes] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const nodeTypes = useMemo(() => ({special: NodeWidget}), [])
     const edgeTypes = useMemo(() => ({special: EdgeWidget}), [])
+    const onNodesChange = useCallback(
+        (x) => setNodes((newNode) => applyNodeChanges(x, newNode)),
+        [setNodes]
+    );
 
     // Elk has a *huge* amount of options to configure. To see everything you can
     // tweak check out:
@@ -79,13 +81,14 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
             const node: Node = {
                 id: row.node_id,
                 data: {
-                    ...row,
+                    row,
+                    stats,
                 },
                 targetPosition: Position.Top,
                 sourcePosition: Position.Bottom,
                 type: 'special',
                 draggable: true,
-                position: {x: 0, y:0},
+                position: {x: 0, y: 0},
             }
 
             initialNodes.push(node)
@@ -96,7 +99,10 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                 id: `${row.node_id}-${row.node_parent_id}`,
                 source: row.node_id,
                 target: row.node_parent_id,
-                style: {strokeWidth: Math.log((row.rows.total / stats.max_rows) * 100) * 10, stroke: theme.palette.primary[200]},
+                style: {
+                    strokeWidth: Math.max(getPercentage(row.rows.total * row.workers.launched, stats.max_rows) / 3, 2),
+                    stroke: theme.palette.primary[200]
+                },
                 data: {
                     rows: row.rows.total,
                 },
@@ -116,13 +122,12 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
 
         const opts = {'elk.direction': 'DOWN', ...elkOptions};
 
-        getLayoutedElements(initialNodes, initialEdges, opts).then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
+        getLayoutedElements(initialNodes, initialEdges, opts, theme).then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
             setNodes(layoutedNodes);
             setEdges(layoutedEdges);
-
             window.requestAnimationFrame(() => fitView());
         });
-    }, [])
+    }, [summary])
 
     return (
         <div style={{height: '80vh', width: '100vw'}}>
@@ -145,8 +150,6 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
 
 export const SummaryDiagram = ({summary, stats}: SummaryTableProps) => {
     return (
-        <ReactFlowProvider>
-            <Diagram summary={summary} stats={stats}/>
-        </ReactFlowProvider>
+        <Diagram summary={summary} stats={stats}/>
     )
 }

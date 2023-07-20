@@ -45,11 +45,11 @@ class Node {
   ["Options"]?: Options;
   ["Timing"]?: Timing;
   ["Settings"]?: Settings;
-  [NodeProp.ACTUAL_LOOPS_PROP]: number;
-  [NodeProp.ACTUAL_ROWS_PROP]: number;
+  [NodeProp.ACTUAL_LOOPS]: number;
+  [NodeProp.ACTUAL_ROWS]: number;
   [NodeProp.ACTUAL_ROWS_REVISED]: number;
-  [NodeProp.ACTUAL_STARTUP_TIME_PROP]?: number;
-  [NodeProp.ACTUAL_TOTAL_TIME_PROP]: number;
+  [NodeProp.ACTUAL_STARTUP_TIME]?: number;
+  [NodeProp.ACTUAL_TOTAL_TIME]: number;
   [NodeProp.EXCLUSIVE_COST]: number;
   [NodeProp.EXCLUSIVE_DURATION]: number;
   [NodeProp.EXCLUSIVE_LOCAL_DIRTIED_BLOCKS]: number;
@@ -65,10 +65,10 @@ class Node {
   [NodeProp.PLANNER_ESTIMATE_DIRECTION]?: any;
   [NodeProp.PLANNER_ESTIMATE_FACTOR]?: number;
   [NodeProp.INDEX_NAME]?: string;
-  [NodeProp.NODE_TYPE_PROP]: string;
+  [NodeProp.NODE_TYPE]: string;
   [NodeProp.PARALLEL_AWARE]: boolean;
   [NodeProp.PLANS_PROP]: Node[];
-  [NodeProp.PLAN_ROWS_PROP]: number;
+  [NodeProp.PLAN_ROWS]: number;
   [NodeProp.PLAN_ROWS_REVISED]?: number;
   [NodeProp.ROWS_REMOVED_BY_FILTER]?: number;
   [NodeProp.ROWS_REMOVED_BY_JOIN_FILTER]?: number;
@@ -99,7 +99,7 @@ class Node {
     if (!type) {
       return
     }
-    this[NodeProp.NODE_TYPE_PROP] = type
+    this[NodeProp.NODE_TYPE] = type
     // tslint:disable-next-line:max-line-length
     const scanMatches =
       /^((?:Parallel\s+)?(?:Seq\sScan|Tid.*Scan|Bitmap\s+Heap\s+Scan|(?:Async\s+)?Foreign\s+Scan|Update|Insert|Delete))\son\s(\S+)(?:\s+(\S+))?$/.exec(
@@ -117,56 +117,56 @@ class Node {
     )
     const subqueryMatches = /^(Subquery\sScan)\son\s(.+)$/.exec(type)
     if (scanMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = scanMatches[1]
+      this[NodeProp.NODE_TYPE] = scanMatches[1]
       this[NodeProp.RELATION_NAME] = scanMatches[2]
       if (scanMatches[3]) {
         this[NodeProp.ALIAS] = scanMatches[3]
       }
     } else if (bitmapMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = bitmapMatches[1]
+      this[NodeProp.NODE_TYPE] = bitmapMatches[1]
       this[NodeProp.INDEX_NAME] = bitmapMatches[2]
     } else if (indexMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = indexMatches[1]
+      this[NodeProp.NODE_TYPE] = indexMatches[1]
       this[NodeProp.INDEX_NAME] = indexMatches[2]
       this[NodeProp.RELATION_NAME] = indexMatches[3]
       if (indexMatches[4]) {
         this[NodeProp.ALIAS] = indexMatches[4]
       }
     } else if (cteMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = cteMatches[1]
+      this[NodeProp.NODE_TYPE] = cteMatches[1]
       this[NodeProp.CTE_NAME] = cteMatches[2]
       if (cteMatches[3]) {
         this[NodeProp.ALIAS] = cteMatches[3]
       }
     } else if (functionMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = functionMatches[1]
+      this[NodeProp.NODE_TYPE] = functionMatches[1]
       this[NodeProp.FUNCTION_NAME] = functionMatches[2]
       if (functionMatches[3]) {
         this[NodeProp.ALIAS] = functionMatches[3]
       }
     } else if (subqueryMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = subqueryMatches[1]
+      this[NodeProp.NODE_TYPE] = subqueryMatches[1]
       // this[NodeProp.SUBQUERY_NAME] = subqueryMatches[2].replace
     }
     const parallelMatches = /^(Parallel\s+)(.*)/.exec(
-      <string>this[NodeProp.NODE_TYPE_PROP]
+      <string>this[NodeProp.NODE_TYPE]
     )
     if (parallelMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = parallelMatches[2]
+      this[NodeProp.NODE_TYPE] = parallelMatches[2]
       this[NodeProp.PARALLEL_AWARE] = true
     }
 
-    const joinMatches = /(.*)\sJoin$/.exec(<string>this[NodeProp.NODE_TYPE_PROP])
+    const joinMatches = /(.*)\sJoin$/.exec(<string>this[NodeProp.NODE_TYPE])
     const joinModifierMatches = /(.*)\s+(Full|Left|Right|Anti)/.exec(
-      <string>this[NodeProp.NODE_TYPE_PROP]
+      <string>this[NodeProp.NODE_TYPE]
     )
     if (joinMatches) {
-      this[NodeProp.NODE_TYPE_PROP] = joinMatches[1]
+      this[NodeProp.NODE_TYPE] = joinMatches[1]
       if (joinModifierMatches) {
-        this[NodeProp.NODE_TYPE_PROP] = joinModifierMatches[1]
-        this[NodeProp.JOIN_TYPE_PROP] = joinModifierMatches[2]
+        this[NodeProp.NODE_TYPE] = joinModifierMatches[1]
+        this[NodeProp.JOIN_TYPE] = joinModifierMatches[2]
       }
-      this[NodeProp.NODE_TYPE_PROP] += " Join"
+      this[NodeProp.NODE_TYPE] += " Join"
     }
   }
 }
@@ -254,7 +254,7 @@ export class PlanService {
     source = source.replace(/^╔(═)+╗\r?\n/gm, "")
 
     // Remove quotes around lines, both ' and "
-    source = source.replace(/^(["'])(.*)\1\r?\n/gm, "$2\n")
+    source = source.replace(/^(["'])(.*)(\1[\r\n]?|\1$)/gm, "$2\n")
 
     // Remove "+" line continuations
     source = source.replace(/\s*\+\r?\n/g, "\n")
@@ -489,7 +489,7 @@ export class PlanService {
           newNode[NodeProp.TOTAL_COST_PROP] = parseFloat(
             nodeMatches[4] || nodeMatches[15]
           )
-          newNode[NodeProp.PLAN_ROWS_PROP] = parseInt(
+          newNode[NodeProp.PLAN_ROWS] = parseInt(
             nodeMatches[5] || nodeMatches[16],
             0
           )
@@ -502,10 +502,10 @@ export class PlanService {
           (nodeMatches[7] && nodeMatches[8]) ||
           (nodeMatches[18] && nodeMatches[19])
         ) {
-          newNode[NodeProp.ACTUAL_STARTUP_TIME_PROP] = parseFloat(
+          newNode[NodeProp.ACTUAL_STARTUP_TIME] = parseFloat(
             nodeMatches[7] || nodeMatches[18]
           )
-          newNode[NodeProp.ACTUAL_TOTAL_TIME_PROP] = parseFloat(
+          newNode[NodeProp.ACTUAL_TOTAL_TIME] = parseFloat(
             nodeMatches[8] || nodeMatches[19]
           )
         }
@@ -515,20 +515,20 @@ export class PlanService {
           (nodeMatches[11] && nodeMatches[12]) ||
           (nodeMatches[20] && nodeMatches[21])
         ) {
-          newNode[NodeProp.ACTUAL_ROWS_PROP] = parseInt(
+          newNode[NodeProp.ACTUAL_ROWS] = parseInt(
             nodeMatches[9] || nodeMatches[11] || nodeMatches[20],
             0
           )
-          newNode[NodeProp.ACTUAL_LOOPS_PROP] = parseInt(
+          newNode[NodeProp.ACTUAL_LOOPS] = parseInt(
             nodeMatches[10] || nodeMatches[12] || nodeMatches[21],
             0
           )
         }
 
         if (neverExecuted) {
-          newNode[NodeProp.ACTUAL_LOOPS_PROP] = 0
-          newNode[NodeProp.ACTUAL_ROWS_PROP] = 0
-          newNode[NodeProp.ACTUAL_TOTAL_TIME_PROP] = 0
+          newNode[NodeProp.ACTUAL_LOOPS] = 0
+          newNode[NodeProp.ACTUAL_ROWS] = 0
+          newNode[NodeProp.ACTUAL_TOTAL_TIME] = 0
         }
         const element = {
           node: newNode,
@@ -607,10 +607,10 @@ export class PlanService {
           previousElement.node[NodeProp.WORKERS]?.push(worker)
         }
         if (workerMatches[3] && workerMatches[4]) {
-          worker[NodeProp.ACTUAL_STARTUP_TIME_PROP] = parseFloat(workerMatches[3])
-          worker[NodeProp.ACTUAL_TOTAL_TIME_PROP] = parseFloat(workerMatches[4])
-          worker[NodeProp.ACTUAL_ROWS_PROP] = parseInt(workerMatches[5], 0)
-          worker[NodeProp.ACTUAL_LOOPS_PROP] = parseInt(workerMatches[6], 0)
+          worker[NodeProp.ACTUAL_STARTUP_TIME] = parseFloat(workerMatches[3])
+          worker[NodeProp.ACTUAL_TOTAL_TIME] = parseFloat(workerMatches[4])
+          worker[NodeProp.ACTUAL_ROWS] = parseInt(workerMatches[5], 0)
+          worker[NodeProp.ACTUAL_LOOPS] = parseInt(workerMatches[6], 0)
         }
 
         if (this.parseSort(workerMatches[10], worker)) {

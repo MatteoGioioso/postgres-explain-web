@@ -27,8 +27,8 @@ const getLayoutedElements = (nodes, edges, options = {}, theme) => {
         layoutOptions: options,
         children: nodes.map((node) => ({
             ...node,
-            targetPosition: 'top',
-            sourcePosition: 'bottom',
+            targetPosition: 'bottom',
+            sourcePosition: 'top',
             width: theme.diagram.node.width,
             height: theme.diagram.node.height,
         })),
@@ -40,7 +40,7 @@ const getLayoutedElements = (nodes, edges, options = {}, theme) => {
         .then((layoutedGraph) => ({
             nodes: layoutedGraph.children.map((node) => ({
                 ...node,
-                position: {x: node.x, y: node.y},
+                position: {x: -node.x, y: -node.y},
             })),
 
             edges: layoutedGraph.edges,
@@ -84,8 +84,8 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                     row,
                     stats,
                 },
-                targetPosition: Position.Top,
-                sourcePosition: Position.Bottom,
+                targetPosition: Position.Bottom,
+                sourcePosition: Position.Top,
                 type: 'special',
                 draggable: true,
                 position: {x: 0, y: 0},
@@ -100,7 +100,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                 source: row.node_id,
                 target: row.node_parent_id,
                 style: {
-                    strokeWidth: Math.max(getPercentage(row.rows.total * row.workers.launched, stats.max_rows) / 3, 2),
+                    strokeWidth: Math.max((getPercentage(row.rows.total * (row.workers.launched + 1), stats.max_rows)/2), 1),
                     stroke: theme.palette.primary[200]
                 },
                 data: {

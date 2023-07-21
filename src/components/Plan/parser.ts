@@ -52,16 +52,6 @@ class Node {
   [NodeProp.ACTUAL_TOTAL_TIME]: number;
   [NodeProp.EXCLUSIVE_COST]: number;
   [NodeProp.EXCLUSIVE_DURATION]: number;
-  [NodeProp.EXCLUSIVE_LOCAL_DIRTIED_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_LOCAL_HIT_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_LOCAL_READ_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_LOCAL_WRITTEN_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_SHARED_DIRTIED_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_SHARED_HIT_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_SHARED_READ_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_SHARED_WRITTEN_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_TEMP_READ_BLOCKS]: number;
-  [NodeProp.EXCLUSIVE_TEMP_WRITTEN_BLOCKS]: number;
   [NodeProp.PLANNER_ESTIMATE_DIRECTION]?: any;
   [NodeProp.PLANNER_ESTIMATE_FACTOR]?: number;
   [NodeProp.INDEX_NAME]?: string;
@@ -79,10 +69,6 @@ class Node {
   [NodeProp.WORKERS_PLANNED]?: number;
   [NodeProp.WORKERS_PLANNED_BY_GATHER]?: number;
   [NodeProp.WORKERS_PLANNED_BY_GATHER]?: number;
-  [NodeProp.EXCLUSIVE_IO_READ_TIME]: number;
-  [NodeProp.EXCLUSIVE_IO_WRITE_TIME]: number;
-  [NodeProp.AVERAGE_IO_READ_TIME]: number;
-  [NodeProp.AVERAGE_IO_WRITE_TIME]: number;
   [k: string]:
     | Node[]
     | Options

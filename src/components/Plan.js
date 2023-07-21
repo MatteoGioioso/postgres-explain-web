@@ -2,8 +2,8 @@ import {useContext, useEffect, useState} from 'react';
 
 // material-ui
 import {
-    Box,
-    Grid,
+    Box, Collapse,
+    Grid, Tab, Tabs,
     Typography
 } from '@mui/material';
 
@@ -16,9 +16,12 @@ import MainCard from "./Plan/MainCard";
 import {ErrorAlert} from "./ErrorReporting";
 import {useNavigate} from "react-router-dom";
 import {OverallStats} from "./Plan/OverallStats";
-
+import {TableTabs} from "./Plan/tabs/TableTabs";
+import {GeneralStatsTable} from "./Plan/stats/GeneralStatsTable";
+import {RawPlan} from "./Plan/stats/RawPlan";
 
 const planService = new PlanService();
+
 
 const DashboardDefault = () => {
     const {plan} = useContext(PlanContext);
@@ -73,16 +76,7 @@ const DashboardDefault = () => {
     return (
         <Grid container>
             {error && <ErrorAlert error={error}/>}
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h5">Overall statistics</Typography>
-                </Grid>
-            </Grid>
-            <MainCard sx={{mt: 2, mb: 2}} content={false}>
-                {Object.keys(explained).length !== 0 && (
-                    <OverallStats stats={explained.stats}/>
-                )}
-            </MainCard>
+
             <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
                     <Typography variant="h5">Diagram</Typography>
@@ -98,21 +92,22 @@ const DashboardDefault = () => {
                 <Box sx={{m: 10}}/>
             </Grid>
             <Grid container>
-                <Grid container alignItems="center" justifyContent="space-between">
-                    <Grid item>
-                        <Typography variant="h5">Table</Typography>
-                    </Grid>
-                </Grid>
-                <MainCard sx={{mt: 2}} content={false}>
+                <TableTabs>
                     {Object.keys(explained).length !== 0 && (
                         <SummaryTable
                             summary={explained.summary}
                             stats={explained.stats}
                         />)
                     }
-                </MainCard>
-            </Grid>
+                    {Object.keys(explained).length !== 0 && (
+                        <GeneralStatsTable
+                            stats={explained.stats}
+                        />)
+                    }
 
+                    <RawPlan plan={planService.fromSource(plan)} />
+                </TableTabs>
+            </Grid>
         </Grid>
     );
 };

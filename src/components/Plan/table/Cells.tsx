@@ -1,8 +1,9 @@
 import React from "react";
 import {Box, Collapse, Popover, TableCell, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {betterDiskSize, betterNumbers, betterTiming, getPercentageColor} from "../utils";
+import {betterDiskSize, betterNumbers, betterTiming, getEstimationColor, getPercentageColor} from "../utils";
 import {PlanRow, Stats} from "../types";
+import {FilterOutlined} from "@ant-design/icons";
 
 export const GenericDetailsPopover = (props: { name: string, content: any, children: any, keepCloseCondition?: boolean, style?: any }) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -154,65 +155,126 @@ export interface CellProps {
     theme?: any
 }
 
-export const RowCell = ({row, expanded}: CellProps) => {
+export const RowsCell = ({row, expanded, theme}: CellProps) => {
     return (
         <TableCell align="left" style={{wordWrap: 'break-word', whiteSpace: 'normal', maxWidth: '150px'}}>
-            <GenericDetailsPopover name={"Rows"} content={row.rows.total}>
-                {betterNumbers(row.rows.total)}
-            </GenericDetailsPopover>
+            {row.scopes.filters && (
+                <FilterOutlined style={{color: theme.palette.secondary.darker, fontSize: '12px'}}/>)} {betterNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <Typography><b>Total</b>: {betterNumbers(row.rows.total * (row.workers.launched + 1))}</Typography>
-                {
-                    row.scopes.filters && (
-                        <>
-                            <GenericDetailsPopover name={"rows removed"} content={row.rows.removed}>
-                                <b>Removed: </b> - {' '}{betterNumbers(row.rows.removed)}
-                            </GenericDetailsPopover>
-                            <GenericDetailsPopover name={"filters"} content={<code>{row.scopes.filters}</code>}>
-                                <Typography noWrap><b>Filter</b>: <code>{row.scopes.filters}</code></Typography>
-                            </GenericDetailsPopover>
-                        </>
-                    )}
+                <Box sx={{pt: 1}}>
+                    <Typography><b>Total</b>: {' '}
+                        <GenericDetailsPopover name={"Rows"} content={row.rows.total}>
+                            {betterNumbers(row.rows.total * (row.workers.launched + 1))}
+                        </GenericDetailsPopover>
+                    </Typography>
+                    <Typography><b>Planned</b>: {' '}
+                        <GenericDetailsPopover name={"Planned rows"} content={row.rows.planned_rows}>
+
+                        {betterNumbers(row.rows.planned_rows)}
+                        </GenericDetailsPopover>
+                    </Typography>
+                    {
+                        row.scopes.filters && (
+                            <>
+                                <b>Removed: </b>
+                                <GenericDetailsPopover name={"rows removed"} content={row.rows.removed}>
+                                    - {' '}{betterNumbers(row.rows.removed)}
+                                </GenericDetailsPopover>
+                                <GenericDetailsPopover
+                                    name={"filters"} content={<code>{row.scopes.filters}</code>}
+                                    keepCloseCondition={row.scopes.filters.length <= theme.diagram.text.maxChars}
+                                >
+                                    <Typography noWrap><b>Filter</b>: <code>{row.scopes.filters}</code></Typography>
+                                </GenericDetailsPopover>
+                            </>
+                        )}
+
+                </Box>
             </Collapse>
         </TableCell>
 
     )
 }
 
-export const BufferReadsCell = ({expanded, row, stats, theme}: CellProps) => {
+export const BufferReadsCell = ({
+                                    expanded, row, stats, theme
+                                }: CellProps) => {
     return (
         <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme)}}>
             {betterDiskSize(row.buffers.effective_blocks_read)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <Typography
-                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_reads)}
-                </Typography>
-                <Typography
-                    variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_reads)}
-                </Typography>
-                <Typography
-                    variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_local_reads)}
-                </Typography>
+                <Box sx={{pt: 1}}>
+
+                    {Boolean(row.buffers.exclusive_reads) && (
+                        <Typography
+                            variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_reads)}
+                        </Typography>
+                    )}
+                    {Boolean(row.buffers.exclusive_temp_reads) && (
+                        <Typography
+                            variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_reads)}
+                        </Typography>
+                    )}
+                    {Boolean(row.buffers.exclusive_local_reads) && (
+                        <Typography
+                            variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_reads)}
+                        </Typography>
+                    )}
+
+                </Box>
             </Collapse>
         </TableCell>
     )
 }
 
-export const BufferWrittenCell = ({expanded, theme, row, stats}: CellProps) => {
+export const BufferWrittenCell = ({
+                                      expanded, theme, row, stats
+                                  }: CellProps) => {
     return (
         <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme)}}>
             {betterDiskSize(row.buffers.effective_blocks_written)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <Typography
-                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_written)}
-                </Typography>
-                <Typography
-                    variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_written)}
-                </Typography>
-                <Typography
-                    variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_written)}
-                </Typography>
+                <Box sx={{pt: 1}}>
+
+                    {Boolean(row.buffers.exclusive_written) && (
+                        <Typography
+                            variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_written)}
+                        </Typography>
+                    )}
+                    {Boolean(row.buffers.exclusive_temp_written) && (
+                        <Typography
+                            variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_written)}
+                        </Typography>
+                    )}
+                    {Boolean(row.buffers.exclusive_local_written) && (
+                        <Typography
+                            variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_written)}
+                        </Typography>
+                    )}
+
+                </Box>
             </Collapse>
+        </TableCell>
+    )
+}
+
+export const RowsEstimationCell = ({
+                                       row, theme, expanded
+                                   }: CellProps) => {
+    return (
+        <TableCell align="left" style={{backgroundColor: getEstimationColor(row.rows.estimation_factor, theme)}}>
+            {getRowEstimateDirectionSymbol(row.rows.estimation_direction) + ' '}
+            <GenericDetailsPopover
+                content={Math.round(row.rows.estimation_factor * 1000) / 1000}
+                name="Rows estimate factor"
+            >
+                {betterNumbers(row.rows.estimation_factor)}
+            </GenericDetailsPopover>
+            {/*<Collapse in={expanded} timeout="auto" unmountOnExit>*/}
+            {/*    <Box sx={{pt: 1}}>*/}
+            {/*        <Typography>Planned: {betterNumbers(row.rows.planned_rows)}</Typography>*/}
+            {/*    </Box>*/}
+            {/*</Collapse>*/}
         </TableCell>
     )
 }

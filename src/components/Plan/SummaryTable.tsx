@@ -3,6 +3,7 @@ import {SummaryTableProps} from './interfaces'
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import {GenericDetailsPopover, headCells} from "./table/Cells";
 import {Row} from "./table/Row";
+import MainCard from "./MainCard";
 
 
 function OrderTableHead({order, orderBy}) {
@@ -31,7 +32,7 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
     const [orderBy] = useState('trackingNo');
 
     return (
-        <>
+        <MainCard content={false}>
             <TableContainer
                 sx={{
                     width: '100vw',
@@ -61,6 +62,6 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </>
+        </MainCard>
     );
 }

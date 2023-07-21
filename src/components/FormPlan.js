@@ -1,5 +1,5 @@
 import {useContext} from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 // material-ui
 import {
@@ -8,7 +8,7 @@ import {
     FormHelperText,
     Grid,
     Stack,
-    TextField
+    TextField, Typography
 } from '@mui/material';
 
 // third party
@@ -94,6 +94,16 @@ const FormPlan = () => {
                                     <FormHelperText error>{errors.submit}</FormHelperText>
                                 </Grid>
                             )}
+                            <Grid item xs={12}>
+                                <Typography variant="body1">
+                                    Postgres explain uses wasm and does not have a backend. <b>I do not save any of the information provided
+                                    in this form</b>.
+                                </Typography>
+                                <Typography variant="body2">
+                                    For the time being all your query plans, query and schemas are stored in the client. If any changes to
+                                    this behaviour will occur, you will be notified.
+                                </Typography>
+                            </Grid>
                             <Grid item xs={12}>
                                 <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit"
                                         variant="contained"

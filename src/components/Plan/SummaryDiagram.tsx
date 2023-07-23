@@ -17,6 +17,9 @@ import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
 import {getPercentage} from "./utils";
+import MainCard from "./MainCard";
+import {GeneralStatsTable} from "./stats/GeneralStatsTable";
+import {Grid} from "@mui/material";
 
 // @ts-ignore
 const elk = new ELK();
@@ -100,7 +103,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                 source: row.node_id,
                 target: row.node_parent_id,
                 style: {
-                    strokeWidth: Math.max((getPercentage(row.rows.total * (row.workers.launched + 1), stats.max_rows)/2), 1),
+                    strokeWidth: Math.max((getPercentage(row.rows.total * (row.workers.launched + 1), stats.max_rows) / 2), 1),
                     stroke: theme.palette.primary[200]
                 },
                 data: {
@@ -130,21 +133,29 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
     }, [summary])
 
     return (
-        <div style={{height: '80vh', width: '100vw'}}>
-            <ReactFlow
-                fitView
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                minZoom={0.1}
-            >
-                <Controls/>
-                <MiniMap/>
-            </ReactFlow>
-        </div>
+        <Grid container>
+            {/*<Grid xs={4}>*/}
+            {/*    <GeneralStatsTable stats={stats}/>*/}
+            {/*</Grid>*/}
+
+            <Grid xs={12} sx={{pt: 2}}>
+                <div style={{height: '80vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
+                    <ReactFlow
+                        fitView
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        minZoom={0.1}
+                    >
+                        <Controls/>
+                        <MiniMap/>
+                    </ReactFlow>
+                </div>
+            </Grid>
+        </Grid>
     )
 }
 

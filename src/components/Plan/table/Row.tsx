@@ -1,71 +1,16 @@
 import {PlanRow, Stats} from "../types";
-import {Box, Chip, Collapse, Divider, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
-import {betterDiskSize, betterNumbers, betterTiming, getEstimationColor, getPercentageColor, truncateText} from "../utils";
+import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
+import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
 import React, {useEffect, useState} from "react";
-import {
-    TimingCell,
-    GenericDetailsPopover,
-    getRowEstimateDirectionSymbol,
-    RowsCell,
-    BufferReadsCell,
-    BufferWrittenCell,
-    RowsEstimationCell
-} from "./Cells";
+import {BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
 import {useTheme} from "@mui/material/styles";
-import {ApartmentOutlined, CloseOutlined, DollarOutlined, DownOutlined, ZoomInOutlined} from "@ant-design/icons";
+import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
 import {useFocus, useNodeHover} from "../hooks";
 
 export interface RowProps {
     row: PlanRow
     stats: Stats
-}
-
-function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: PlanRow, stats: Stats, theme: any }) {
-    return (
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-            <Box sx={{pt: 1, pb: 1}}>
-                <Divider/>
-            </Box>
-            {Object.keys(row.scopes).map(scopeName => (
-                row.scopes[scopeName] && (
-                    <GenericDetailsPopover
-                        style={{width: '1500px'}}
-                        keepCloseCondition={row.scopes[scopeName].length <= theme.diagram.text.maxChars}
-                        name={scopeName}
-                        content={
-                            <Typography>
-                                <b>{scopeName} </b><code>{row.scopes[scopeName]}</code>
-                            </Typography>
-                        }
-                    >
-                        <Typography><b>{scopeName} </b><code>{truncateText(row.scopes[scopeName], theme.diagram.text.maxChars)}</code></Typography>
-                    </GenericDetailsPopover>
-                )
-            ))}
-
-            <Box sx={{pt: 1, pb: 1}}>
-                <Divider/>
-            </Box>
-
-            <div>
-                Total cost:
-                <Chip
-                    style={{backgroundColor: getPercentageColor(row.costs.total_cost, stats.max_cost, theme)}}
-                    icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                    label={`${row.costs.total_cost}`}
-                    sx={{ml: 1.25, pl: 1}}
-                    size="small"
-                />
-            </div>
-            <div>
-                Startup cost: {row.costs.startup_cost}
-            </div>
-            <div>
-                Plan width: {row.costs.plan_width}
-            </div>
-        </Collapse>
-    )
 }
 
 
@@ -131,12 +76,16 @@ export function Row({row, stats}: RowProps) {
             <TableCell align="right">
                 {betterNumbers(row.loops)} / {row.workers.launched + 1}
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Typography
-                        variant='subtitle2'>Workers Planned: {row.workers.planned}
-                    </Typography>
-                    <Typography
-                        variant='subtitle2'>Workers Launched: {row.workers.launched}
-                    </Typography>
+                    {Boolean(row.workers.planned) && (
+                        <Typography
+                            variant='subtitle2'>Workers Planned: {row.workers.planned}
+                        </Typography>
+                    )}
+                    {Boolean(row.workers.launched) && (
+                        <Typography
+                            variant='subtitle2'>Workers Launched: {row.workers.launched}
+                        </Typography>
+                    )}
                 </Collapse>
             </TableCell>
 
@@ -144,26 +93,7 @@ export function Row({row, stats}: RowProps) {
 
             <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
-            <TableCell align="left">
-                <Grid container>
-                    <Box sx={{pl: row.level * 4}}>
-                        <Grid>
-                            {'└' + '─>'}
-                        </Grid>
-                    </Box>
-                    <Grid>
-                        <div>
-                            <div>
-                                <Box sx={{pl: 1.5}}>
-                                    <Typography variant="h5" color='bold'>{row.operation}</Typography>
-                                </Box>
-                            </div>
-                            <NodeStats expanded={expanded} row={row} stats={stats} theme={theme}/>
-
-                        </div>
-                    </Grid>
-                </Grid>
-            </TableCell>
+            <InfoCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
             <TableCell>
                 {!isUnfocused() && (

@@ -1,9 +1,9 @@
 import React from "react";
-import {Box, Collapse, Popover, TableCell, Typography} from "@mui/material";
+import {Box, Chip, Collapse, Divider, Grid, Popover, TableCell, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {betterDiskSize, betterNumbers, betterTiming, getEstimationColor, getPercentageColor} from "../utils";
+import {betterDiskSize, betterNumbers, betterTiming, getEstimationColor, getPercentageColor, truncateText} from "../utils";
 import {PlanRow, Stats} from "../types";
-import {FilterOutlined} from "@ant-design/icons";
+import {DollarOutlined, FilterOutlined} from "@ant-design/icons";
 
 export const GenericDetailsPopover = (props: { name: string, content: any, children: any, keepCloseCondition?: boolean, style?: any }) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -159,7 +159,7 @@ export const RowsCell = ({row, expanded, theme}: CellProps) => {
     return (
         <TableCell align="left" style={{wordWrap: 'break-word', whiteSpace: 'normal', maxWidth: '150px'}}>
             {row.scopes.filters && (
-                <FilterOutlined style={{color: theme.palette.secondary.darker, fontSize: '12px'}}/>)} {betterNumbers(row.rows.total)}
+                <FilterOutlined style={{color: theme.palette.primary.light, fontSize: '12px'}}/>)} {betterNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <Box sx={{pt: 1}}>
                     <Typography><b>Total</b>: {' '}
@@ -170,7 +170,7 @@ export const RowsCell = ({row, expanded, theme}: CellProps) => {
                     <Typography><b>Planned</b>: {' '}
                         <GenericDetailsPopover name={"Planned rows"} content={row.rows.planned_rows}>
 
-                        {betterNumbers(row.rows.planned_rows)}
+                            {betterNumbers(row.rows.planned_rows)}
                         </GenericDetailsPopover>
                     </Typography>
                     {
@@ -276,5 +276,82 @@ export const RowsEstimationCell = ({
             {/*    </Box>*/}
             {/*</Collapse>*/}
         </TableCell>
+    )
+}
+
+export const InfoCell = ({row, expanded, stats, theme}: CellProps) => {
+    return (
+        <TableCell align="left">
+            <Grid container>
+                <Box sx={{pl: row.level * 4}}>
+                    <Grid>
+                        {'└' + '─>'}
+                    </Grid>
+                </Box>
+                <Grid>
+                    <div>
+                        <div>
+                            <Box sx={{pl: 1.5}}>
+                                <Typography variant="h5" color='bold'>{row.operation}</Typography>
+                            </Box>
+                        </div>
+                        <NodeStats expanded={expanded} row={row} stats={stats} theme={theme}/>
+
+                    </div>
+                </Grid>
+            </Grid>
+        </TableCell>
+    )
+}
+
+function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: PlanRow, stats: Stats, theme: any }) {
+    const scopesNames = Object.keys(row.scopes);
+    const areScopesEmpty = Object.values(row.scopes).every(x => x === "")
+
+    return (
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+            {!areScopesEmpty && (
+                <Box sx={{pt: 1, pb: 1}}>
+                    <Divider/>
+                </Box>
+            )}
+            {scopesNames.map(scopeName => (
+                row.scopes[scopeName] && (
+                    <GenericDetailsPopover
+                        style={{width: '1500px'}}
+                        keepCloseCondition={row.scopes[scopeName].length <= theme.diagram.text.maxChars}
+                        name={scopeName}
+                        content={
+                            <Typography>
+                                <b>{scopeName} </b><code>{row.scopes[scopeName]}</code>
+                            </Typography>
+                        }
+                    >
+                        <Typography><b>{scopeName} </b><code>{truncateText(row.scopes[scopeName], theme.diagram.text.maxChars)}</code></Typography>
+                    </GenericDetailsPopover>
+                )
+            ))}
+
+            <Box sx={{pt: 1, pb: 1}}>
+                <Divider/>
+            </Box>
+
+            <div>
+                Total cost:
+                <Chip
+                    style={{backgroundColor: getPercentageColor(row.costs.total_cost, stats.max_cost, theme)}}
+                    icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                    label={`${row.costs.total_cost}`}
+                    sx={{ml: 1.25, pl: 1}}
+                    size="small"
+                />
+            </div>
+            <div>
+                Startup cost: {row.costs.startup_cost}
+            </div>
+            <div>
+                Plan width: {row.costs.plan_width}
+            </div>
+        </Collapse>
     )
 }

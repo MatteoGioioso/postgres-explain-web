@@ -60,6 +60,13 @@ const FormPlan = () => {
                     setPlan(values.plan)
                     navigate('/plan')
                 }}
+                validate={values => {
+                    const errors = {};
+                    if (!values.plan) {
+                        errors.plan = 'Required';
+                    }
+                    return errors;
+                }}
             >
                 {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
                     <form noValidate onSubmit={handleSubmit}>
@@ -68,7 +75,7 @@ const FormPlan = () => {
                                 <Stack spacing={1}>
                                     <TextField
                                         fullWidth
-                                        error={Boolean(touched.email && errors.email)}
+                                        error={Boolean(touched.plan && errors.plan)}
                                         id="plan"
                                         type="text"
                                         value={values.email}
@@ -81,9 +88,9 @@ const FormPlan = () => {
                                         rows={30}
                                         maxRows={100}
                                     />
-                                    {touched.email && errors.email && (
-                                        <FormHelperText error id="helper-text-email-signup">
-                                            {errors.email}
+                                    {touched.plan && errors.plan && (
+                                        <FormHelperText error id="helper-text-plan-signup">
+                                            {errors.plan}
                                         </FormHelperText>
                                     )}
                                 </Stack>

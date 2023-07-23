@@ -19,6 +19,7 @@ import {OverallStats} from "./Plan/OverallStats";
 import {TableTabs} from "./Plan/tabs/TableTabs";
 import {GeneralStatsTable} from "./Plan/stats/GeneralStatsTable";
 import {RawPlan} from "./Plan/stats/RawPlan";
+import {IndexesStatsTable} from "./Plan/stats/IndexesStatsTable";
 
 const planService = new PlanService();
 
@@ -104,8 +105,11 @@ const DashboardDefault = () => {
                             stats={explained.stats}
                         />)
                     }
+                    {Object.keys(explained).length !== 0 && (
+                        <IndexesStatsTable stats={explained.indexes_stats}/>
+                    )}
 
-                    <RawPlan plan={planService.fromSource(plan)} />
+                    <RawPlan plan={planService.fromSource(plan)}/>
                 </TableTabs>
             </Grid>
         </Grid>

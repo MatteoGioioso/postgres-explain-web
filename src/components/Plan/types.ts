@@ -147,13 +147,13 @@ export interface Stats {
 export type Plans = {
     Plan: { [key: string]: any};
   }[];
+export interface IndexesStats {
+  indexes: { [key: string]: IndexStats};
+}
 export interface Explained {
   summary: PlanRow[];
   stats: Stats;
-}
-export interface Position {
-  x_factor: number /* float64 */;
-  y_factor: number /* float64 */;
+  indexes_stats: IndexesStats;
 }
 export interface NodeScopes {
   table: string;
@@ -230,4 +230,14 @@ export interface Operation {
 export interface Scope {
   name: string;
   prepend: string;
+}
+export interface IndexNode {
+  Id: string;
+  Type: string;
+  ExclusiveTime: number /* float64 */;
+  Condition: string;
+}
+export interface IndexStats {
+  indexes: IndexNode[];
+  total_time: number /* float64 */;
 }

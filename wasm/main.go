@@ -41,20 +41,25 @@ func explain() js.Func {
 			}
 		}
 
-		stats, err := pkg.GetStatsFromPlans(plans)
-		if err != nil {
+		pkg.NewPlanEnricher().AnalyzePlan(node)
+
+		statsGather := pkg.NewStatsGather()
+		if err := statsGather.GetStatsFromPlans(plans); err != nil {
 			return map[string]any{
 				"error":         "could not get stats from plan",
 				"error_details": err.Error(),
 			}
 		}
-		pkg.NewPlanEnricher().AnalyzePlan(node, &stats)
+
+		stats := statsGather.ComputeStats(node)
+		indexesStats := statsGather.ComputeIndexesStats(node)
 
 		summary := pkg.NewSummary().Do(node, stats)
 
 		explained := pkg.Explained{
-			Summary: summary,
-			Stats:   stats,
+			Summary:      summary,
+			Stats:        stats,
+			IndexesStats: indexesStats,
 		}
 
 		marshalledExplained, err := json.Marshal(explained)

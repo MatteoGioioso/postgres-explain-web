@@ -53,6 +53,13 @@ export const TableTabs = (props) => {
                 <Tab label={
                     <Grid container alignItems="center" justifyContent="space-between">
                         <Grid item>
+                            <Typography variant="h5">Indexes</Typography>
+                        </Grid>
+                    </Grid>
+                }/>
+                <Tab label={
+                    <Grid container alignItems="center" justifyContent="space-between">
+                        <Grid item>
                             <Typography variant="h5">Raw Plan</Typography>
                         </Grid>
                     </Grid>

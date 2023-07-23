@@ -2,16 +2,16 @@ import MainCard from "../MainCard";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React from "react";
 import {GenericDetailsPopover,} from "../table/Cells";
-import {Stats} from "../types";
+import {IndexesStats, IndexStats, Stats} from "../types";
 import {betterDiskSize, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
 
-export interface GeneralStatsTableProps {
-    stats: Stats
+export interface IndexesStatsTableProps {
+    stats: IndexesStats
 }
 
-export const GeneralStatsTable = ({stats}: GeneralStatsTableProps) => {
+export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
     return (
-        <MainCard content={false} sx={{width: '40vw'}}>
+        <MainCard content={false}  sx={{width: '40vw'}}>
             <TableContainer
                 sx={{
                     overflowX: 'auto',
@@ -46,8 +46,8 @@ export const GeneralStatsTable = ({stats}: GeneralStatsTableProps) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {Object.keys(stats).map((s) => {
-                            return <Row name={s} data={stats[s]}/>
+                        {Object.keys(stats.indexes).map((s) => {
+                            return <Row name={s} data={stats.indexes[s]}/>
                         })}
                     </TableBody>
                 </Table>
@@ -56,7 +56,7 @@ export const GeneralStatsTable = ({stats}: GeneralStatsTableProps) => {
     )
 }
 
-const Row = ({name, data}: { name: string, data: number }) => {
+const Row = ({name, data}: { name: string, data: IndexStats }) => {
     // @ts-ignore
     const formattedName = capitalizeFirstLetter(name.replaceAll("_", " "))
     return (
@@ -72,10 +72,10 @@ const Row = ({name, data}: { name: string, data: number }) => {
                 {formattedName}
             </TableCell>
             <TableCell>
-                <b>{getMeasure(formattedName, data)}</b>
+                <b>{betterTiming(data.total_time)}</b>
             </TableCell>
             <TableCell>
-                {data}
+                0
             </TableCell>
         </TableRow>
     )

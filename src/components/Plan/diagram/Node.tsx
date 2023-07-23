@@ -80,10 +80,6 @@ const Node = ({data, stats, theme}: NodeProps) => {
             setExpanded(!expanded);
         };
 
-        const onClickFocus = (e) => {
-            focus()
-        }
-
         const getStyle = () => {
             const hoverOrFocus = {
                 width: 'auto',

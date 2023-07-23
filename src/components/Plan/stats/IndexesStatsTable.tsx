@@ -1,17 +1,23 @@
 import MainCard from "../MainCard";
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
-import React from "react";
+import {Box, Collapse, Divider, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import React, {useContext, useState} from "react";
 import {GenericDetailsPopover,} from "../table/Cells";
-import {IndexesStats, IndexStats, Stats} from "../types";
-import {betterDiskSize, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
+import {IndexesStats, IndexNode, IndexStats, Stats} from "../types";
+import {betterDiskSize, betterNumbers, betterTiming, capitalizeFirstLetter, getColorFromPercentage, getPercentageColor} from "../utils";
+import {ExpandMore} from "../ExpandMore";
+import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
+import {useFocus} from "../hooks";
+import {TableTabsContext} from "../Contexts";
+import {useTheme} from "@mui/material/styles";
 
 export interface IndexesStatsTableProps {
     stats: IndexesStats
 }
 
 export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
+    const theme = useTheme();
     return (
-        <MainCard content={false}  sx={{width: '40vw'}}>
+        <MainCard content={false} sx={{width: '40vw'}}>
             <TableContainer
                 sx={{
                     overflowX: 'auto',
@@ -47,7 +53,7 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
                     </TableHead>
                     <TableBody>
                         {Object.keys(stats.indexes).map((s) => {
-                            return <Row name={s} data={stats.indexes[s]}/>
+                            return <Row name={s} data={stats.indexes[s]} theme={theme}/>
                         })}
                     </TableBody>
                 </Table>
@@ -56,9 +62,14 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
     )
 }
 
-const Row = ({name, data}: { name: string, data: IndexStats }) => {
+const Row = ({name, data, theme}: { name: string, data: IndexStats, theme: any }) => {
     // @ts-ignore
     const formattedName = capitalizeFirstLetter(name.replaceAll("_", " "))
+    const [expanded, setExpanded] = useState(false);
+    const handleExpandClick = () => {
+        setExpanded(!expanded);
+    };
+
     return (
         <TableRow
             hover
@@ -69,15 +80,53 @@ const Row = ({name, data}: { name: string, data: IndexStats }) => {
             id={name}
         >
             <TableCell>
+                <ExpandMore
+                    expand={expanded}
+                    onClick={handleExpandClick}
+                    aria-expanded={expanded}
+                    aria-label="show more"
+                >
+                    <DownOutlined style={{fontSize: '10px'}}/>
+                </ExpandMore>
                 {formattedName}
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    {data.indexes.map(node => (
+                        <NodeSubRow node={node}/>
+                    ))}
+                </Collapse>
             </TableCell>
             <TableCell>
                 <b>{betterTiming(data.total_time)}</b>
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    {data.indexes.map(i => (
+                        <Box sx={{pb: 1, pt: 1.5}}>{i.exclusive_time}</Box>
+                    ))}
+                </Collapse>
             </TableCell>
-            <TableCell>
-                0
+            <TableCell style={{backgroundColor: getColorFromPercentage(data.percentage, theme)}}>
+                {betterNumbers(data.percentage)} %
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <Box sx={{pb: 1, pt: 1.5}}>0</Box>
+                </Collapse>
             </TableCell>
         </TableRow>
+    )
+}
+
+const NodeSubRow = ({node}: { node: IndexNode }) => {
+    const {switchToNode} = useFocus(node.id);
+    const {setTabIndex} = useContext(TableTabsContext);
+
+    return (
+        <Box sx={{pb: 1, pt: 1.5}}>
+            <IconButton onClick={(e) => {
+                switchToNode(e)
+                setTabIndex(0)
+            }}>
+                <ApartmentOutlined style={{fontSize: '10px'}}/>
+            </IconButton>
+            {node.type}
+        </Box>
     )
 }
 
@@ -101,13 +150,3 @@ const headCells = (areBuffersPresent?: boolean) => [
         description: ""
     },
 ]
-
-const getMeasure = (name: string, data: number): string => {
-    if (name.includes("time") || name.includes("duration")) {
-        return betterTiming(data)
-    } else if (name.includes("blocks")) {
-        return betterDiskSize(data)
-    }
-
-    return betterNumbers(data)
-}

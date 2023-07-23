@@ -218,6 +218,7 @@ export interface PlanRow {
   parent_plan_id: string;
   does_contain_buffers: boolean;
   workers: Workers;
+  node_type_specific_properties: { [key: string]: any};
 }
 export interface Operation {
   relation_name: string;
@@ -232,12 +233,13 @@ export interface Scope {
   prepend: string;
 }
 export interface IndexNode {
-  Id: string;
-  Type: string;
-  ExclusiveTime: number /* float64 */;
-  Condition: string;
+  id: string;
+  type: string;
+  exclusive_time: number /* float64 */;
+  condition: string;
 }
 export interface IndexStats {
   indexes: IndexNode[];
   total_time: number /* float64 */;
+  percentage: number /* float64 */;
 }

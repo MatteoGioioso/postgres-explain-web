@@ -10,8 +10,10 @@ interface NodeContextProps {
 export const NodeContext = createContext<NodeContextProps>({
     focusedNodeId: '',
     hoverNodeId: '',
-    setFocusedNodeId: value => {},
-    setHoverNodeId: value => {}
+    setFocusedNodeId: value => {
+    },
+    setHoverNodeId: value => {
+    }
 });
 
 export function NodeProvider(props) {
@@ -22,5 +24,25 @@ export function NodeProvider(props) {
         <NodeContext.Provider value={{focusedNodeId, setFocusedNodeId, hoverNodeId, setHoverNodeId}}>
             {props.children}
         </NodeContext.Provider>
+    )
+}
+
+interface TableTabsProps {
+    tabIndex: number
+    setTabIndex: Dispatch<SetStateAction<number>>
+}
+
+export const TableTabsContext = createContext<TableTabsProps>({
+    tabIndex: 0,
+    setTabIndex: value => {}
+})
+
+export function TableTabsProvider(props) {
+    const [tabIndex, setTabIndex] = useState(0);
+
+    return (
+        <TableTabsContext.Provider value={{tabIndex, setTabIndex}}>
+            {props.children}
+        </TableTabsContext.Provider>
     )
 }

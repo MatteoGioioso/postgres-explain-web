@@ -1,9 +1,9 @@
 import {Grid, Tab, Typography, Tabs, Box} from "@mui/material";
-import React, {useState} from "react";
+import React, {useContext} from "react";
+import {TableTabsContext} from "../Contexts";
 
 export function CustomTabPanel(props) {
     const {children, value, index, ...other} = props;
-
     return (
         <div
             role="tabpanel"
@@ -17,22 +17,17 @@ export function CustomTabPanel(props) {
     );
 }
 
-export interface TabsProps {
-    tabs: JSX.Element[]
-
-}
-
 export const TableTabs = (props) => {
-    const [value, setValue] = useState(0);
+    const {tabIndex, setTabIndex} = useContext(TableTabsContext);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setValue(newValue);
+        setTabIndex(newValue);
     };
 
     return (
         <Box sx={{width: '100%'}}>
             <Tabs
-                value={value}
+                value={tabIndex}
                 onChange={handleChange}
                 aria-label="table tabs">
                 <Tab
@@ -66,7 +61,7 @@ export const TableTabs = (props) => {
                 }/>
             </Tabs>
             {props.children.map((tab, index) => (
-                    <CustomTabPanel index={index} value={value}>
+                    <CustomTabPanel index={index} value={tabIndex}>
                         {tab}
                     </CustomTabPanel>
                 )

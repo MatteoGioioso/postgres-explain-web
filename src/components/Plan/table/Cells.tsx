@@ -352,6 +352,16 @@ function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: Plan
             <div>
                 Plan width: {row.costs.plan_width}
             </div>
+
+            {row.node_type_specific_properties && (
+                <Box sx={{pt: 1, pb: 1}}>
+                    <Divider/>
+                </Box>
+            )}
+
+            {Object.keys(row.node_type_specific_properties || {}).map(k => (
+                <div>{k}: {row.node_type_specific_properties[k]}</div>
+            ))}
         </Collapse>
     )
 }

@@ -23,7 +23,7 @@ import {
     RiseOutlined, TableOutlined,
     ZoomInOutlined
 } from '@ant-design/icons';
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {
     areRowsOverEstimated,
     betterNumbers,
@@ -34,6 +34,7 @@ import {
 import {PlanRow, Stats} from "../types";
 import {ExpandMore} from "../ExpandMore";
 import {useFocus, useNodeHover} from "../hooks";
+import {TableTabsContext} from "../Contexts";
 
 interface NodeProps {
     data: PlanRow
@@ -72,13 +73,9 @@ function showRowEstimationChip(factor: number): boolean {
 const Node = ({data, stats, theme}: NodeProps) => {
         const {isFocused, focus, switchToRow} = useFocus(data.node_id);
         const {isHovered, unsetHover, setHover} = useNodeHover(data.node_id);
-        const [expanded, setExpanded] = useState(false);
+        const {setTabIndex} = useContext(TableTabsContext);
         const exclusiveTimeColor = getPercentageColor(data.exclusive, data.execution_time, theme);
         const exclusiveTimePercentage = getPercentage(data.exclusive, data.execution_time);
-
-        const handleExpandClick = () => {
-            setExpanded(!expanded);
-        };
 
         const getStyle = () => {
             const hoverOrFocus = {
@@ -112,14 +109,6 @@ const Node = ({data, stats, theme}: NodeProps) => {
                     <Stack spacing={0.5}>
 
                         <Grid container alignItems="center">
-                            <ExpandMore
-                                expand={expanded}
-                                onClick={handleExpandClick}
-                                aria-expanded={expanded}
-                                aria-label="show more"
-                            >
-                                <DownOutlined style={{fontSize: '10px'}}/>
-                            </ExpandMore>
                             <Typography variant="h5" color="bold">
                                 {data.operation}
                             </Typography>
@@ -177,7 +166,13 @@ const Node = ({data, stats, theme}: NodeProps) => {
                                     icon={<TableOutlined style={{fontSize: '0.90rem', color: 'inherit'}}/>}
                                     sx={{ml: 1.25, pl: 1}}
                                     size="medium"
-                                    onClick={switchToRow}
+                                    onClick={async () => {
+                                        // If the tab is set to, for example, Indexes, the app will crash because it won't find the row id
+                                        // of the main table. Moreover the switchToRow cannot happen asynchronously, thus we must wait
+                                        // that setTabIndex has finished
+                                        await setTabIndex(0)
+                                        switchToRow()
+                                    }}
                                 />
                             </Grid>
                         </Grid>
@@ -196,10 +191,6 @@ const Node = ({data, stats, theme}: NodeProps) => {
                     <Box sx={{pt: 1, pb: 0}}>
                         <Divider/>
                     </Box>
-                    <Collapse in={expanded} timeout="auto" unmountOnExit>
-                        <CardContent sx={{p: 0.2}}>
-                        </CardContent>
-                    </Collapse>
                 </MainCard>
             </div>
         );

@@ -53,8 +53,8 @@ export function betterTiming(milliseconds: number): string {
 }
 
 export function betterDiskSize(blocks: number): string {
-    const units = ['B','KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    let size = blocks*8192;
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    let size = blocks * 8192;
     let unitIndex = 0;
 
     while (size >= 1024 && unitIndex < units.length - 1) {
@@ -69,6 +69,10 @@ export function getPercentageColor(reference: number, total: number, theme?: any
     if (total === 0 || total === undefined) return '#fff'
 
     const percentage = getPercentage(reference, total)
+    return getColorFromPercentage(percentage, theme);
+}
+
+export function getColorFromPercentage(percentage: number, theme): string {
     if (percentage <= 10) {
         return theme.palette.secondary.A100
     }

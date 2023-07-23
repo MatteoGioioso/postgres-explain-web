@@ -54,14 +54,10 @@ const getLayoutedElements = (nodes, edges, options = {}, theme) => {
 export const Diagram = ({summary, stats}: SummaryTableProps) => {
     const theme = useTheme();
     const {fitView} = useReactFlow()
-    const [nodes, setNodes] = useNodesState([])
+    const [nodes, setNodes, onNodesChange] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const nodeTypes = useMemo(() => ({special: NodeWidget}), [])
     const edgeTypes = useMemo(() => ({special: EdgeWidget}), [])
-    const onNodesChange = useCallback(
-        (x) => setNodes((newNode) => applyNodeChanges(x, newNode)),
-        [setNodes]
-    );
 
     // Elk has a *huge* amount of options to configure. To see everything you can
     // tweak check out:
@@ -148,10 +144,12 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                         onEdgesChange={onEdgesChange}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
+                        // This will cause "ResizeObserver loop completed with undelivered notifications".
+                        // According to SO this can be ignored: https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+                        onlyRenderVisibleElements
                         minZoom={0.1}
                     >
                         <Controls/>
-                        <MiniMap/>
                     </ReactFlow>
                 </div>
             </Grid>

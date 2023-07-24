@@ -157,7 +157,7 @@ export interface CellProps {
 
 export const RowsCell = ({row, expanded, theme}: CellProps) => {
     return (
-        <TableCell align="left" style={{wordWrap: 'break-word', whiteSpace: 'normal', maxWidth: '150px'}}>
+        <TableCell align="left" style={{wordWrap: 'break-word', whiteSpace: 'normal', width: '200px'}}>
             {row.scopes.filters && (
                 <FilterOutlined style={{color: theme.palette.primary.light, fontSize: '12px'}}/>)} {betterNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
@@ -179,12 +179,6 @@ export const RowsCell = ({row, expanded, theme}: CellProps) => {
                                 <b>Removed: </b>
                                 <GenericDetailsPopover name={"rows removed"} content={row.rows.removed}>
                                     - {' '}{betterNumbers(row.rows.removed)}
-                                </GenericDetailsPopover>
-                                <GenericDetailsPopover
-                                    name={"filters"} content={<code>{row.scopes.filters}</code>}
-                                    keepCloseCondition={row.scopes.filters.length <= theme.diagram.text.maxChars}
-                                >
-                                    <Typography noWrap><b>Filter</b>: <code>{row.scopes.filters}</code></Typography>
                                 </GenericDetailsPopover>
                             </>
                         )}
@@ -270,35 +264,25 @@ export const RowsEstimationCell = ({
             >
                 {betterNumbers(row.rows.estimation_factor)}
             </GenericDetailsPopover>
-            {/*<Collapse in={expanded} timeout="auto" unmountOnExit>*/}
-            {/*    <Box sx={{pt: 1}}>*/}
-            {/*        <Typography>Planned: {betterNumbers(row.rows.planned_rows)}</Typography>*/}
-            {/*    </Box>*/}
-            {/*</Collapse>*/}
         </TableCell>
     )
 }
 
 export const InfoCell = ({row, expanded, stats, theme}: CellProps) => {
     return (
-        <TableCell align="left">
+        <TableCell align="left" style={{width: '500px'}}>
             <Grid container>
-                <Box sx={{pl: row.level * 4}}>
-                    <Grid>
+                {expanded || (
+                    <Box sx={{pl: row.level * 4}}>
                         {'└' + '─>'}
-                    </Grid>
-                </Box>
-                <Grid>
-                    <div>
-                        <div>
-                            <Box sx={{pl: 1.5}}>
-                                <Typography variant="h5" color='bold'>{row.operation}</Typography>
-                            </Box>
-                        </div>
-                        <NodeStats expanded={expanded} row={row} stats={stats} theme={theme}/>
-
-                    </div>
-                </Grid>
+                    </Box>
+                )}
+                <div>
+                    <Box sx={{pl: expanded ? 0 : 1.5}}>
+                        <Typography variant="h5" color='bold'>{row.operation}</Typography>
+                    </Box>
+                    <NodeStats expanded={expanded} row={row} stats={stats} theme={theme}/>
+                </div>
             </Grid>
         </TableCell>
     )
@@ -362,6 +346,20 @@ function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: Plan
             {Object.keys(row.node_type_specific_properties || {}).map(k => (
                 <div>{k}: {row.node_type_specific_properties[k]}</div>
             ))}
+
+            {row.workers?.list?.length > 0 && (
+                <>
+                    <Box sx={{pt: 1, pb: 1}}>
+                        <Divider/>
+                    </Box>
+                    {row.workers.list.map(worker => (
+                        <div>
+                            Worker {worker.number}: time {betterTiming(worker.time)}, rows {betterNumbers(worker.rows)}, loops {worker.loops}
+                        </div>
+                    ))}
+                </>
+            )}
+
         </Collapse>
     )
 }

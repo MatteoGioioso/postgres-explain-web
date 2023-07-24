@@ -1,7 +1,7 @@
 import {PlanRow, Stats} from "../types";
 import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
 import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
-import React, {useEffect, useState} from "react";
+import React, {memo, useEffect, useState} from "react";
 import {BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
 import {useTheme} from "@mui/material/styles";
 import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons";
@@ -14,7 +14,7 @@ export interface RowProps {
 }
 
 
-export function Row({row, stats}: RowProps) {
+export const Row = memo(({row, stats}: RowProps) => {
     const theme = useTheme();
     const {isFocused, switchToNode, isUnfocused, closeFocusNavigation, focus} = useFocus(row.node_id);
     const {setHover, unsetHover, isHovered} = useNodeHover(row.node_id);
@@ -61,7 +61,7 @@ export function Row({row, stats}: RowProps) {
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <Box sx={{pt: 1}}>
                         <Typography variant='subtitle2'>
-                            Total: {betterTiming(row.exclusive * (row.workers.launched + 1))} for {row.workers.launched + 1} workers
+                            Total: {betterTiming(row.exclusive * (row.workers.launched + 1))}
                         </Typography>
                     </Box>
                 </Collapse>
@@ -116,9 +116,6 @@ export function Row({row, stats}: RowProps) {
                 )}
 
                 {!isFocused && !isUnfocused() && (
-                    // <IconButton onClick={focus}>
-                    //     <ZoomInOutlined style={{color: 'inherit', fontSize: '10px'}}/>
-                    // </IconButton>
                     <IconButton onClick={switchToNode}>
                         <ApartmentOutlined style={{fontSize: '10px'}}/>
                     </IconButton>
@@ -126,4 +123,4 @@ export function Row({row, stats}: RowProps) {
             </TableCell>
         </TableRow>
     );
-}
+})

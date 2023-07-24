@@ -148,7 +148,7 @@ export type Plans = {
     Plan: { [key: string]: any};
   }[];
 export interface IndexesStats {
-  indexes: { [key: string]: IndexStats};
+  indexes: IndexStats[];
 }
 export interface Explained {
   summary: PlanRow[];
@@ -196,9 +196,16 @@ export interface Buffers {
   effective_blocks_read: number /* float64 */;
   effective_blocks_written: number /* float64 */;
 }
+export interface Worker {
+  number: number /* float64 */;
+  loops: number /* float64 */;
+  rows: number /* float64 */;
+  time: number /* float64 */;
+}
 export interface Workers {
   launched: number /* float64 */;
   planned: number /* float64 */;
+  list: Worker[];
 }
 export interface PlanRow {
   node_id: string;
@@ -242,4 +249,5 @@ export interface IndexStats {
   indexes: IndexNode[];
   total_time: number /* float64 */;
   percentage: number /* float64 */;
+  name: string;
 }

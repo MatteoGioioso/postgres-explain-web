@@ -52,8 +52,8 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {Object.keys(stats.indexes).map((s) => {
-                            return <Row name={s} data={stats.indexes[s]} theme={theme}/>
+                        {stats.indexes.map((index) => {
+                            return <Row data={index} theme={theme}/>
                         })}
                     </TableBody>
                 </Table>
@@ -62,9 +62,9 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
     )
 }
 
-const Row = ({name, data, theme}: { name: string, data: IndexStats, theme: any }) => {
+const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
     // @ts-ignore
-    const formattedName = capitalizeFirstLetter(name.replaceAll("_", " "))
+    const formattedName = capitalizeFirstLetter(data.name.replaceAll("_", " "))
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -76,8 +76,8 @@ const Row = ({name, data, theme}: { name: string, data: IndexStats, theme: any }
             role="checkbox"
             sx={{'&:last-child td, &:last-child th': {border: 0}}}
             tabIndex={-1}
-            key={name}
-            id={name}
+            key={data.name}
+            id={data.name}
         >
             <TableCell>
                 <ExpandMore

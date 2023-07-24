@@ -146,7 +146,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                         edgeTypes={edgeTypes}
                         // This will cause "ResizeObserver loop completed with undelivered notifications".
                         // According to SO this can be ignored: https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
-                        onlyRenderVisibleElements
+                        // onlyRenderVisibleElements
                         minZoom={0.1}
                     >
                         <Controls/>

@@ -6,10 +6,9 @@ import {CopyFilled} from "@ant-design/icons";
 
 export const RawPlan = ({plan}: { plan: any }) => {
     return (
-        <MainCard content={false} sx={{width: '70vw', p: 3}}>
+        <MainCard content={false} sx={{width: 'auto', p: 3}}>
             <Box sx={{pb: 2}}>
                 <CopyToClipboardButton data={plan} />
-
             </Box>
             <ReactJson src={JSON.parse(plan)}/>
         </MainCard>

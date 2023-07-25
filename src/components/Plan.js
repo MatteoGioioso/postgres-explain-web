@@ -109,7 +109,7 @@ const DashboardDefault = () => {
                         <IndexesStatsTable stats={explained.indexes_stats}/>
                     )}
 
-                    <RawPlan plan={planService.fromSource(plan)}/>
+                    <RawPlan plan={plan && planService.fromSource(plan)}/>
                 </TableTabs>
             </Grid>
         </Grid>

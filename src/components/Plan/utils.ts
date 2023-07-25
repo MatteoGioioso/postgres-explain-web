@@ -65,6 +65,17 @@ export function betterDiskSize(blocks: number): string {
     return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
+export const getFunctionFromKind = (kind: string) => {
+    const kindMap = {
+        "timing": betterTiming,
+        "quantity": betterNumbers,
+        "disk_size": betterDiskSize,
+        "": (val: any) => val
+    }
+
+    return kindMap[kind]
+}
+
 export function getPercentageColor(reference: number, total: number, theme?: any): string {
     if (total === 0 || total === undefined) return '#fff'
 

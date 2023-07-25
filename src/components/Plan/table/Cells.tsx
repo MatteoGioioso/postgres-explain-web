@@ -1,9 +1,17 @@
 import React from "react";
 import {Box, Chip, Collapse, Divider, Grid, Popover, TableCell, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {betterDiskSize, betterNumbers, betterTiming, getEstimationColor, getPercentageColor, truncateText} from "../utils";
-import {PlanRow, Stats} from "../types";
+import {
+    betterDiskSize,
+    betterNumbers,
+    betterTiming,
+    getEstimationColor, getFunctionFromKind,
+    getPercentageColor,
+    truncateText
+} from "../utils";
+import {PlanRow, Property, Stats} from "../types";
 import {DollarOutlined, FilterOutlined} from "@ant-design/icons";
+import {property} from "lodash";
 
 export const GenericDetailsPopover = (props: { name: string, content: any, children: any, keepCloseCondition?: boolean, style?: any }) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -273,8 +281,8 @@ export const InfoCell = ({row, expanded, stats, theme}: CellProps) => {
         <TableCell align="left" style={{width: '500px'}}>
             <Grid container>
                 {expanded || (
-                    <Box sx={{pl: row.level * 4}}>
-                        {'└' + '─>'}
+                    <Box sx={{pl: row.level * 2}}>
+                        {'└' + '>'}
                     </Box>
                 )}
                 <div>
@@ -343,8 +351,8 @@ function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: Plan
                 </Box>
             )}
 
-            {Object.keys(row.node_type_specific_properties || {}).map(k => (
-                <div>{k}: {row.node_type_specific_properties[k]}</div>
+            {row.node_type_specific_properties.map(property => (
+                <div><RenderProperty property={property}/></div>
             ))}
 
             {row.workers?.list?.length > 0 && (
@@ -354,12 +362,24 @@ function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: Plan
                     </Box>
                     {row.workers.list.map(worker => (
                         <div>
-                            Worker {worker.number}: time {betterTiming(worker.time)}, rows {betterNumbers(worker.rows)}, loops {worker.loops}
+                            Worker {worker.number}: time {betterTiming(worker.time)}, rows {betterNumbers(worker.rows)},
+                            loops {worker.loops}
                         </div>
                     ))}
                 </>
             )}
 
         </Collapse>
+    )
+}
+
+
+export const RenderProperty = ({property}: {
+    property: Property,
+}) => {
+    return (
+        property.skip ? (<></>) : (
+            <>{property.name}: {getFunctionFromKind(property.kind)((property[property.type]))}</>
+        )
     )
 }

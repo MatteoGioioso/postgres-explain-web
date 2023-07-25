@@ -17,6 +17,21 @@ export function CustomTabPanel(props) {
     );
 }
 
+export function UnmountableTabPanel(props) {
+    const {children, value, index, ...other} = props;
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`diagram-tabpanel-${index}`}
+            aria-labelledby={`diagram-tab-${index}`}
+            {...other}
+        >
+            {children}
+        </div>
+    );
+}
+
 export const TableTabs = (props) => {
     const {tabIndex, setTabIndex} = useContext(TableTabsContext);
 
@@ -29,7 +44,18 @@ export const TableTabs = (props) => {
             <Tabs
                 value={tabIndex}
                 onChange={handleChange}
-                aria-label="table tabs">
+                aria-label="table tabs"
+
+            >
+                <Tab
+                    label={
+                        <Grid container alignItems="center" justifyContent="space-between">
+                            <Grid item>
+                                <Typography variant="h5">Diagram</Typography>
+                            </Grid>
+                        </Grid>
+                    }
+                />
                 <Tab
                     label={
                         <Grid container alignItems="center" justifyContent="space-between">
@@ -37,7 +63,8 @@ export const TableTabs = (props) => {
                                 <Typography variant="h5">Table</Typography>
                             </Grid>
                         </Grid>
-                    }/>
+                    }
+                />
                 <Tab label={
                     <Grid container alignItems="center" justifyContent="space-between">
                         <Grid item>
@@ -60,7 +87,11 @@ export const TableTabs = (props) => {
                     </Grid>
                 }/>
             </Tabs>
-            {props.children.map((tab, index) => (
+            {props.children.map((tab, index) => index == 0 ? (
+                    <UnmountableTabPanel index={index} value={tabIndex}>
+                        {tab}
+                    </UnmountableTabPanel>
+                ) : (
                     <CustomTabPanel index={index} value={tabIndex}>
                         {tab}
                     </CustomTabPanel>

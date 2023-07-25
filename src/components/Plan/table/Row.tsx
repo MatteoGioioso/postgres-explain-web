@@ -1,12 +1,13 @@
 import {PlanRow, Stats} from "../types";
 import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
 import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
-import React, {memo, useEffect, useState} from "react";
+import React, {memo, useContext, useEffect, useState} from "react";
 import {BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
 import {useTheme} from "@mui/material/styles";
 import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
 import {useFocus, useNodeHover} from "../hooks";
+import {TableTabsContext} from "../Contexts";
 
 export interface RowProps {
     row: PlanRow
@@ -17,24 +18,15 @@ export interface RowProps {
 export const Row = memo(({row, stats}: RowProps) => {
     const theme = useTheme();
     const {isFocused, switchToNode, isUnfocused, closeFocusNavigation, focus} = useFocus(row.node_id);
-    const {setHover, unsetHover, isHovered} = useNodeHover(row.node_id);
     const [expanded, setExpanded] = useState(isFocused);
+    const {setTabIndex} = useContext(TableTabsContext);
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
-    useEffect(() => {
-        setExpanded(isFocused)
-    }, [isFocused])
 
     const getRowStyle = (): {} => {
-        if (isHovered(row.node_id)) {
-            return {boxShadow: theme.shadows[23], border: `2px solid ${theme.palette.secondary.main}`}
-        }
-
-        if (isUnfocused()) {
-            return {pointerEvents: 'none'}
-        } else if (isFocused) {
-            return {boxShadow: theme.shadows[23], border: `2px solid ${theme.palette.secondary.main}`}
+        if (isFocused) {
+            return {border: `2px solid ${theme.palette.secondary.main}`}
         }
 
         return {}
@@ -42,8 +34,6 @@ export const Row = memo(({row, stats}: RowProps) => {
 
     return (
         <TableRow
-            onMouseEnter={setHover}
-            onMouseLeave={unsetHover}
             hover
             role="checkbox"
             sx={{'&:last-child td, &:last-child th': {border: 0}}}
@@ -96,29 +86,24 @@ export const Row = memo(({row, stats}: RowProps) => {
             <InfoCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
             <TableCell>
-                {!isUnfocused() && (
-                    <>
-                        <ExpandMore expand={expanded} onClick={handleExpandClick}>
-                            <DownOutlined style={{fontSize: '10px'}}/>
-                        </ExpandMore>
-                    </>
-                )}
-
+                <ExpandMore expand={expanded} onClick={handleExpandClick}>
+                    <DownOutlined style={{fontSize: '10px'}}/>
+                </ExpandMore>
+                <IconButton onClick={() => {
+                    setTabIndex(0)
+                    // Probably a quirk or a bug with React flow, somehow setTimeout will help to focus on the now
+                    setTimeout(()=> {
+                        switchToNode(row.node_id)
+                    })
+                }}>
+                    <ApartmentOutlined style={{fontSize: '10px'}}/>
+                </IconButton>
                 {isFocused && (
                     <>
-                        <IconButton onClick={switchToNode}>
-                            <ApartmentOutlined style={{fontSize: '10px'}}/>
-                        </IconButton>
                         <IconButton onClick={closeFocusNavigation}>
                             <CloseOutlined style={{fontSize: '10px', color: 'inherit'}}/>
                         </IconButton>
                     </>
-                )}
-
-                {!isFocused && !isUnfocused() && (
-                    <IconButton onClick={switchToNode}>
-                        <ApartmentOutlined style={{fontSize: '10px'}}/>
-                    </IconButton>
                 )}
             </TableCell>
         </TableRow>

@@ -1,13 +1,12 @@
-import {useLocation} from "react-router-dom";
 import {useReactFlow} from "reactflow";
 import {useContext, useEffect, useState} from "react";
-import {NodeContext, TableTabsContext} from "./Contexts";
+import {NodeContext, NodeData} from "./Contexts";
 
 export const useFocus = (nodeId: string) => {
     const {focusedNodeId, setFocusedNodeId} = useContext(NodeContext);
     const [isFocused, setIsFocused] = useState<boolean>(false);
     const [nodeIdFromHash, setNodeIdFromHash] = useState<string>();
-    const {getNode, fitView} = useReactFlow();
+    const {getNode, fitView, addNodes} = useReactFlow();
 
     useEffect(() => {
         setNodeIdFromHash(focusedNodeId)
@@ -22,7 +21,7 @@ export const useFocus = (nodeId: string) => {
     const focusInternal = () => {
         setFocusedNodeId(nodeId)
         const node = getNode(nodeId);
-        fitView({nodes: [node], duration: 800, maxZoom: 1.5})
+        fitView({nodes: [node], duration: 800, maxZoom: 1.25})
     }
 
     const scrollToElement = (id: string): void => {
@@ -45,35 +44,20 @@ export const useFocus = (nodeId: string) => {
                 return false
             }
         },
-        goToParentNode: (parendNodeId: string): void => {
-            if (parendNodeId) {
-                setFocusedNodeId(parendNodeId)
-                const parentNode = getNode(parendNodeId);
-                window.scrollTo(0, 0);
-                fitView({nodes: [parentNode], duration: 800, maxZoom: 1.5})
-            }
-        },
-        goUpRow: (): void => {
-            const node = getNode(nodeId);
-        },
         closeFocusNavigation: () => {
             setFocusedNodeId('')
             fitView({duration: 800})
         },
-        switchToNode: (e) => {
+        switchToNode: (nodeIdv?: string) => {
             setFocusedNodeId(nodeId)
-            window.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: 'smooth'
-            });
             const node = getNode(nodeId);
             fitView({nodes: [node], duration: 800, maxZoom: 1.5})
         },
         switchToRow: () => {
             setFocusedNodeId(nodeId)
             scrollToElement(nodeId)
-        }
+        },
+        focusedNodeId
     }
 }
 
@@ -90,5 +74,30 @@ export const useNodeHover = (nodeId: string) => {
         isHovered: (nodeId: string): boolean => {
             return nodeId === hoverNodeId
         }
+    }
+}
+
+export const useNodeDataProvider = () => {
+    const {nodeData, setNodeData, focusedNodeId, explained, setExplained} = useContext(NodeContext);
+
+    useEffect(() => {
+        if (explained && focusedNodeId) {
+            const planRow = explained.summary.find(node => node.node_id === focusedNodeId);
+            setNodeData({
+                row: planRow,
+                stats: explained.stats
+            })
+        }
+
+        if (focusedNodeId === "") {
+            setNodeData(null)
+        }
+
+    }, [explained, focusedNodeId])
+
+    return {
+        getNodeData: (): NodeData => {
+            return nodeData
+        },
     }
 }

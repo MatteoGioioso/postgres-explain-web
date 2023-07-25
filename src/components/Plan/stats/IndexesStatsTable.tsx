@@ -63,8 +63,6 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
 }
 
 const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
-    // @ts-ignore
-    const formattedName = capitalizeFirstLetter(data.name.replaceAll("_", " "))
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -88,7 +86,7 @@ const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
                 >
                     <DownOutlined style={{fontSize: '10px'}}/>
                 </ExpandMore>
-                {formattedName}
+                {data.name}
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     {data.indexes.map(node => (
                         <NodeSubRow node={node}/>
@@ -105,9 +103,11 @@ const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
             </TableCell>
             <TableCell style={{backgroundColor: getColorFromPercentage(data.percentage, theme)}}>
                 {betterNumbers(data.percentage)} %
-                <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Box sx={{pb: 1, pt: 1.5}}>0</Box>
-                </Collapse>
+                {data.indexes.map(i => (
+                    <Collapse in={expanded} timeout="auto" unmountOnExit>
+                        <Box sx={{pb: 1, pt: 1.5}}>0</Box>
+                    </Collapse>
+                ))}
             </TableCell>
         </TableRow>
     )
@@ -119,9 +119,9 @@ const NodeSubRow = ({node}: { node: IndexNode }) => {
 
     return (
         <Box sx={{pb: 1, pt: 1.5}}>
-            <IconButton onClick={(e) => {
-                switchToNode(e)
-                setTabIndex(0)
+            <IconButton onClick={async () => {
+                await setTabIndex(0)
+                switchToNode(node.id)
             }}>
                 <ApartmentOutlined style={{fontSize: '10px'}}/>
             </IconButton>

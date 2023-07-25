@@ -26,7 +26,7 @@ import {
 import React, {useContext, useState} from "react";
 import {
     areRowsOverEstimated,
-    betterNumbers,
+    betterNumbers, betterTiming,
     getEstimationColor,
     getPercentage,
     getPercentageColor,
@@ -42,20 +42,27 @@ interface NodeProps {
     stats: Stats
 }
 
-function LinearProgressWithLabel(props: LinearProgressProps & { value: number, theme: any, cellWarningColor: string }) {
+function LinearProgressWithLabel(props: LinearProgressProps & { value: number, time: number, theme: any, cellWarningColor: string }) {
     return (
         <Box sx={{display: 'flex', alignItems: 'center'}}>
-            <Box sx={{width: '100%', mr: 1}}>
+            <Box sx={{width: '75%', mr: 1, position: 'relative'}}>
                 <LinearProgress variant="determinate" {...props} sx={{
                     backgroundColor: props.theme.palette.secondary.lighter,
+                    height: "20px",
                     '& .MuiLinearProgress-bar': {
                         backgroundColor: props.cellWarningColor
                     }
                 }}/>
-            </Box>
-            <Box sx={{minWidth: 35}}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                    color="text.primary"
+                    style={{position: 'absolute', top: 0, left: "50%", transform: "translate(-50%)"}}
+                >
                     {`${Math.round(props.value)}%`}
+                </Typography>
+            </Box>
+            <Box sx={{width: 'auto'}}>
+                <Typography color="text.primary">
+                    {betterTiming(props.time)}
                 </Typography>
             </Box>
         </Box>
@@ -72,7 +79,6 @@ function showRowEstimationChip(factor: number): boolean {
 
 const Node = ({data, stats, theme}: NodeProps) => {
         const {isFocused, focus, switchToRow} = useFocus(data.node_id);
-        const {isHovered, unsetHover, setHover} = useNodeHover(data.node_id);
         const {setTabIndex} = useContext(TableTabsContext);
         const exclusiveTimeColor = getPercentageColor(data.exclusive, data.execution_time, theme);
         const exclusiveTimePercentage = getPercentage(data.exclusive, data.execution_time);
@@ -89,17 +95,19 @@ const Node = ({data, stats, theme}: NodeProps) => {
                 return hoverOrFocus
             }
 
-            if (isHovered(data.node_id)) {
-                return hoverOrFocus
+            return {
+                width: 'auto',
+                minWidth: theme.diagram.node.width,
+                ':hover': {
+                    boxShadow: theme.shadows[10]
+                },
             }
-            return {width: 'auto', minWidth: theme.diagram.node.width}
         }
 
         return (
             <div
                 id={`node_${data.node_id}`}
-                onMouseLeave={unsetHover}
-                onMouseEnter={setHover}
+                onClick={focus}
             >
                 <MainCard
                     contentSX={{p: 1.5}}
@@ -170,26 +178,24 @@ const Node = ({data, stats, theme}: NodeProps) => {
                                         // If the tab is set to, for example, Indexes, the app will crash because it won't find the row id
                                         // of the main table. Moreover the switchToRow cannot happen asynchronously, thus we must wait
                                         // that setTabIndex has finished
-                                        await setTabIndex(0)
+                                        await setTabIndex(1)
                                         switchToRow()
                                     }}
                                 />
                             </Grid>
                         </Grid>
                     </Stack>
-                    {showChipsBasedOnPercentage(exclusiveTimePercentage) && (
-                        <Box sx={{pt: 1, pb: 1}}>
-                            <LinearProgressWithLabel cellWarningColor={exclusiveTimeColor} theme={theme} value={exclusiveTimePercentage}/>
-                        </Box>
-                    )}
+                    {/*{showChipsBasedOnPercentage(exclusiveTimePercentage) && (*/}
+                    <Box sx={{pt: 2, pb: 2}}>
+                        <LinearProgressWithLabel cellWarningColor={exclusiveTimeColor} theme={theme} value={exclusiveTimePercentage}
+                                                 time={data.exclusive}/>
+                    </Box>
+                    {/*)}*/}
                     <Box sx={{pt: 1}}>
                         <Typography sx={{color: `${exclusiveTimeColor || 'primary'}.main`}}>
                             Rows returned: {` `}
                             <b>{betterNumbers(data.rows.total * (data.workers.launched + 1))}</b>
                         </Typography>{' '}
-                    </Box>
-                    <Box sx={{pt: 1, pb: 0}}>
-                        <Divider/>
                     </Box>
                 </MainCard>
             </div>

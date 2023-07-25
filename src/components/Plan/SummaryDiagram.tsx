@@ -17,6 +17,9 @@ import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
 import {getPercentage} from "./utils";
+import MainCard from "./MainCard";
+import {GeneralStatsTable} from "./stats/GeneralStatsTable";
+import {Grid} from "@mui/material";
 
 // @ts-ignore
 const elk = new ELK();
@@ -27,8 +30,8 @@ const getLayoutedElements = (nodes, edges, options = {}, theme) => {
         layoutOptions: options,
         children: nodes.map((node) => ({
             ...node,
-            targetPosition: 'top',
-            sourcePosition: 'bottom',
+            targetPosition: 'bottom',
+            sourcePosition: 'top',
             width: theme.diagram.node.width,
             height: theme.diagram.node.height,
         })),
@@ -40,7 +43,7 @@ const getLayoutedElements = (nodes, edges, options = {}, theme) => {
         .then((layoutedGraph) => ({
             nodes: layoutedGraph.children.map((node) => ({
                 ...node,
-                position: {x: node.x, y: node.y},
+                position: {x: -node.x, y: -node.y},
             })),
 
             edges: layoutedGraph.edges,
@@ -51,14 +54,10 @@ const getLayoutedElements = (nodes, edges, options = {}, theme) => {
 export const Diagram = ({summary, stats}: SummaryTableProps) => {
     const theme = useTheme();
     const {fitView} = useReactFlow()
-    const [nodes, setNodes] = useNodesState([])
+    const [nodes, setNodes, onNodesChange] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const nodeTypes = useMemo(() => ({special: NodeWidget}), [])
     const edgeTypes = useMemo(() => ({special: EdgeWidget}), [])
-    const onNodesChange = useCallback(
-        (x) => setNodes((newNode) => applyNodeChanges(x, newNode)),
-        [setNodes]
-    );
 
     // Elk has a *huge* amount of options to configure. To see everything you can
     // tweak check out:
@@ -84,8 +83,8 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                     row,
                     stats,
                 },
-                targetPosition: Position.Top,
-                sourcePosition: Position.Bottom,
+                targetPosition: Position.Bottom,
+                sourcePosition: Position.Top,
                 type: 'special',
                 draggable: true,
                 position: {x: 0, y: 0},
@@ -100,7 +99,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                 source: row.node_id,
                 target: row.node_parent_id,
                 style: {
-                    strokeWidth: Math.max(getPercentage(row.rows.total * row.workers.launched, stats.max_rows) / 3, 2),
+                    strokeWidth: Math.max((getPercentage(row.rows.total * (row.workers.launched + 1), stats.max_rows) / 2), 1),
                     stroke: theme.palette.primary[200]
                 },
                 data: {
@@ -130,21 +129,31 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
     }, [summary])
 
     return (
-        <div style={{height: '80vh', width: '100vw'}}>
-            <ReactFlow
-                fitView
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                minZoom={0.1}
-            >
-                <Controls/>
-                <MiniMap/>
-            </ReactFlow>
-        </div>
+        <Grid container>
+            {/*<Grid xs={4}>*/}
+            {/*    <GeneralStatsTable stats={stats}/>*/}
+            {/*</Grid>*/}
+
+            <Grid xs={12} sx={{pt: 2}}>
+                <div style={{height: '80vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
+                    <ReactFlow
+                        fitView
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        // This will cause "ResizeObserver loop completed with undelivered notifications".
+                        // According to SO this can be ignored: https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+                        // onlyRenderVisibleElements
+                        minZoom={0.1}
+                    >
+                        <Controls/>
+                    </ReactFlow>
+                </div>
+            </Grid>
+        </Grid>
     )
 }
 

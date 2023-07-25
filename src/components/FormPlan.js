@@ -1,5 +1,5 @@
 import {useContext} from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 // material-ui
 import {
@@ -8,7 +8,7 @@ import {
     FormHelperText,
     Grid,
     Stack,
-    TextField
+    TextField, Typography
 } from '@mui/material';
 
 // third party
@@ -60,6 +60,13 @@ const FormPlan = () => {
                     setPlan(values.plan)
                     navigate('/plan')
                 }}
+                validate={values => {
+                    const errors = {};
+                    if (!values.plan) {
+                        errors.plan = 'Required';
+                    }
+                    return errors;
+                }}
             >
                 {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
                     <form noValidate onSubmit={handleSubmit}>
@@ -68,7 +75,7 @@ const FormPlan = () => {
                                 <Stack spacing={1}>
                                     <TextField
                                         fullWidth
-                                        error={Boolean(touched.email && errors.email)}
+                                        error={Boolean(touched.plan && errors.plan)}
                                         id="plan"
                                         type="text"
                                         value={values.email}
@@ -81,9 +88,9 @@ const FormPlan = () => {
                                         rows={30}
                                         maxRows={100}
                                     />
-                                    {touched.email && errors.email && (
-                                        <FormHelperText error id="helper-text-email-signup">
-                                            {errors.email}
+                                    {touched.plan && errors.plan && (
+                                        <FormHelperText error id="helper-text-plan-signup">
+                                            {errors.plan}
                                         </FormHelperText>
                                     )}
                                 </Stack>
@@ -94,6 +101,16 @@ const FormPlan = () => {
                                     <FormHelperText error>{errors.submit}</FormHelperText>
                                 </Grid>
                             )}
+                            <Grid item xs={12}>
+                                <Typography variant="body1">
+                                    Postgres explain uses wasm and does not have a backend. <b>I do not save any of the information provided
+                                    in this form</b>.
+                                </Typography>
+                                <Typography variant="body2">
+                                    For the time being all your query plans, query and schemas are stored in the client. If any changes to
+                                    this behaviour will occur, you will be notified.
+                                </Typography>
+                            </Grid>
                             <Grid item xs={12}>
                                 <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit"
                                         variant="contained"

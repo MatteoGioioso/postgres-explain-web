@@ -3,16 +3,18 @@ import ThemeCustomization from './themes';
 import Router from "./Router";
 import {PlanProvider} from "./MainContext";
 import {ReactFlowProvider} from "reactflow";
-import {NodeProvider} from "./components/Plan/Contexts";
+import {NodeProvider, TableTabsProvider} from "./components/Plan/Contexts";
 
 function App() {
     return (
         <ThemeCustomization>
             <ReactFlowProvider>
                 <PlanProvider>
-                    <NodeProvider>
-                        <Router/>
-                    </NodeProvider>
+                    <TableTabsProvider>>
+                        <NodeProvider>
+                            <Router/>
+                        </NodeProvider>
+                    </TableTabsProvider>
                 </PlanProvider>
             </ReactFlowProvider>
         </ThemeCustomization>

@@ -1,69 +1,23 @@
 import {PlanRow, Stats} from "../types";
-import {Box, Chip, Collapse, Divider, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
-import {betterDiskSize, betterNumbers, betterTiming, getEstimationColor, getPercentageColor, truncateText} from "../utils";
-import React, {useEffect, useState} from "react";
-import {TimingCell, GenericDetailsPopover, getRowEstimateDirectionSymbol, RowCell, BufferReadsCell, BufferWrittenCell} from "./Cells";
+import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
+import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
+import React, {memo, useEffect, useState} from "react";
+import {BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
 import {useTheme} from "@mui/material/styles";
-import {ApartmentOutlined, CloseOutlined, DollarOutlined, DownOutlined, ZoomInOutlined} from "@ant-design/icons";
+import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
-import {useFocus} from "../hooks";
+import {useFocus, useNodeHover} from "../hooks";
 
 export interface RowProps {
     row: PlanRow
     stats: Stats
 }
 
-function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: PlanRow, stats: Stats, theme: any }) {
-    return (
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-            <Box sx={{pt: 1, pb: 1}}>
-                <Divider/>
-            </Box>
-            {Object.keys(row.scopes).map(scopeName => (
-                row.scopes[scopeName] && (
-                    <GenericDetailsPopover
-                        style={{width: '1500px'}}
-                        keepCloseCondition={row.scopes[scopeName].length <= theme.diagram.text.maxChars}
-                        name={scopeName}
-                        content={
-                            <Typography>
-                                <b>{scopeName} </b><code>{row.scopes[scopeName]}</code>
-                            </Typography>
-                        }
-                    >
-                        <Typography><b>{scopeName} </b><code>{truncateText(row.scopes[scopeName], theme.diagram.text.maxChars)}</code></Typography>
-                    </GenericDetailsPopover>
-                )
-            ))}
 
-            <Box sx={{pt: 1, pb: 1}}>
-                <Divider/>
-            </Box>
-
-            <div>
-                Total cost:
-                <Chip
-                    style={{backgroundColor: getPercentageColor(row.costs.total_cost, stats.max_cost, theme)}}
-                    icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                    label={`${row.costs.total_cost}`}
-                    sx={{ml: 1.25, pl: 1}}
-                    size="small"
-                />
-            </div>
-            <div>
-                Startup cost: {row.costs.startup_cost}
-            </div>
-            <div>
-                Plan width: {row.costs.plan_width}
-            </div>
-        </Collapse>
-    )
-}
-
-
-export function Row({row, stats}: RowProps) {
+export const Row = memo(({row, stats}: RowProps) => {
     const theme = useTheme();
     const {isFocused, switchToNode, isUnfocused, closeFocusNavigation, focus} = useFocus(row.node_id);
+    const {setHover, unsetHover, isHovered} = useNodeHover(row.node_id);
     const [expanded, setExpanded] = useState(isFocused);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -73,6 +27,10 @@ export function Row({row, stats}: RowProps) {
     }, [isFocused])
 
     const getRowStyle = (): {} => {
+        if (isHovered(row.node_id)) {
+            return {boxShadow: theme.shadows[23], border: `2px solid ${theme.palette.secondary.main}`}
+        }
+
         if (isUnfocused()) {
             return {pointerEvents: 'none'}
         } else if (isFocused) {
@@ -84,6 +42,8 @@ export function Row({row, stats}: RowProps) {
 
     return (
         <TableRow
+            onMouseEnter={setHover}
+            onMouseLeave={unsetHover}
             hover
             role="checkbox"
             sx={{'&:last-child td, &:last-child th': {border: 0}}}
@@ -99,35 +59,33 @@ export function Row({row, stats}: RowProps) {
                 }}>
                 {betterTiming(row.exclusive)}
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Typography
-                        variant='subtitle2'>Total: {betterTiming(row.exclusive * (row.workers.launched + 1))} for {row.workers.launched + 1} workers</Typography>
+                    <Box sx={{pt: 1}}>
+                        <Typography variant='subtitle2'>
+                            Total: {betterTiming(row.exclusive * (row.workers.launched + 1))}
+                        </Typography>
+                    </Box>
                 </Collapse>
             </TableCell>
 
             <TimingCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'}/>
 
-            <RowCell row={row} expanded={expanded} stats={stats}/>
+            <RowsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
-            <TableCell align="left" style={{backgroundColor: getEstimationColor(row.rows.estimation_factor, theme)}}>
-                <>
-                    {getRowEstimateDirectionSymbol(row.rows.estimation_direction) + ' '}
-                    <GenericDetailsPopover
-                        content={Math.round(row.rows.estimation_factor * 1000) / 1000}
-                        name="Rows estimate factor"
-                    >
-                        {betterNumbers(row.rows.estimation_factor)}
-                    </GenericDetailsPopover>
-                </>
-            </TableCell>
+            <RowsEstimationCell row={row} expanded={expanded} stats={stats}/>
+
             <TableCell align="right">
                 {betterNumbers(row.loops)} / {row.workers.launched + 1}
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Typography
-                        variant='subtitle2'>Workers Planned: {row.workers.planned}
-                    </Typography>
-                    <Typography
-                        variant='subtitle2'>Workers Launched: {row.workers.launched}
-                    </Typography>
+                    {Boolean(row.workers.planned) && (
+                        <Typography
+                            variant='subtitle2'>Workers Planned: {row.workers.planned}
+                        </Typography>
+                    )}
+                    {Boolean(row.workers.launched) && (
+                        <Typography
+                            variant='subtitle2'>Workers Launched: {row.workers.launched}
+                        </Typography>
+                    )}
                 </Collapse>
             </TableCell>
 
@@ -135,24 +93,7 @@ export function Row({row, stats}: RowProps) {
 
             <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
-            <TableCell align="left">
-                <Grid container>
-                    <Grid>
-                        {'└' + '──'.repeat(row.level) + '->'}
-                    </Grid>
-                    <Grid>
-                        <div>
-                            <div>
-                                <Box sx={{pl: 1.5}}>
-                                    <Typography variant="h5" color='bold'>{row.operation}</Typography>
-                                </Box>
-                            </div>
-                            <NodeStats expanded={expanded} row={row} stats={stats} theme={theme}/>
-
-                        </div>
-                    </Grid>
-                </Grid>
-            </TableCell>
+            <InfoCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
             <TableCell>
                 {!isUnfocused() && (
@@ -160,10 +101,6 @@ export function Row({row, stats}: RowProps) {
                         <ExpandMore expand={expanded} onClick={handleExpandClick}>
                             <DownOutlined style={{fontSize: '10px'}}/>
                         </ExpandMore>
-
-                        <IconButton onClick={focus}>
-                            <ZoomInOutlined style={{color: 'inherit', fontSize: '10px'}}/>
-                        </IconButton>
                     </>
                 )}
 
@@ -177,7 +114,13 @@ export function Row({row, stats}: RowProps) {
                         </IconButton>
                     </>
                 )}
+
+                {!isFocused && !isUnfocused() && (
+                    <IconButton onClick={switchToNode}>
+                        <ApartmentOutlined style={{fontSize: '10px'}}/>
+                    </IconButton>
+                )}
             </TableCell>
         </TableRow>
     );
-}
+})

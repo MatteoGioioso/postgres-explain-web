@@ -1,7 +1,7 @@
 import {useLocation} from "react-router-dom";
 import {useReactFlow} from "reactflow";
 import {useContext, useEffect, useState} from "react";
-import {NodeContext} from "./Contexts";
+import {NodeContext, TableTabsContext} from "./Contexts";
 
 export const useFocus = (nodeId: string) => {
     const {focusedNodeId, setFocusedNodeId} = useContext(NodeContext);
@@ -26,11 +26,11 @@ export const useFocus = (nodeId: string) => {
     }
 
     const scrollToElement = (id: string): void => {
+        const yOffset = -100;
         const element = document.getElementById(id);
+        const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
 
-        if (element) {
-            element.scrollIntoView({behavior: 'smooth'});
-        }
+        window.scrollTo({top: y, behavior: 'smooth'});
     }
 
     return {
@@ -61,6 +61,7 @@ export const useFocus = (nodeId: string) => {
             fitView({duration: 800})
         },
         switchToNode: (e) => {
+            setFocusedNodeId(nodeId)
             window.scrollTo({
                 top: 0,
                 left: 0,
@@ -69,8 +70,25 @@ export const useFocus = (nodeId: string) => {
             const node = getNode(nodeId);
             fitView({nodes: [node], duration: 800, maxZoom: 1.5})
         },
-        switchToRow: (e) => {
+        switchToRow: () => {
+            setFocusedNodeId(nodeId)
             scrollToElement(nodeId)
+        }
+    }
+}
+
+export const useNodeHover = (nodeId: string) => {
+    const {hoverNodeId, setHoverNodeId} = useContext(NodeContext);
+
+    return {
+        setHover: () => {
+            setHoverNodeId(nodeId)
+        },
+        unsetHover: () => {
+            setHoverNodeId('')
+        },
+        isHovered: (nodeId: string): boolean => {
+            return nodeId === hoverNodeId
         }
     }
 }

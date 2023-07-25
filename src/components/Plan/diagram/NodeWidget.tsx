@@ -4,7 +4,7 @@ import {PlanRow, Stats} from '../types'
 import Node from "./Node";
 import {useTheme} from "@mui/material/styles";
 import {IconButton} from "@mui/material";
-import {CloseOutlined, DownOutlined, TableOutlined} from "@ant-design/icons";
+import {CloseOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
 
 
@@ -19,23 +19,17 @@ export interface NodeWidgetProps {
 
 export const NodeWidget = memo(({data}: NodeWidgetProps) => {
     const theme = useTheme()
-    const {goToParentNode, closeFocusNavigation, isFocused, switchToRow} = useFocus(data.row.node_id);
+    const {closeFocusNavigation, isFocused} = useFocus(data.row.node_id);
 
     return (
         <>
             <Handle
-                type="target"
+                type="source"
                 position={Position.Top}
                 isConnectable={false}
                 style={{backgroundColor: 'transparent', color: 'transparent'}}
             />
             <NodeToolbar isVisible={isFocused} position={Position.Right}>
-                {data.row.node_parent_id && (
-                    <IconButton onClick={() => goToParentNode(data.row.node_parent_id)}>
-                        <DownOutlined style={{fontSize: '0.90rem', color: 'inherit'}}/>
-                    </IconButton>)
-                }
-                <IconButton onClick={switchToRow}><TableOutlined style={{fontSize: '0.90rem', color: 'inherit'}}/></IconButton>
                 <IconButton onClick={closeFocusNavigation}>
                     <CloseOutlined style={{fontSize: '0.90rem', color: 'inherit'}}/>
                 </IconButton>
@@ -46,7 +40,7 @@ export const NodeWidget = memo(({data}: NodeWidgetProps) => {
                 stats={data.stats}
             />
             <Handle
-                type="source"
+                type="target"
                 position={Position.Bottom}
                 isConnectable={false}
             />

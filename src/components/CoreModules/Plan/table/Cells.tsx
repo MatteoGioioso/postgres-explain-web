@@ -11,7 +11,6 @@ import {
 } from "../utils";
 import {PlanRow, Property, Stats} from "../types";
 import {DollarOutlined, FilterOutlined} from "@ant-design/icons";
-import {property} from "lodash";
 
 export const GenericDetailsPopover = (props: { name: string, content: any, children: any, keepCloseCondition?: boolean, style?: any }) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);

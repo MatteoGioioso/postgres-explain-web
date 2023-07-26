@@ -3,7 +3,7 @@ import ThemeCustomization from './themes';
 import Router from "./Router";
 import {PlanProvider} from "./MainContext";
 import {ReactFlowProvider} from "reactflow";
-import {NodeProvider, TableTabsProvider} from "./components/Plan/Contexts";
+import {NodeProvider, TableTabsProvider} from "./components/CoreModules/Plan/Contexts";
 
 function App() {
     return (

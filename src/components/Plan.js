@@ -9,18 +9,18 @@ import {
 
 // assets
 import {PlanContext} from "../MainContext";
-import {SummaryDiagram} from "./Plan/SummaryDiagram";
-import {PlanService} from "./Plan/parser";
-import {SummaryTable} from "./Plan/SummaryTable";
-import MainCard from "./Plan/MainCard";
+import {SummaryDiagram} from "./CoreModules/Plan/SummaryDiagram";
+import {PlanService} from "./CoreModules/Plan/parser";
+import {SummaryTable} from "./CoreModules/Plan/SummaryTable";
+import MainCard from "./CoreModules/Plan/MainCard";
 import {ErrorAlert} from "./ErrorReporting";
 import {useNavigate} from "react-router-dom";
-import {TableTabs} from "./Plan/tabs/TableTabs";
-import {GeneralStatsTable} from "./Plan/stats/GeneralStatsTable";
-import {RawPlan} from "./Plan/stats/RawPlan";
-import {IndexesStatsTable} from "./Plan/stats/IndexesStatsTable";
-import {useNodeDataProvider} from "./Plan/hooks";
-import {NodeContext} from "./Plan/Contexts";
+import {TableTabs} from "./CoreModules/Plan/tabs/TableTabs";
+import {GeneralStatsTable} from "./CoreModules/Plan/stats/GeneralStatsTable";
+import {RawPlan} from "./CoreModules/Plan/stats/RawPlan";
+import {IndexesStatsTable} from "./CoreModules/Plan/stats/IndexesStatsTable";
+import {useNodeDataProvider} from "./CoreModules/Plan/hooks";
+import {NodeContext} from "./CoreModules/Plan/Contexts";
 
 const planService = new PlanService();
 

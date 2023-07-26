@@ -119,9 +119,11 @@ const NodeSubRow = ({node}: { node: IndexNode }) => {
 
     return (
         <Box sx={{pb: 1, pt: 1.5}}>
-            <IconButton onClick={async () => {
-                await setTabIndex(0)
-                switchToNode(node.id)
+            <IconButton onClick={() => {
+                setTabIndex(0)
+                setTimeout(()=> {
+                    switchToNode(node.id)
+                })
             }}>
                 <ApartmentOutlined style={{fontSize: '10px'}}/>
             </IconButton>

@@ -8,24 +8,21 @@ import {
 } from '@mui/material';
 
 // assets
-import {PlanContext} from "../MainContext";
-import {SummaryDiagram} from "./CoreModules/Plan/SummaryDiagram";
-import {PlanService} from "./CoreModules/Plan/parser";
-import {SummaryTable} from "./CoreModules/Plan/SummaryTable";
-import MainCard from "./CoreModules/Plan/MainCard";
-import {ErrorAlert} from "./ErrorReporting";
+import {PlanContext} from "../../MainContext";
+import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
+import {PlanService} from "../CoreModules/Plan/parser";
+import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
+import {ErrorAlert} from "../ErrorReporting";
 import {useNavigate} from "react-router-dom";
-import {TableTabs} from "./CoreModules/Plan/tabs/TableTabs";
-import {GeneralStatsTable} from "./CoreModules/Plan/stats/GeneralStatsTable";
-import {RawPlan} from "./CoreModules/Plan/stats/RawPlan";
-import {IndexesStatsTable} from "./CoreModules/Plan/stats/IndexesStatsTable";
-import {useNodeDataProvider} from "./CoreModules/Plan/hooks";
-import {NodeContext} from "./CoreModules/Plan/Contexts";
+import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
+import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
+import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
+import {IndexesStatsTable} from "../CoreModules/Plan/stats/IndexesStatsTable";
+import {NodeContext} from "../CoreModules/Plan/Contexts";
 
 const planService = new PlanService();
 
-
-const DashboardDefault = () => {
+const PlanVisualizationWeb = () => {
     const {plan} = useContext(PlanContext);
     const [error, setError] = useState()
     const navigate = useNavigate();
@@ -65,7 +62,6 @@ const DashboardDefault = () => {
             })
         }
     }
-
 
     useEffect(() => {
         if (plan) {
@@ -108,4 +104,4 @@ const DashboardDefault = () => {
     );
 };
 
-export default DashboardDefault;
+export default PlanVisualizationWeb;

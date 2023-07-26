@@ -1,13 +1,18 @@
 import {lazy} from 'react';
-
-// project import
 import Loadable from './components/Loadable';
 import MainLayout from './components/MainLayout';
 import {useRoutes} from "react-router-dom";
+import {SELF_HOSTED, NORMAL, LoadComponent} from "./modes"
 
-// render - dashboard
+const componentsMap = {
+    [SELF_HOSTED]: import('./components/SelfHosted/PlanVisualizationSelfHosted'),
+    [NORMAL]: import('./components/Web/PlanVisualizationWeb')
+}
+
 const DashboardDefault = Loadable(lazy(() => import('./components/Dashboard')));
-const PlanLoadable = Loadable(lazy(() => import('./components/Plan')));
+const PlanVisualizationLoadable = Loadable(lazy(() => {
+    return LoadComponent(componentsMap)
+}))
 
 
 // ==============================|| MAIN ROUTING ||============================== //
@@ -22,7 +27,7 @@ const MainRoutes = {
         },
         {
             path: '/plan',
-            element: <PlanLoadable/>
+            element: <PlanVisualizationLoadable/>
         },
     ]
 };

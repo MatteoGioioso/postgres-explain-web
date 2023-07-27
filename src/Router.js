@@ -2,11 +2,11 @@ import {lazy} from 'react';
 import Loadable from './components/Loadable';
 import MainLayout from './components/MainLayout';
 import {useRoutes} from "react-router-dom";
-import {SELF_HOSTED, NORMAL, LoadComponent} from "./modes"
+import {SELF_HOSTED, WEB, LoadComponent} from "./modes"
 
 const componentsMap = {
     [SELF_HOSTED]: import('./components/SelfHosted/PlanVisualizationSelfHosted'),
-    [NORMAL]: import('./components/Web/PlanVisualizationWeb')
+    [WEB]: import('./components/Web/PlanVisualizationWeb')
 }
 
 const DashboardDefault = Loadable(lazy(() => import('./components/Dashboard')));

@@ -1,7 +1,7 @@
 // import Form from "./components/Form";
 import ThemeCustomization from './themes';
 import Router from "./Router";
-import {PlanProvider} from "./MainContext";
+import {AppFunctionalityProvider, PlanProvider} from "./MainContext";
 import {ReactFlowProvider} from "reactflow";
 import {NodeProvider, TableTabsProvider} from "./components/CoreModules/Plan/Contexts";
 
@@ -10,9 +10,11 @@ function App() {
         <ThemeCustomization>
             <ReactFlowProvider>
                 <PlanProvider>
-                    <TableTabsProvider>>
+                    <TableTabsProvider>
                         <NodeProvider>
-                            <Router/>
+                            <AppFunctionalityProvider>
+                                <Router/>
+                            </AppFunctionalityProvider>
                         </NodeProvider>
                     </TableTabsProvider>
                 </PlanProvider>

@@ -1,7 +1,5 @@
-import {lazy} from "react";
-
 export const SELF_HOSTED = "self_hosted"
-export const NORMAL = "normal"
+export const WEB = "web"
 
 const mode = window._env_.REACT_APP_MODE
 

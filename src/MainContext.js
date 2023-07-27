@@ -1,4 +1,5 @@
 import {createContext, useState} from "react";
+import {getMode} from "./modes";
 
 export const PlanContext = createContext({});
 
@@ -14,7 +15,7 @@ export function PlanProvider(props) {
 
 export const AppFunctionalityContext = createContext({})
 export const AppFunctionalityProvider = (props) => {
-    const appMode = window._env_.REACT_APP_MODE
+    const appMode = getMode()
 
     return (
         <AppFunctionalityContext.Provider value={{appMode}}>

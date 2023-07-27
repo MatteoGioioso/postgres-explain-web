@@ -1,4 +1,4 @@
-import React, {useMemo, useEffect, useCallback} from 'react'
+import React, {useMemo, useEffect, useCallback, useContext, useState} from 'react'
 import ReactFlow, {
     Controls,
     Edge,
@@ -17,9 +17,8 @@ import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
 import {getPercentage} from "./utils";
-import MainCard from "./MainCard";
-import {GeneralStatsTable} from "./stats/GeneralStatsTable";
-import {Grid} from "@mui/material";
+import {Collapse, Grid} from "@mui/material";
+import {DetailsTable} from "./diagram/DetailsTable";
 
 // @ts-ignore
 const elk = new ELK();
@@ -53,17 +52,12 @@ const getLayoutedElements = (nodes, edges, options = {}, theme) => {
 
 export const Diagram = ({summary, stats}: SummaryTableProps) => {
     const theme = useTheme();
-    const {fitView} = useReactFlow()
+    const {fitView, getNode} = useReactFlow()
     const [nodes, setNodes, onNodesChange] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const nodeTypes = useMemo(() => ({special: NodeWidget}), [])
     const edgeTypes = useMemo(() => ({special: EdgeWidget}), [])
 
-    // Elk has a *huge* amount of options to configure. To see everything you can
-    // tweak check out:
-    //
-    // - https://www.eclipse.org/elk/reference/algorithms.html
-    // - https://www.eclipse.org/elk/reference/options.html
     const elkOptions = {
         'elk.algorithm': 'layered',
         'elk.spacing.nodeNode': 80,
@@ -128,14 +122,15 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
         });
     }, [summary])
 
+
     return (
         <Grid container>
-            {/*<Grid xs={4}>*/}
-            {/*    <GeneralStatsTable stats={stats}/>*/}
-            {/*</Grid>*/}
+            <Grid xs={4} sx={{pt: 2, pr: 2}} position='absolute' zIndex='999'>
+                <DetailsTable/>
+            </Grid>
 
             <Grid xs={12} sx={{pt: 2}}>
-                <div style={{height: '80vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
+                <div style={{height: '82vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
                     <ReactFlow
                         fitView
                         nodes={nodes}

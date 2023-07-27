@@ -11,7 +11,6 @@ import {
 } from "../utils";
 import {PlanRow, Property, Stats} from "../types";
 import {DollarOutlined, FilterOutlined} from "@ant-design/icons";
-import {property} from "lodash";
 
 export const GenericDetailsPopover = (props: { name: string, content: any, children: any, keepCloseCondition?: boolean, style?: any }) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -169,32 +168,38 @@ export const RowsCell = ({row, expanded, theme}: CellProps) => {
             {row.scopes.filters && (
                 <FilterOutlined style={{color: theme.palette.primary.light, fontSize: '12px'}}/>)} {betterNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <Box sx={{pt: 1}}>
-                    <Typography><b>Total</b>: {' '}
-                        <GenericDetailsPopover name={"Rows"} content={row.rows.total}>
-                            {betterNumbers(row.rows.total * (row.workers.launched + 1))}
-                        </GenericDetailsPopover>
-                    </Typography>
-                    <Typography><b>Planned</b>: {' '}
-                        <GenericDetailsPopover name={"Planned rows"} content={row.rows.planned_rows}>
-
-                            {betterNumbers(row.rows.planned_rows)}
-                        </GenericDetailsPopover>
-                    </Typography>
-                    {
-                        row.scopes.filters && (
-                            <>
-                                <b>Removed: </b>
-                                <GenericDetailsPopover name={"rows removed"} content={row.rows.removed}>
-                                    - {' '}{betterNumbers(row.rows.removed)}
-                                </GenericDetailsPopover>
-                            </>
-                        )}
-
-                </Box>
+                <RowsCellCollapsedContent row={row} expanded={expanded} stats={null}/>
             </Collapse>
         </TableCell>
 
+    )
+}
+
+export const RowsCellCollapsedContent = ({row}: CellProps) => {
+    return (
+        <Box sx={{pt: 1}}>
+            <Typography><b>Total</b>: {' '}
+                <GenericDetailsPopover name={"Rows"} content={row.rows.total}>
+                    {betterNumbers(row.rows.total * (row.workers.launched + 1))}
+                </GenericDetailsPopover>
+            </Typography>
+            <Typography><b>Planned</b>: {' '}
+                <GenericDetailsPopover name={"Planned rows"} content={row.rows.planned_rows}>
+
+                    {betterNumbers(row.rows.planned_rows)}
+                </GenericDetailsPopover>
+            </Typography>
+            {
+                row.scopes.filters && (
+                    <>
+                        <b>Removed: </b>
+                        <GenericDetailsPopover name={"rows removed"} content={row.rows.removed}>
+                            - {' '}{betterNumbers(row.rows.removed)}
+                        </GenericDetailsPopover>
+                    </>
+                )}
+
+        </Box>
     )
 }
 
@@ -205,27 +210,33 @@ export const BufferReadsCell = ({
         <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme)}}>
             {betterDiskSize(row.buffers.effective_blocks_read)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <Box sx={{pt: 1}}>
-
-                    {Boolean(row.buffers.exclusive_reads) && (
-                        <Typography
-                            variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_reads)}
-                        </Typography>
-                    )}
-                    {Boolean(row.buffers.exclusive_temp_reads) && (
-                        <Typography
-                            variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_reads)}
-                        </Typography>
-                    )}
-                    {Boolean(row.buffers.exclusive_local_reads) && (
-                        <Typography
-                            variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_reads)}
-                        </Typography>
-                    )}
-
-                </Box>
+                <BufferReadsCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
             </Collapse>
         </TableCell>
+    )
+}
+
+export const BufferReadsCellCollapsedContent = ({row}: CellProps) => {
+    return (
+        <Box sx={{pt: 1}}>
+
+            {Boolean(row.buffers.exclusive_reads) && (
+                <Typography
+                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_reads)}
+                </Typography>
+            )}
+            {Boolean(row.buffers.exclusive_temp_reads) && (
+                <Typography
+                    variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_reads)}
+                </Typography>
+            )}
+            {Boolean(row.buffers.exclusive_local_reads) && (
+                <Typography
+                    variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_reads)}
+                </Typography>
+            )}
+
+        </Box>
     )
 }
 
@@ -236,27 +247,32 @@ export const BufferWrittenCell = ({
         <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme)}}>
             {betterDiskSize(row.buffers.effective_blocks_written)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <Box sx={{pt: 1}}>
-
-                    {Boolean(row.buffers.exclusive_written) && (
-                        <Typography
-                            variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_written)}
-                        </Typography>
-                    )}
-                    {Boolean(row.buffers.exclusive_temp_written) && (
-                        <Typography
-                            variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_written)}
-                        </Typography>
-                    )}
-                    {Boolean(row.buffers.exclusive_local_written) && (
-                        <Typography
-                            variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_written)}
-                        </Typography>
-                    )}
-
-                </Box>
+                <BufferWrittenCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
             </Collapse>
         </TableCell>
+    )
+}
+
+export const BufferWrittenCellCollapsedContent = ({row}: CellProps) => {
+    return (
+        <Box sx={{pt: 1}}>
+            {Boolean(row.buffers.exclusive_written) && (
+                <Typography
+                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_written)}
+                </Typography>
+            )}
+            {Boolean(row.buffers.exclusive_temp_written) && (
+                <Typography
+                    variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_written)}
+                </Typography>
+            )}
+            {Boolean(row.buffers.exclusive_local_written) && (
+                <Typography
+                    variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_written)}
+                </Typography>
+            )}
+
+        </Box>
     )
 }
 
@@ -296,7 +312,7 @@ export const InfoCell = ({row, expanded, stats, theme}: CellProps) => {
     )
 }
 
-function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: PlanRow, stats: Stats, theme: any }) {
+export function NodeStats({expanded, row, stats, theme}: { expanded: boolean, row: PlanRow, stats: Stats, theme: any }) {
     const scopesNames = Object.keys(row.scopes);
     const areScopesEmpty = Object.values(row.scopes).every(x => x === "")
 

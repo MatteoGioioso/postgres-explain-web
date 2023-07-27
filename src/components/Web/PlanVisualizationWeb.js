@@ -8,27 +8,25 @@ import {
 } from '@mui/material';
 
 // assets
-import {PlanContext} from "../MainContext";
-import {SummaryDiagram} from "./Plan/SummaryDiagram";
-import {PlanService} from "./Plan/parser";
-import {SummaryTable} from "./Plan/SummaryTable";
-import MainCard from "./Plan/MainCard";
-import {ErrorAlert} from "./ErrorReporting";
+import {PlanContext} from "../../MainContext";
+import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
+import {PlanService} from "../CoreModules/Plan/parser";
+import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
+import {ErrorAlert} from "../ErrorReporting";
 import {useNavigate} from "react-router-dom";
-import {OverallStats} from "./Plan/OverallStats";
-import {TableTabs} from "./Plan/tabs/TableTabs";
-import {GeneralStatsTable} from "./Plan/stats/GeneralStatsTable";
-import {RawPlan} from "./Plan/stats/RawPlan";
-import {IndexesStatsTable} from "./Plan/stats/IndexesStatsTable";
+import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
+import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
+import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
+import {IndexesStatsTable} from "../CoreModules/Plan/stats/IndexesStatsTable";
+import {NodeContext} from "../CoreModules/Plan/Contexts";
 
 const planService = new PlanService();
 
-
-const DashboardDefault = () => {
+const PlanVisualizationWeb = () => {
     const {plan} = useContext(PlanContext);
     const [error, setError] = useState()
-    const [explained, setExplained] = useState({})
     const navigate = useNavigate();
+    const {setExplained, explained} = useContext(NodeContext);
 
     function fetchQueryPlan(queryPlan) {
         if (!queryPlan) return
@@ -65,7 +63,6 @@ const DashboardDefault = () => {
         }
     }
 
-
     useEffect(() => {
         if (plan) {
             fetchQueryPlan(plan)
@@ -77,35 +74,26 @@ const DashboardDefault = () => {
     return (
         <Grid container>
             {error && <ErrorAlert error={error}/>}
-
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h5">Diagram</Typography>
-                </Grid>
-                {Object.keys(explained).length !== 0 && (
-                    <SummaryDiagram
-                        summary={explained.summary}
-                        stats={explained.stats}
-                    />)
-                }
-            </Grid>
-            <Grid>
-                <Box sx={{m: 10}}/>
-            </Grid>
             <Grid container>
                 <TableTabs>
-                    {Object.keys(explained).length !== 0 && (
+                    {Boolean(explained) && (
+                        <SummaryDiagram
+                            summary={explained.summary}
+                            stats={explained.stats}
+                        />)
+                    }
+                    {Boolean(explained) && (
                         <SummaryTable
                             summary={explained.summary}
                             stats={explained.stats}
                         />)
                     }
-                    {Object.keys(explained).length !== 0 && (
+                    {Boolean(explained) && (
                         <GeneralStatsTable
                             stats={explained.stats}
                         />)
                     }
-                    {Object.keys(explained).length !== 0 && (
+                    {Boolean(explained) && (
                         <IndexesStatsTable stats={explained.indexes_stats}/>
                     )}
 
@@ -116,4 +104,4 @@ const DashboardDefault = () => {
     );
 };
 
-export default DashboardDefault;
+export default PlanVisualizationWeb;

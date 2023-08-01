@@ -1,4 +1,9 @@
-import {GetQueryPlanCustomRequest, GetQueryPlanRequest, GetQueryPlanResponse, QueryExplainer} from "../proto/query_explainer.pb";
+import {
+    GetQueryPlanRequest,
+    GetQueryPlanResponse,
+    QueryExplainer,
+    SaveQueryPlanRequest, SaveQueryPlanResponse
+} from "../proto/query_explainer.pb";
 
 export class QueryExplainerRepository {
     private readonly ORIGIN: string;
@@ -10,6 +15,6 @@ export class QueryExplainerRepository {
     getQueryPlan = async (body: GetQueryPlanRequest): Promise<GetQueryPlanResponse> => QueryExplainer
         .GetQueryPlan(body, {pathPrefix: this.ORIGIN});
 
-    getQueryPlanCustom = async (body: GetQueryPlanCustomRequest): Promise<GetQueryPlanResponse> => QueryExplainer
-        .GetQueryPlanCustom(body, {pathPrefix: this.ORIGIN});
+    saveQueryPlan = async (body: SaveQueryPlanRequest): Promise<SaveQueryPlanResponse> => QueryExplainer
+        .SaveQueryPlan(body, {pathPrefix: this.ORIGIN});
 }

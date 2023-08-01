@@ -75,7 +75,7 @@ const PlanVisualizationWeb = () => {
         <Grid container>
             {error && <ErrorAlert error={error}/>}
             <Grid container>
-                <TableTabs>
+                <TableTabs tabs={["Diagram", "Table", "Stats", "Indexes", "Raw plan"]}>
                     {Boolean(explained) && (
                         <SummaryDiagram
                             summary={explained.summary}

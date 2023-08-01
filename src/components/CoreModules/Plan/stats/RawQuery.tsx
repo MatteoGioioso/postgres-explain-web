@@ -1,16 +1,18 @@
 import MainCard from "../MainCard";
-import ReactJson from 'react-json-view'
 import {useState} from "react";
 import {Snackbar, Button, Box} from "@mui/material";
 import {CopyFilled} from "@ant-design/icons";
+import Highlight from 'react-highlight'
 
-export const RawPlan = ({plan}: { plan: any }) => {
+export const RawQuery = ({query}: { query: string }) => {
     return (
         <MainCard content={false} sx={{width: 'auto', p: 3}}>
             <Box sx={{pb: 2}}>
-                <CopyToClipboardButton data={plan} />
+                <CopyToClipboardButton data={query} />
             </Box>
-            <ReactJson src={JSON.parse(plan)}/>
+            <Highlight className='sql'>
+                {query}
+            </Highlight>
         </MainCard>
     )
 }

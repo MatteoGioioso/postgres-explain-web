@@ -26,9 +26,11 @@ export type GetQueryPlanRequest = {
 
 export type GetQueryPlanResponse = {
   query_id?: string
+  plan_id?: string
   query_plan?: string
   query_original_plan?: string
   query_fingerprint?: string
+  query?: string
 }
 
 export class QueryExplainer {

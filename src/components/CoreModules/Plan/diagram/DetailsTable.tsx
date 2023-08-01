@@ -3,13 +3,14 @@ import {useTheme} from "@mui/material/styles";
 import MainCard from "../MainCard";
 import {Box, Chip, Collapse, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import {
-    betterDiskSize,
+    betterDiskSizeFromBlocks,
     betterNumbers,
     betterTiming, getEstimationColor,
     getPercentage,
     getPercentageColor
 } from "../utils";
 import {
+    BufferHitsCellCollapsedContent,
     BufferReadsCellCollapsedContent,
     BufferWrittenCellCollapsedContent, GenericDetailsPopover, getRowEstimateDirectionSymbol,
     NodeStats,
@@ -99,7 +100,7 @@ export const DetailsTable = () => {
                                 <Row
                                     name="Reads"
                                     color={getPercentageColor(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read, theme)}
-                                    mainValue={betterDiskSize(data.row.buffers.effective_blocks_read)}
+                                    mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_read)}
                                     showWarning={getPercentage(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read) >= 25}
                                 >
                                     <BufferReadsCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
@@ -108,10 +109,17 @@ export const DetailsTable = () => {
                                 <Row
                                     name="Written"
                                     color={getPercentageColor(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written, theme)}
-                                    mainValue={betterDiskSize(data.row.buffers.effective_blocks_written)}
+                                    mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_written)}
                                     showWarning={getPercentage(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written) > 25}
                                 >
                                     <BufferWrittenCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
+                                </Row>
+
+                                <Row
+                                    name="Cache"
+                                    mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_hits)}
+                                >
+                                    <BufferHitsCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
                                 </Row>
 
 

@@ -1,5 +1,5 @@
 import {QueryExplainerRepository} from "../datalayer/QueryExplainer.repository";
-import {GetQueryPlanCustomRequest} from "../proto/query_explainer.pb";
+import {GetQueryPlanRequest, SaveQueryPlanRequest} from "../proto/query_explainer.pb";
 import {Explained, IndexesStats, PlanRow, Stats} from "../../CoreModules/Plan/types";
 import {PlanService} from "../../CoreModules/Plan/parser";
 
@@ -7,6 +7,14 @@ export interface QueryPlanResponse {
     summary: PlanRow[]
     stats: Stats
     indexes_stats: IndexesStats
+}
+
+export interface QueryPlan {
+    summary: PlanRow[];
+    stats: Stats;
+    indexes_stats: IndexesStats;
+    original_plan: string;
+    query: string;
 }
 
 export class QueryExplainerService {
@@ -18,13 +26,20 @@ export class QueryExplainerService {
         this.planService = new PlanService();
     }
 
-    async getQueryPlanCustom(body: GetQueryPlanCustomRequest): Promise<Explained> {
-        const response = await this.queryExplainerRepository.getQueryPlanCustom(body);
+    async saveQueryPlan(body: SaveQueryPlanRequest): Promise<string> {
+        const response = await this.queryExplainerRepository.saveQueryPlan(body);
+        return response.plan_id
+    }
+
+    async getQueryPlan(body: GetQueryPlanRequest): Promise<QueryPlan> {
+        const response = await this.queryExplainerRepository.getQueryPlan(body)
         const parsedResponse: QueryPlanResponse = JSON.parse(response.query_plan);
         return {
             indexes_stats: parsedResponse.indexes_stats,
             stats: parsedResponse.stats,
             summary: parsedResponse.summary,
+            original_plan: response.query_original_plan,
+            query: response.query
         }
     }
 }

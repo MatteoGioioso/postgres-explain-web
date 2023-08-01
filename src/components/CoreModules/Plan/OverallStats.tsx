@@ -1,7 +1,7 @@
 import MainCard from "./MainCard";
 import {Stats} from "./types"
 import {Box, Grid, Table, TableBody, TableCell, TableContainer, TableRow, Typography} from "@mui/material";
-import {betterDiskSize, betterNumbers, betterTiming} from "./utils";
+import {betterDiskSizeFromBlocks, betterNumbers, betterTiming} from "./utils";
 import {Row} from "./table/Row";
 import React from "react";
 import {TimingCell, GenericDetailsPopover, getRowEstimateDirectionSymbol} from "./table/Cells";
@@ -49,10 +49,10 @@ export const OverallStats = ({stats}: OverallStatsProps) => {
                             Planning time: {betterTiming(stats.planning_time)}
                         </TableCell>
                         <TableCell align="left">
-                            Total reads from Disk: {betterDiskSize(stats.max_blocks_read)}
+                            Total reads from Disk: {betterDiskSizeFromBlocks(stats.max_blocks_read)}
                         </TableCell>
                         <TableCell align="left">
-                            Total written to Disk: {betterDiskSize(stats.max_blocks_written)}
+                            Total written to Disk: {betterDiskSizeFromBlocks(stats.max_blocks_written)}
                         </TableCell>
                     </TableRow>
                 </TableBody>

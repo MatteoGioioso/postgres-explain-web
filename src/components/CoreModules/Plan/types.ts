@@ -173,9 +173,12 @@ export interface Buffers {
   written: number /* float64 */;
   hits: number /* float64 */;
   dirtied: number /* float64 */;
+  local_reads: number /* float64 */;
+  local_written: number /* float64 */;
+  local_hits: number /* float64 */;
+  local_dirtied: number /* float64 */;
   temp_reads: number /* float64 */;
   temp_written: number /* float64 */;
-  temp_hits: number /* float64 */;
   exclusive_reads: number /* float64 */;
   exclusive_written: number /* float64 */;
   exclusive_hits: number /* float64 */;
@@ -185,8 +188,10 @@ export interface Buffers {
   exclusive_local_reads: number /* float64 */;
   exclusive_local_written: number /* float64 */;
   exclusive_local_hits: number /* float64 */;
+  exclusive_local_dirtied: number /* float64 */;
   effective_blocks_read: number /* float64 */;
   effective_blocks_written: number /* float64 */;
+  effective_blocks_hits: number /* float64 */;
 }
 export interface Worker {
   number: number /* float64 */;

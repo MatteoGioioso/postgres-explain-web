@@ -2,7 +2,7 @@ import {PlanRow, Stats} from "../types";
 import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
 import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
 import React, {memo, useContext, useEffect, useState} from "react";
-import {BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
+import {BufferHitsCell, BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
 import {useTheme} from "@mui/material/styles";
 import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
@@ -83,6 +83,8 @@ export const Row = memo(({row, stats}: RowProps) => {
 
             <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
+            <BufferHitsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+
             <InfoCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
             <TableCell>
@@ -92,7 +94,7 @@ export const Row = memo(({row, stats}: RowProps) => {
                 <IconButton onClick={() => {
                     setTabIndex(0)
                     // Probably a quirk or a bug with React flow, somehow setTimeout will help to focus on the now
-                    setTimeout(()=> {
+                    setTimeout(() => {
                         switchToNode(row.node_id)
                     })
                 }}>

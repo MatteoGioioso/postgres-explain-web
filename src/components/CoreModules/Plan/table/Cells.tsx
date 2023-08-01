@@ -2,7 +2,7 @@ import React from "react";
 import {Box, Chip, Collapse, Divider, Grid, Popover, TableCell, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {
-    betterDiskSize,
+    betterDiskSizeFromBlocks,
     betterNumbers,
     betterTiming,
     getEstimationColor, getFunctionFromKind,
@@ -142,6 +142,11 @@ export const headCells = (areBuffersPresent?: boolean) => [
         disablePadding: false,
     },
     {
+        id: 'hits',
+        label: 'Cache',
+        align: 'left'
+    },
+    {
         id: 'node',
         label: 'Node',
         align: 'left',
@@ -208,7 +213,7 @@ export const BufferReadsCell = ({
                                 }: CellProps) => {
     return (
         <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme)}}>
-            {betterDiskSize(row.buffers.effective_blocks_read)}
+            {betterDiskSizeFromBlocks(row.buffers.effective_blocks_read)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferReadsCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
             </Collapse>
@@ -245,7 +250,7 @@ export const BufferWrittenCell = ({
                                   }: CellProps) => {
     return (
         <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme)}}>
-            {betterDiskSize(row.buffers.effective_blocks_written)}
+            {betterDiskSizeFromBlocks(row.buffers.effective_blocks_written)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferWrittenCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
             </Collapse>
@@ -275,6 +280,37 @@ export const BufferWrittenCellCollapsedContent = ({row}: CellProps) => {
         </Box>
     )
 }
+
+export const BufferHitsCell = ({
+                                   expanded, theme, row, stats
+                               }: CellProps) => {
+    return (
+        <TableCell>
+            {betterDiskSizeFromBlocks(row.buffers.effective_blocks_hits)}
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+                <BufferHitsCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
+            </Collapse>
+        </TableCell>
+    )
+}
+
+export const BufferHitsCellCollapsedContent = ({row}: CellProps) => {
+    return (
+        <Box sx={{pt: 1}}>
+            {Boolean(row.buffers.exclusive_hits) && (
+                <Typography
+                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_hits)}
+                </Typography>
+            )}
+            {Boolean(row.buffers.exclusive_local_hits) && (
+                <Typography
+                    variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_hits)}
+                </Typography>
+            )}
+        </Box>
+    )
+}
+
 
 export const RowsEstimationCell = ({
                                        row, theme, expanded

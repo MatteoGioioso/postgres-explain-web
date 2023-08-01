@@ -47,45 +47,17 @@ export const TableTabs = (props) => {
                 aria-label="table tabs"
 
             >
-                <Tab
-                    label={
-                        <Grid container alignItems="center" justifyContent="space-between">
-                            <Grid item>
-                                <Typography variant="h5">Diagram</Typography>
+                {props.tabs.map(t => (
+                    <Tab
+                        label={
+                            <Grid container alignItems="center" justifyContent="space-between">
+                                <Grid item>
+                                    <Typography variant="h5">{t}</Typography>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    }
-                />
-                <Tab
-                    label={
-                        <Grid container alignItems="center" justifyContent="space-between">
-                            <Grid item>
-                                <Typography variant="h5">Table</Typography>
-                            </Grid>
-                        </Grid>
-                    }
-                />
-                <Tab label={
-                    <Grid container alignItems="center" justifyContent="space-between">
-                        <Grid item>
-                            <Typography variant="h5">Stats</Typography>
-                        </Grid>
-                    </Grid>
-                }/>
-                <Tab label={
-                    <Grid container alignItems="center" justifyContent="space-between">
-                        <Grid item>
-                            <Typography variant="h5">Indexes</Typography>
-                        </Grid>
-                    </Grid>
-                }/>
-                <Tab label={
-                    <Grid container alignItems="center" justifyContent="space-between">
-                        <Grid item>
-                            <Typography variant="h5">Raw Plan</Typography>
-                        </Grid>
-                    </Grid>
-                }/>
+                        }
+                    />
+                ))}
             </Tabs>
             {props.children.map((tab, index) => index == 0 ? (
                     <UnmountableTabPanel index={index} value={tabIndex}>

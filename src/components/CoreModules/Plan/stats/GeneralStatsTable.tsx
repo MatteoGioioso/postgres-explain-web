@@ -3,7 +3,7 @@ import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "
 import React from "react";
 import {GenericDetailsPopover,} from "../table/Cells";
 import {Stats} from "../types";
-import {betterDiskSize, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
+import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
 
 export interface GeneralStatsTableProps {
     stats: Stats
@@ -106,7 +106,7 @@ const getMeasure = (name: string, data: number): string => {
     if (name.includes("time") || name.includes("duration")) {
         return betterTiming(data)
     } else if (name.includes("blocks")) {
-        return betterDiskSize(data)
+        return betterDiskSizeFromBlocks(data)
     }
 
     return betterNumbers(data)

@@ -3,6 +3,7 @@ import {QUERY_EXAMPLE_PLACEHOLDER, QUERY_PLAN_EXAMPLE_PLACEHOLDER} from "../util
 import {Formik} from "formik";
 import MainCard from "../CoreModules/Plan/MainCard";
 import {useNavigate, useParams} from "react-router-dom";
+import {queryExplainerService} from "./ioc";
 
 const FormWrapper = ({children}) => (
     <Box sx={{minHeight: '100vh'}}>
@@ -34,13 +35,12 @@ export const ClustersTableAndQueryForm = () => {
                     plan: ''
                 }}
                 onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
-                    navigate(
-                        `/clusters/${cluster_id}/plans/123`,
-                        {
-                            state: {
-                                query: values.query
-                            }
-                        })
+                    const planID = await queryExplainerService.saveQueryPlan({
+                        query: values.query,
+                        cluster_name: cluster_id,
+                        database: "postgres",
+                    });
+                    navigate(`/clusters/${cluster_id}/plans/${planID}`)
                 }}
                 validate={values => {
                     const errors = {};

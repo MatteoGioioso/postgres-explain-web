@@ -30,7 +30,7 @@ function OrderTableHead({order, orderBy}) {
 export function SummaryTable({summary, stats}: SummaryTableProps) {
     const [order] = useState('asc');
     const [orderBy] = useState('trackingNo');
-
+    console.log(summary)
     return (
         <MainCard content={false}>
             <TableContainer

@@ -3,7 +3,7 @@ import {Box, Collapse, Divider, IconButton, Table, TableBody, TableCell, TableCo
 import React, {useContext, useState} from "react";
 import {GenericDetailsPopover,} from "../table/Cells";
 import {IndexesStats, IndexNode, IndexStats, Stats} from "../types";
-import {betterDiskSize, betterNumbers, betterTiming, capitalizeFirstLetter, getColorFromPercentage, getPercentageColor} from "../utils";
+import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, getColorFromPercentage, getPercentageColor} from "../utils";
 import {ExpandMore} from "../ExpandMore";
 import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";

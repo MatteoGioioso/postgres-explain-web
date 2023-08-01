@@ -39,7 +39,7 @@ const SelfHostedRoutes = () => ({
     children: [
         {
             path: '/',
-            element: <DashboardDefault/>
+            element: <div>Postgres explain</div>
         },
         {
             path: '/clusters/:cluster_id',

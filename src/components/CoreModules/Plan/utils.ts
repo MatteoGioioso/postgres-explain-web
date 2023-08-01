@@ -52,7 +52,7 @@ export function betterTiming(milliseconds: number): string {
     }
 }
 
-export function betterDiskSize(blocks: number): string {
+export function betterDiskSizeFromBlocks(blocks: number): string {
     const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     let size = blocks * 8192;
     let unitIndex = 0;
@@ -65,10 +65,23 @@ export function betterDiskSize(blocks: number): string {
     return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
+export function betterDiskSize(diskSize: number): string {
+    const units = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    let unitIndex = 0;
+
+    while (diskSize >= 1024 && unitIndex < units.length - 1) {
+        diskSize /= 1024;
+        unitIndex++;
+    }
+
+    return `${diskSize.toFixed(2)} ${units[unitIndex]}`;
+}
+
 export const getFunctionFromKind = (kind: string) => {
     const kindMap = {
         "timing": betterTiming,
         "quantity": betterNumbers,
+        "blocks": betterDiskSizeFromBlocks,
         "disk_size": betterDiskSize,
         "": (val: any) => val
     }

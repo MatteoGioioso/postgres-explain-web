@@ -1,5 +1,6 @@
 import {createContext, useState} from "react";
-import {getMode} from "./modes";
+
+import {getMode} from "./config";
 
 export const PlanContext = createContext({});
 

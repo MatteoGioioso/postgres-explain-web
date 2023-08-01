@@ -10,58 +10,51 @@ import {
 // assets
 import {PlanContext} from "../../MainContext";
 import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
-import {PlanService} from "../CoreModules/Plan/parser";
 import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
 import {ErrorAlert} from "../ErrorReporting";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
 import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {IndexesStatsTable} from "../CoreModules/Plan/stats/IndexesStatsTable";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
+import {QueryExplainerRepository} from "./datalayer/QueryExplainer.repository";
+import {getBackendOrigin} from "../../config";
+import {QueryExplainerService} from "./services/QueryExplainer.service";
 
-const planService = new PlanService();
+const queryExplainerRepository = new QueryExplainerRepository(getBackendOrigin());
+const queryExplainerService = new QueryExplainerService(queryExplainerRepository);
 
 const PlanVisualizationSelfHosted = () => {
     const {plan} = useContext(PlanContext);
     const [error, setError] = useState()
     const navigate = useNavigate();
     const {setExplained, explained} = useContext(NodeContext);
+    const {state} = useLocation();
+    const {cluster_id, plan_id} = useParams();
 
-    function fetchQueryPlan(queryPlan) {
-        if (!queryPlan) return
+    async function explainQuery(query) {
+        try {
+            const queryPlanResponse = await queryExplainerService.getQueryPlanCustom({
+                query,
+                cluster_name: cluster_id,
+                database: "postgres",
+                namespace: null
+            });
 
-        // const plan = planService.fromSource(queryPlan);
-        // console.log(JSON.parse(plan))
-        // try {
-        //     const out = global.explain(plan)
-        //
-        //     if (out.error) {
-        //         console.error(`${out.error}: ${out.error_details}`)
-        //
-        //         setError({
-        //             message: out.error,
-        //             error_details: out.error_details,
-        //             stackTrace: out.error_stack,
-        //         })
-        //     } else {
-        //         const parsedExplained = JSON.parse(out.explained);
-        //         console.log(parsedExplained)
-        //         setExplained(parsedExplained)
-        //     }
-        //
-        // } catch (e) {
-        //     setError({
-        //         message: e.message,
-        //     })
-        // }
+            setExplained(queryPlanResponse)
+        } catch (e) {
+            setError({
+                message: e.message,
+            })
+        }
     }
 
     useEffect(() => {
-        if (plan) {
-            fetchQueryPlan(plan)
+        if (state.query) {
+            explainQuery(state.query)
         } else {
-            navigate('/')
+            navigate(`/clusters/${cluster_id}`)
         }
     }, [])
 
@@ -91,7 +84,7 @@ const PlanVisualizationSelfHosted = () => {
                         <IndexesStatsTable stats={explained.indexes_stats}/>
                     )}
 
-                    <RawPlan plan={plan && planService.fromSource(plan)}/>
+                    <RawPlan plan={{}}/>
                 </TableTabs>
             </Grid>
         </Grid>

@@ -1,13 +1,15 @@
-import {GetQueryPlanRequest, GetQueryPlanResponse, QueryExplainer} from "../proto/query_explainer.pb";
+import {GetQueryPlanCustomRequest, GetQueryPlanRequest, GetQueryPlanResponse, QueryExplainer} from "../proto/query_explainer.pb";
 
 export class QueryExplainerRepository {
-    private readonly HOST: string;
+    private readonly ORIGIN: string;
 
-    constructor() {
-        // @ts-ignore
-        this.HOST = window._env_.REACT_APP_API_URL;
+    constructor(origin: string) {
+        this.ORIGIN = origin
     }
 
     getQueryPlan = async (body: GetQueryPlanRequest): Promise<GetQueryPlanResponse> => QueryExplainer
-        .GetQueryPlan(body, {pathPrefix: this.HOST});
+        .GetQueryPlan(body, {pathPrefix: this.ORIGIN});
+
+    getQueryPlanCustom = async (body: GetQueryPlanCustomRequest): Promise<GetQueryPlanResponse> => QueryExplainer
+        .GetQueryPlanCustom(body, {pathPrefix: this.ORIGIN});
 }

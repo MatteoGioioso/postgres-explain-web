@@ -21,3 +21,8 @@ export const QUERY_PLAN_EXAMPLE_PLACEHOLDER = `[
     "Triggers": []
   }
 ]`
+
+
+export const QUERY_EXAMPLE_PLACEHOLDER = `SELECT DISTINCT city
+                                          FROM weather
+                                          ORDER BY city;`

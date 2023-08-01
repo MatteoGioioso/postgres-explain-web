@@ -1,3 +1,0 @@
-[submodule "postgres-explain"]
-	path = postgres-explain
-	url = https://github.com/MatteoGioioso/postgres-explain.git

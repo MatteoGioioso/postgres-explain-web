@@ -17,7 +17,7 @@ export const RawQuery = ({query}: { query: string }) => {
     )
 }
 
-const CopyToClipboardButton = (props) => {
+export const CopyToClipboardButton = (props) => {
     const [open, setOpen] = useState(false)
 
     const handleClick = () => {

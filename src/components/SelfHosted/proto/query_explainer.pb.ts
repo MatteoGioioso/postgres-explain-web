@@ -33,11 +33,36 @@ export type GetQueryPlanResponse = {
   query?: string
 }
 
+export type GetQueryPlansListRequest = {
+  period_start_from?: GoogleProtobufTimestamp.Timestamp
+  period_start_to?: GoogleProtobufTimestamp.Timestamp
+  cluster_name?: string
+  limit?: string
+  order?: string
+  query_fingerprint?: string
+  tracking_id?: string
+}
+
+export type GetQueryPlansListResponse = {
+  plans?: PlanItem[]
+}
+
+export type PlanItem = {
+  id?: string
+  alias?: string
+  period_start?: GoogleProtobufTimestamp.Timestamp
+  query?: string
+  tracking_id?: string
+}
+
 export class QueryExplainer {
   static SaveQueryPlan(req: SaveQueryPlanRequest, initReq?: fm.InitReq): Promise<SaveQueryPlanResponse> {
     return fm.fetchReq<SaveQueryPlanRequest, SaveQueryPlanResponse>(`/v0/explain/SaveQueryPlan`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
   }
   static GetQueryPlan(req: GetQueryPlanRequest, initReq?: fm.InitReq): Promise<GetQueryPlanResponse> {
     return fm.fetchReq<GetQueryPlanRequest, GetQueryPlanResponse>(`/v0/explain/GetQueryPlan`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
+  }
+  static GetQueryPlansList(req: GetQueryPlansListRequest, initReq?: fm.InitReq): Promise<GetQueryPlansListResponse> {
+    return fm.fetchReq<GetQueryPlansListRequest, GetQueryPlansListResponse>(`/v0/explain/GetQueryPlansList`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
   }
 }

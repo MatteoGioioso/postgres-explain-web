@@ -1,6 +1,6 @@
 import {
     GetQueryPlanRequest,
-    GetQueryPlanResponse,
+    GetQueryPlanResponse, GetQueryPlansListRequest, GetQueryPlansListResponse,
     QueryExplainer,
     SaveQueryPlanRequest, SaveQueryPlanResponse
 } from "../proto/query_explainer.pb";
@@ -17,4 +17,7 @@ export class QueryExplainerRepository {
 
     saveQueryPlan = async (body: SaveQueryPlanRequest): Promise<SaveQueryPlanResponse> => QueryExplainer
         .SaveQueryPlan(body, {pathPrefix: this.ORIGIN});
+
+    getQueryPlans = async (body: GetQueryPlansListRequest): Promise<GetQueryPlansListResponse> => QueryExplainer
+        .GetQueryPlansList(body, {pathPrefix: this.ORIGIN})
 }

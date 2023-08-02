@@ -1,5 +1,5 @@
 import {QueryExplainerRepository} from "../datalayer/QueryExplainer.repository";
-import {GetQueryPlanRequest, SaveQueryPlanRequest} from "../proto/query_explainer.pb";
+import {GetQueryPlanRequest, GetQueryPlansListRequest, SaveQueryPlanRequest} from "../proto/query_explainer.pb";
 import {Explained, IndexesStats, PlanRow, Stats} from "../../CoreModules/Plan/types";
 import {PlanService} from "../../CoreModules/Plan/parser";
 
@@ -10,11 +10,14 @@ export interface QueryPlanResponse {
 }
 
 export interface QueryPlan {
-    summary: PlanRow[];
-    stats: Stats;
-    indexes_stats: IndexesStats;
-    original_plan: string;
-    query: string;
+    summary?: PlanRow[];
+    stats?: Stats;
+    indexes_stats?: IndexesStats;
+    original_plan?: string;
+    query?: string;
+    queryId?: string;
+    id?: string;
+    period_start?: Date
 }
 
 export class QueryExplainerService {
@@ -41,5 +44,17 @@ export class QueryExplainerService {
             original_plan: response.query_original_plan,
             query: response.query
         }
+    }
+
+    async getQueryPlansList(body: GetQueryPlansListRequest): Promise<QueryPlan[]> {
+        const response = await this.queryExplainerRepository.getQueryPlans({
+            cluster_name: body.cluster_name,
+        });
+
+        return response.plans.map(plan => ({
+            id: plan.id,
+            query: plan.query,
+            period_start: new Date(plan.period_start as number)
+        }))
     }
 }

@@ -1,7 +1,6 @@
 import MainCard from "../MainCard";
-import {useState} from "react";
-import {Snackbar, Button, Box} from "@mui/material";
-import {CopyFilled} from "@ant-design/icons";
+import {Box} from "@mui/material";
+import {CopyToClipboardButton} from "../../CopyToClipboard";
 import Highlight from 'react-highlight'
 
 export const RawQuery = ({query}: { query: string }) => {
@@ -14,28 +13,5 @@ export const RawQuery = ({query}: { query: string }) => {
                 {query}
             </Highlight>
         </MainCard>
-    )
-}
-
-export const CopyToClipboardButton = (props) => {
-    const [open, setOpen] = useState(false)
-
-    const handleClick = () => {
-        setOpen(true)
-        navigator.clipboard.writeText(props.data)
-    }
-
-    return (
-        <>
-            <Button variant="outlined" size='small' onClick={handleClick} startIcon={<CopyFilled />}>
-                Copy
-            </Button>
-            <Snackbar
-                open={open}
-                onClose={() => setOpen(false)}
-                autoHideDuration={2000}
-                message="Copied to clipboard"
-            />
-        </>
     )
 }

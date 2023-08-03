@@ -1,7 +1,6 @@
 import MainCard from "../MainCard";
 import {Box, Collapse, Divider, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React, {useContext, useState} from "react";
-import {GenericDetailsPopover,} from "../table/Cells";
 import {IndexesStats, IndexNode, IndexStats, Stats} from "../types";
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, getColorFromPercentage, getPercentageColor} from "../utils";
 import {ExpandMore} from "../ExpandMore";
@@ -9,6 +8,7 @@ import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
 import {useTheme} from "@mui/material/styles";
+import {GenericDetailsPopover} from "../../GenericDetailsPopover";
 
 export interface IndexesStatsTableProps {
     stats: IndexesStats

@@ -4,7 +4,8 @@ import {Box, Grid, Table, TableBody, TableCell, TableContainer, TableRow, Typogr
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming} from "./utils";
 import {Row} from "./table/Row";
 import React from "react";
-import {TimingCell, GenericDetailsPopover, getRowEstimateDirectionSymbol} from "./table/Cells";
+import {TimingCell, getRowEstimateDirectionSymbol} from "./table/Cells";
+import {GenericDetailsPopover} from "../GenericDetailsPopover";
 
 interface OverallStatsProps {
     stats: Stats

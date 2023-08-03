@@ -51,10 +51,14 @@ export class QueryExplainerService {
             cluster_name: body.cluster_name,
         });
 
-        return response.plans.map(plan => ({
-            id: plan.id,
-            query: plan.query,
-            period_start: new Date(plan.period_start as number)
-        }))
+        if (response.plans?.length) {
+            return response.plans.map(plan => ({
+                id: plan.id,
+                query: plan.query,
+                period_start: new Date(plan.period_start as number)
+            }))
+        }
+
+        return []
     }
 }

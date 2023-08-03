@@ -12,13 +12,14 @@ import {
 import {
     BufferHitsCellCollapsedContent,
     BufferReadsCellCollapsedContent,
-    BufferWrittenCellCollapsedContent, GenericDetailsPopover, getRowEstimateDirectionSymbol,
+    BufferWrittenCellCollapsedContent, getRowEstimateDirectionSymbol,
     NodeStats,
     RowsCellCollapsedContent,
 } from "../table/Cells";
 import {ExpandMore} from "../ExpandMore";
 import {DownOutlined, WarningOutlined} from "@ant-design/icons";
 import {useNodeDataProvider} from "../hooks";
+import {GenericDetailsPopover} from "../../GenericDetailsPopover";
 
 export const DetailsTable = () => {
     const theme = useTheme();

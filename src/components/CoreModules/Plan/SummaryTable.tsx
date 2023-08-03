@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react'
 import {SummaryTableProps} from './interfaces'
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
-import {GenericDetailsPopover, headCells} from "./table/Cells";
+import {headCells} from "./table/Cells";
 import {Row} from "./table/Row";
 import MainCard from "./MainCard";
+import {GenericDetailsPopover} from "../GenericDetailsPopover";
 
 
 function OrderTableHead({order, orderBy}) {
@@ -30,7 +31,7 @@ function OrderTableHead({order, orderBy}) {
 export function SummaryTable({summary, stats}: SummaryTableProps) {
     const [order] = useState('asc');
     const [orderBy] = useState('trackingNo');
-    console.log(summary)
+
     return (
         <MainCard content={false}>
             <TableContainer

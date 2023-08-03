@@ -14,6 +14,7 @@ export type SaveQueryPlanRequest = {
   query?: string
   database?: string
   namespace?: string
+  parameters?: string[]
 }
 
 export type SaveQueryPlanResponse = {

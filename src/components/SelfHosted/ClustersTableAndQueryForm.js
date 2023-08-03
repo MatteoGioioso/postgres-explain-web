@@ -1,45 +1,46 @@
 import {
-    Avatar,
     Box,
     Button,
     FormHelperText,
     Grid,
     List,
     ListItem,
-    ListItemAvatar, ListItemButton, ListItemIcon,
-    ListItemText, ListSubheader,
+    ListItemButton, ListItemIcon,
+    ListItemText,
     Stack,
     TextField,
     Typography
 } from "@mui/material";
-import {QUERY_EXAMPLE_PLACEHOLDER, QUERY_PLAN_EXAMPLE_PLACEHOLDER} from "../utils";
+import {QUERY_EXAMPLE_PLACEHOLDER} from "../utils";
 import {Formik} from "formik";
 import MainCard from "../CoreModules/Plan/MainCard";
 import {useNavigate, useParams} from "react-router-dom";
-import {queryExplainerService} from "./ioc";
+import {analyticsService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
-import {GenericDetailsPopover} from "../CoreModules/Plan/table/Cells";
 import {ConsoleSqlOutlined} from "@ant-design/icons";
-import {CopyToClipboardButton, RawQuery} from "../CoreModules/Plan/stats/RawQuery";
 import Highlight from 'react-highlight'
+import {GenericDetailsPopover} from "../CoreModules/GenericDetailsPopover";
+import {QueriesListTable} from "../CoreModules/Tables/QueriesListTable";
+import {CopyToClipboardButton} from "../CoreModules/CopyToClipboard";
 
-const FormWrapper = ({children}) => (
-    <Box sx={{pb: 2, pt: 2}}>
-        <Grid item>
-            <FormCard>{children}</FormCard>
+const Wrapper = ({children, title, sx = {}, other}) => (
+    <>
+        <Grid container alignItems="center" justifyContent="space-between">
+            <Grid item>
+                <Typography variant="h5">{title}</Typography>
+            </Grid>
         </Grid>
-    </Box>
-);
-
-const FormCard = ({children, ...other}) => (
-    <MainCard
-        content={false}
-        {...other}
-        border={false}
-        boxShadow
-    >
-        <Box sx={{p: {xs: 2, sm: 3, md: 4, xl: 5}}}>{children}</Box>
-    </MainCard>
+        <Box sx={{...sx}}>
+            <MainCard
+                content={false}
+                {...other}
+                border={false}
+                boxShadow
+            >
+                <Box sx={{p: {xs: 2, sm: 2, md: 2, xl: 2}}}>{children}</Box>
+            </MainCard>
+        </Box>
+    </>
 );
 
 export function PlansList(props) {
@@ -79,10 +80,81 @@ export function PlansList(props) {
     );
 }
 
+const QueryForm = ({cluster_id}) => {
+    const navigate = useNavigate();
+    return (
+        <Formik
+            initialValues={{
+                plan: ''
+            }}
+            onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
+                const planID = await queryExplainerService.saveQueryPlan({
+                    query: values.query,
+                    cluster_name: cluster_id,
+                    database: "postgres",
+                });
+                navigate(`/clusters/${cluster_id}/plans/${planID}`)
+            }}
+            validate={values => {
+                const errors = {};
+                if (!values.query) {
+                    errors.query = 'Required';
+                }
+                return errors;
+            }}
+        >
+            {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
+                <form noValidate onSubmit={handleSubmit}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Stack spacing={1}>
+                                <TextField
+                                    fullWidth
+                                    error={Boolean(touched.query && errors.query)}
+                                    id="query"
+                                    type="text"
+                                    value={values.query}
+                                    name="query"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    placeholder={QUERY_EXAMPLE_PLACEHOLDER}
+                                    inputProps={{}}
+                                    multiline
+                                    rows={10}
+                                />
+                                {touched.query && errors.query && (
+                                    <FormHelperText error id="helper-text-plan-signup">
+                                        {errors.query}
+                                    </FormHelperText>
+                                )}
+                            </Stack>
+                        </Grid>
+
+                        {errors.submit && (
+                            <Grid item xs={12}>
+                                <FormHelperText error>{errors.submit}</FormHelperText>
+                            </Grid>
+                        )}
+                        <Grid item xs={12}>
+                            <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit"
+                                    variant="contained"
+                                    color="primary">
+                                Explain
+                            </Button>
+                        </Grid>
+
+                    </Grid>
+                </form>
+            )}
+        </Formik>
+    )
+}
+
 export const ClustersTableAndQueryForm = () => {
     const {cluster_id} = useParams();
-    const navigate = useNavigate();
     const [plansList, setPlansList] = useState([])
+    const [queriesList, setQueriesList] = useState({queries: []})
+    const navigate = useNavigate();
 
     useEffect(() => {
         queryExplainerService.getQueryPlansList({
@@ -90,100 +162,58 @@ export const ClustersTableAndQueryForm = () => {
         }).then(plansList => {
             setPlansList(plansList)
         })
+        analyticsService.getQueriesList({
+            cluster_name: cluster_id,
+        }).then((resp) => {
+            setQueriesList(resp)
+        })
     }, []);
+
+    const onClickRow = async (queryId, query, params) => {
+        try {
+            const planID = await queryExplainerService.saveQueryPlan({
+                query_id: queryId,
+                query,
+                cluster_name: cluster_id,
+                database: "postgres",
+                parameters: params.split(","),
+            });
+            navigate(`/clusters/${cluster_id}/plans/${planID}`)
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
     return (
         <>
             <Grid container>
+                <Grid xs={12}>
+                    <Wrapper sx={{pr: 2, pt: 2}} title={"Queries list"}>
+                        {Boolean(queriesList.queries.length) && (
+                            <QueriesListTable
+                                mappings={queriesList.mappings}
+                                queries={queriesList.queries}
+                                onClickRow={onClickRow}
+                            />
+                        )}
+                    </Wrapper>
+                </Grid>
+            </Grid>
+            <Box sx={{pt: 4}}/>
+            <Grid container>
                 <Grid xs={8}>
-
+                    <Wrapper sx={{pt: 2, pr: 2}} title="Custom query">
+                        <QueryForm cluster_id={cluster_id}/>
+                    </Wrapper>
                 </Grid>
                 <Grid xs={4}>
-                    <Grid container alignItems="center" justifyContent="space-between">
-                        <Grid item>
-                            <Typography variant="h5">Plans</Typography>
-                        </Grid>
-                    </Grid>
-                    <FormWrapper>
+                    <Wrapper sx={{pt: 2}} title="Plans">
                         {Boolean(plansList.length) && (
                             <PlansList items={plansList} clusterId={cluster_id}/>
                         )}
-                    </FormWrapper>
+                    </Wrapper>
                 </Grid>
             </Grid>
-            <Box sx={{pt: 2}}>
-                <Grid container alignItems="center" justifyContent="space-between">
-                    <Grid item>
-                        <Typography variant="h5">Custom query</Typography>
-                    </Grid>
-                </Grid>
-                <FormWrapper>
-                    <Formik
-                        initialValues={{
-                            plan: ''
-                        }}
-                        onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
-                            const planID = await queryExplainerService.saveQueryPlan({
-                                query: values.query,
-                                cluster_name: cluster_id,
-                                database: "postgres",
-                            });
-                            navigate(`/clusters/${cluster_id}/plans/${planID}`)
-                        }}
-                        validate={values => {
-                            const errors = {};
-                            if (!values.query) {
-                                errors.query = 'Required';
-                            }
-                            return errors;
-                        }}
-                    >
-                        {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
-                            <form noValidate onSubmit={handleSubmit}>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12}>
-                                        <Stack spacing={1}>
-                                            <TextField
-                                                fullWidth
-                                                error={Boolean(touched.query && errors.query)}
-                                                id="query"
-                                                type="text"
-                                                value={values.query}
-                                                name="query"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                placeholder={QUERY_EXAMPLE_PLACEHOLDER}
-                                                inputProps={{}}
-                                                multiline
-                                                rows={10}
-                                            />
-                                            {touched.query && errors.query && (
-                                                <FormHelperText error id="helper-text-plan-signup">
-                                                    {errors.query}
-                                                </FormHelperText>
-                                            )}
-                                        </Stack>
-                                    </Grid>
-
-                                    {errors.submit && (
-                                        <Grid item xs={12}>
-                                            <FormHelperText error>{errors.submit}</FormHelperText>
-                                        </Grid>
-                                    )}
-                                    <Grid item xs={12}>
-                                        <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit"
-                                                variant="contained"
-                                                color="primary">
-                                            Explain
-                                        </Button>
-                                    </Grid>
-
-                                </Grid>
-                            </form>
-                        )}
-                    </Formik>
-                </FormWrapper>
-            </Box>
         </>
     )
 }

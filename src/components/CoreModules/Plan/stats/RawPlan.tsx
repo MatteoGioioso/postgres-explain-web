@@ -1,8 +1,7 @@
 import MainCard from "../MainCard";
 import ReactJson from 'react-json-view'
-import {useState} from "react";
-import {Snackbar, Button, Box} from "@mui/material";
-import {CopyFilled} from "@ant-design/icons";
+import {Box} from "@mui/material";
+import {CopyToClipboardButton} from "../../CopyToClipboard";
 
 export const RawPlan = ({plan}: { plan: any }) => {
     return (
@@ -12,28 +11,5 @@ export const RawPlan = ({plan}: { plan: any }) => {
             </Box>
             <ReactJson src={JSON.parse(plan)}/>
         </MainCard>
-    )
-}
-
-const CopyToClipboardButton = (props) => {
-    const [open, setOpen] = useState(false)
-
-    const handleClick = () => {
-        setOpen(true)
-        navigator.clipboard.writeText(props.data)
-    }
-
-    return (
-        <>
-            <Button variant="outlined" size='small' onClick={handleClick} startIcon={<CopyFilled />}>
-                Copy
-            </Button>
-            <Snackbar
-                open={open}
-                onClose={() => setOpen(false)}
-                autoHideDuration={2000}
-                message="Copied to clipboard"
-            />
-        </>
     )
 }

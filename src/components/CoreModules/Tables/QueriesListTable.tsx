@@ -129,8 +129,8 @@ const Row = ({query, onClickRow}: { query: Query, onClickRow: any }) => {
                 <TableCell>
                     <code>{truncateText(query.text, 50)}</code>
                 </TableCell>
-                {query.metrics.map(metric => (
-                    <TableCell>
+                {query.metrics.map((metric, i) => (
+                    <TableCell key={i}>
                         {metric.value || "-"}
                     </TableCell>
                 ))}

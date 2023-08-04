@@ -14,6 +14,7 @@ const DashboardDefault = Loadable(lazy(() => import('./components/Dashboard')));
 const PlanVisualizationLoadableWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationWeb')))
 const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
 const ClustersTableLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersTableAndQueryForm')));
+const ClustersListLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersList')))
 
 
 // ==============================|| MAIN ROUTING ||============================== //
@@ -39,7 +40,11 @@ const SelfHostedRoutes = () => ({
     children: [
         {
             path: '/',
-            element: <div>Postgres explain</div>
+            element: <ClustersListLoadable/>
+        },
+        {
+            path: '/clusters',
+            element: <ClustersListLoadable/>
         },
         {
             path: '/clusters/:cluster_id',

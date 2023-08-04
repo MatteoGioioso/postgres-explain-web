@@ -18,6 +18,7 @@ import TableCell from './TableCell';
 import Tabs from './Tabs';
 import Typography from './Typography';
 import Alert from "./Alert";
+import TableRow from "./TableRow";
 
 // ==============================|| OVERRIDES - MAIN ||============================== //
 
@@ -38,6 +39,6 @@ export default function ComponentsOverrides(theme) {
         TableCell(theme),
         Tabs(),
         Typography(),
-        // Alert()
+        TableRow(theme)
     );
 }

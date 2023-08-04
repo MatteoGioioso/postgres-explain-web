@@ -10,7 +10,7 @@ import {GenericDetailsPopover} from "../GenericDetailsPopover";
 function OrderTableHead({order, orderBy}) {
     return (
         <TableHead>
-            <TableRow>
+            <TableRow hover={false}>
                 {headCells().map((headCell) => (
                     <TableCell
                         key={headCell.id}

@@ -9,12 +9,16 @@ export type GetClustersRequest = {
 }
 
 export type GetClustersResponse = {
-  clusters?: Clusters[]
+  clusters?: Cluster[]
 }
 
-export type Clusters = {
+export type Cluster = {
   id?: string
   name?: string
+  hostname?: string
+  port?: string
+  status?: string
+  status_error?: string
 }
 
 export class Info {

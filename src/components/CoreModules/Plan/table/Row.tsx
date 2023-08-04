@@ -6,7 +6,7 @@ import {BufferHitsCell, BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, 
 import {useTheme} from "@mui/material/styles";
 import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
-import {useFocus, useNodeHover} from "../hooks";
+import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
 
 export interface RowProps {

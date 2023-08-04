@@ -34,8 +34,7 @@ const Wrapper = ({children, title, sx = {}, other}) => (
             <MainCard
                 content={false}
                 {...other}
-                border={false}
-                boxShadow
+                border
             >
                 <Box sx={{p: {xs: 2, sm: 2, md: 2, xl: 2}}}>{children}</Box>
             </MainCard>
@@ -187,7 +186,7 @@ export const ClustersTableAndQueryForm = () => {
     return (
         <>
             <Grid container>
-                <Grid xs={12}>
+                <Grid item xs={12}>
                     <Wrapper sx={{pr: 2, pt: 2}} title={"Queries list"}>
                         {Boolean(queriesList.queries.length) && (
                             <QueriesListTable
@@ -201,12 +200,12 @@ export const ClustersTableAndQueryForm = () => {
             </Grid>
             <Box sx={{pt: 4}}/>
             <Grid container>
-                <Grid xs={8}>
+                <Grid item xs={8}>
                     <Wrapper sx={{pt: 2, pr: 2}} title="Custom query">
                         <QueryForm cluster_id={cluster_id}/>
                     </Wrapper>
                 </Grid>
-                <Grid xs={4}>
+                <Grid item xs={4}>
                     <Wrapper sx={{pt: 2}} title="Plans">
                         {Boolean(plansList.length) && (
                             <PlansList items={plansList} clusterId={cluster_id}/>

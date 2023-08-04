@@ -87,8 +87,8 @@ const Node = ({data, stats, theme}: NodeProps) => {
             const hoverOrFocus = {
                 width: 'auto',
                 minWidth: theme.diagram.node.width,
-                boxShadow: `0px 0px 60px 25px ${theme.palette.secondary.main}`,
-                border: `1px solid ${theme.palette.secondary.main} !important`
+                boxShadow: theme.customShadows.z1,
+                border: `2px solid ${theme.palette.secondary.main} !important`
             }
 
             if (isFocused) {
@@ -98,9 +98,6 @@ const Node = ({data, stats, theme}: NodeProps) => {
             return {
                 width: 'auto',
                 minWidth: theme.diagram.node.width,
-                ':hover': {
-                    boxShadow: theme.shadows[10]
-                },
             }
         }
 
@@ -112,6 +109,7 @@ const Node = ({data, stats, theme}: NodeProps) => {
                 <MainCard
                     contentSX={{p: 1.5}}
                     sx={getStyle()}
+                    border
                     boxShadow
                 >
                     <Stack spacing={0.5}>

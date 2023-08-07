@@ -9,7 +9,7 @@ import {
     getFunctionFromKind,
     getPercentageColor,
     truncateText
-} from "../utils";
+} from "../../utils";
 import {PlanRow, Property, Stats} from "../types";
 import {DollarOutlined, FilterOutlined} from "@ant-design/icons";
 import {GenericDetailsPopover} from "../../GenericDetailsPopover";
@@ -336,7 +336,7 @@ export function NodeStats({expanded, row, stats, theme}: { expanded: boolean, ro
                 <Chip
                     style={{backgroundColor: getPercentageColor(row.costs.total_cost, stats.max_cost, theme)}}
                     icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                    label={`${row.costs.total_cost}`}
+                    label={betterNumbers(row.costs.total_cost)}
                     sx={{ml: 1.25, pl: 1}}
                     size="small"
                 />

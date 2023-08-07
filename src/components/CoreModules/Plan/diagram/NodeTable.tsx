@@ -5,7 +5,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import {betterNumbers} from "../utils";
+import {betterNumbers} from "../../utils";
 import {Buffers} from "../types";
 
 export default function NodeTable({buffers}: { buffers: Buffers }) {

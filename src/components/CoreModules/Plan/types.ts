@@ -11,7 +11,7 @@ export const ACTUAL_ROWS = "Actual Rows";
 export const PLAN_ROWS = "Plan Rows";
 export const ACTUAL_TOTAL_TIME = "Actual Total Time";
 export const ACTUAL_LOOPS = "Actual Loops";
-export const TOTAL_COST_PROP = "Total Cost";
+export const TOTAL_COST = "Total Cost";
 export const PLANS_PROP = "Plans";
 export const STARTUP_COST = "Startup Cost";
 export const PLAN_WIDTH = "Plan Width";
@@ -136,6 +136,7 @@ export interface Stats {
   max_cost: number /* float64 */;
   max_blocks_read: number /* float64 */;
   max_blocks_written: number /* float64 */;
+  max_blocks_hit: number /* float64 */;
 }
 export type Plans = {
     Plan: { [key: string]: any};
@@ -288,3 +289,22 @@ export interface Property {
   kind: Kind;
 }
 export type Kind = string;
+export interface ComparisonGeneralStats {
+  execution_time: PropComparison;
+  planning_time: PropComparison;
+  max_rows: PropComparison;
+  max_duration: PropComparison;
+  max_cost: PropComparison;
+  max_blocks_read: PropComparison;
+  max_blocks_written: PropComparison;
+  max_blocks_hit: PropComparison;
+}
+export interface Comparison {
+  general_stats: ComparisonGeneralStats;
+}
+export interface PropComparison {
+  previous: number /* float64 */;
+  optimized: number /* float64 */;
+  has_improved: boolean;
+  percentage_improved: number /* float64 */;
+}

@@ -2,7 +2,7 @@ import MainCard from "../MainCard";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React from "react";
 import {Stats} from "../types";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
+import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../../utils";
 
 export interface JITStatsTableProps {
     stats: Stats

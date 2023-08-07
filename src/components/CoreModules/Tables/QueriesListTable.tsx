@@ -1,10 +1,8 @@
 import React, {useEffect, useState} from 'react'
 import {
     Box,
-    Button, FormHelperText,
-    Grid,
-    Modal,
-    Stack,
+    Button, Grid,
+    Modal, Stack,
     Table,
     TableBody,
     TableCell,
@@ -17,7 +15,7 @@ import {
 import Highlight from 'react-highlight'
 import {MetricInfo, Query} from "../../SelfHosted/proto/analytics.pb";
 import {GenericDetailsPopover} from "../GenericDetailsPopover";
-import {truncateText} from "../Plan/utils";
+import {truncateText} from "../utils";
 import MainCard from "../Plan/MainCard";
 import {Formik} from "formik";
 
@@ -65,41 +63,74 @@ const RowModal = ({open, handleClose, query, onClick}: { open: boolean, handleCl
                 <Highlight classname='sql'>
                     {query.text}
                 </Highlight>
-                <Formik
-                    initialValues={{parameters: ''}}
-                    onSubmit={(values, {setErrors, setStatus, setSubmitting}) => {
-                        onClick(query.id, query.text, values.parameters)
-                    }}
-                >
-                    {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
-                        <form noValidate onSubmit={handleSubmit}>
-                            <TextField
-                                fullWidth
-                                error={Boolean(touched.parameters && errors.parameters)}
-                                id="parameters"
-                                type="text"
-                                value={values.parameters}
-                                name="parameters"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                placeholder={"30, 5, 'customer'"}
-                                inputProps={{}}
-                                multiline
-                                rows={1}
-                            />
-                            <Box sx={{pt: 2}}/>
-                            <Button
-                                disableElevation
-                                size="large"
-                                type="submit"
-                                variant="contained"
-                                color="primary"
-                            >
-                                Explain
-                            </Button>
-                        </form>
-                    )}
-                </Formik>
+                {query.parameters?.length > 0 ? (
+                    <Formik
+                        initialValues={{}}
+                        onSubmit={(values, {setErrors, setStatus, setSubmitting}) => {
+                            const parameters = Object.keys(values).map(key => values[key]);
+                            onClick(query.id, query.text, parameters)
+                        }}
+                        validate={values => {
+                            const errors = {};
+                            if (Object.keys(values).length !== query.parameters.length) {
+                                query.parameters.forEach(param => {
+                                    if (!values[param]) {
+                                        errors[param] = 'Required';
+                                    }
+                                })
+                            }
+                            return errors;
+                        }}
+                    >
+                        {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
+                            <form noValidate onSubmit={handleSubmit}>
+                                <Grid container spacing={1}>
+                                    {query.parameters.map((param) => (
+                                        <Grid item xs={2} display='inline-flex'>
+                                            <Typography sx={{pr: 2}}>
+                                                {param}=
+                                            </Typography>
+                                            <TextField
+                                                fullWidth
+                                                error={Boolean(errors[param])}
+                                                id={param}
+                                                type="text"
+                                                value={values[param]}
+                                                name={param}
+                                                onBlur={handleBlur}
+                                                onChange={handleChange}
+                                                inputProps={{}}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                                <Box sx={{pt: 2}}/>
+                                <Button
+                                    disableElevation
+                                    size="large"
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                >
+                                    Explain
+                                </Button>
+                            </form>
+                        )}
+                    </Formik>
+                ) : (
+                    <Button
+                        disableElevation
+                        size="large"
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            onClick(query.id, query.text, null)
+                        }}
+                    >
+                        Explain
+                    </Button>
+                )}
             </MainCard>
         </Modal>
     )
@@ -148,7 +179,7 @@ export function QueriesListTable({queries, mappings, onClickRow}: MetricsTablePr
     };
 
     useEffect(() => {
-        setPageData(queries.slice(page*rowsPerPage, page*rowsPerPage+rowsPerPage))
+        setPageData(queries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage))
     }, [page])
 
     return (

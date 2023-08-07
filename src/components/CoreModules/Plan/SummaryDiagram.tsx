@@ -16,7 +16,7 @@ import 'reactflow/dist/style.css'
 import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
-import {getPercentage} from "./utils";
+import {getPercentage} from "../utils";
 import {Collapse, Grid} from "@mui/material";
 import {DetailsTable} from "./diagram/DetailsTable";
 

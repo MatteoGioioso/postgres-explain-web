@@ -63,7 +63,7 @@ class Node {
   [NodeProp.ROWS_REMOVED_BY_FILTER]?: number;
   [NodeProp.ROWS_REMOVED_BY_JOIN_FILTER]?: number;
   [NodeProp.SUBPLAN_NAME]?: string;
-  [NodeProp.TOTAL_COST_PROP]: number;
+  [NodeProp.TOTAL_COST]: number;
   [NodeProp.WORKERS]?: Worker[];
   [NodeProp.WORKERS_LAUNCHED]?: number;
   [NodeProp.WORKERS_PLANNED]?: number;
@@ -472,7 +472,7 @@ export class PlanService {
           newNode[NodeProp.STARTUP_COST] = parseFloat(
             nodeMatches[3] || nodeMatches[14]
           )
-          newNode[NodeProp.TOTAL_COST_PROP] = parseFloat(
+          newNode[NodeProp.TOTAL_COST] = parseFloat(
             nodeMatches[4] || nodeMatches[15]
           )
           newNode[NodeProp.PLAN_ROWS] = parseInt(

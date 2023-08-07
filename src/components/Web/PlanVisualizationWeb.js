@@ -11,8 +11,7 @@ import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
-
-const planService = new PlanService();
+import {planService} from "./ioc";
 
 const PlanVisualizationWeb = () => {
     const {plan} = useContext(PlanContext);
@@ -26,28 +25,21 @@ const PlanVisualizationWeb = () => {
         const plan = planService.fromSource(queryPlan);
         console.log(JSON.parse(plan))
         try {
-            // eslint-disable-next-line
-            const go = new Go()
+            const out = global.explain(plan)
 
-            WebAssembly.instantiateStreaming(fetch('/main.wasm'), go.importObject).then(res => {
-                go.run(res.instance)
-                const out = global.explain(plan)
+            if (out.error) {
+                console.error(`${out.error}: ${out.error_details}`)
 
-                if (out.error) {
-                    console.error(`${out.error}: ${out.error_details}`)
-
-                    setError({
-                        message: out.error,
-                        error_details: out.error_details,
-                        stackTrace: out.error_stack,
-                    })
-                } else {
-                    const parsedExplained = JSON.parse(out.explained);
-                    console.log(parsedExplained)
-                    setExplained(parsedExplained)
-                }
-            })
-
+                setError({
+                    message: out.error,
+                    error_details: out.error_details,
+                    stackTrace: out.error_stack,
+                })
+            } else {
+                const parsedExplained = JSON.parse(out.explained);
+                console.log(parsedExplained)
+                setExplained(parsedExplained)
+            }
         } catch (e) {
             setError({
                 message: e.message,

@@ -9,7 +9,7 @@ import {
     capitalizeFirstLetter,
     getColorFromPercentage,
     getPercentageColor
-} from "../utils";
+} from "../../utils";
 import {ExpandMore} from "../ExpandMore";
 import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
@@ -59,7 +59,7 @@ export const GenericStatsTable = ({stats, headCells}: GenericStatsTableProps) =>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {stats.stats.map((index) => {
+                        {stats?.stats.map((index) => {
                             return <Row data={index} theme={theme}/>
                         })}
                     </TableBody>

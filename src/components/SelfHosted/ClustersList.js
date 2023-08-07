@@ -12,13 +12,11 @@ const ClustersList = () => {
     const [clusters, setClusters] = useState([])
 
     useEffect(() => {
-        try {
-            infoService.getClustersList({}).then(resp => {
-                setClusters(resp.clusters)
-            })
-        } catch (e) {
+        infoService.getClustersList({}).then(resp => {
+            setClusters(resp.clusters)
+        }).catch(e => {
             console.error(e)
-        }
+        })
     }, [])
 
     function onCardClick(cluster) {

@@ -8,7 +8,7 @@ import {
     betterTiming, getEstimationColor,
     getPercentage,
     getPercentageColor
-} from "../utils";
+} from "../../utils";
 import {
     BufferHitsCellCollapsedContent,
     BufferReadsCellCollapsedContent,

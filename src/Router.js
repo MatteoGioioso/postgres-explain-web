@@ -3,25 +3,21 @@ import Loadable from './components/Loadable';
 import MainLayout from './components/MainLayout';
 import {useRoutes} from "react-router-dom";
 
-import {getMode, LoadComponent, SELF_HOSTED, WEB} from "./config";
-
-const componentsMap = {
-    [SELF_HOSTED]: import('./components/SelfHosted/PlanVisualizationSelfHosted'),
-    [WEB]: import('./components/Web/PlanVisualizationWeb')
-}
+import {getMode, SELF_HOSTED, WEB} from "./config";
+import HeaderContent from "./components/MainLayout/Header/HeaderContent";
+import HeaderContentSelfHosted from "./components/MainLayout/Header/HeaderContent/HeaderContentSelfHosted";
 
 const DashboardDefault = Loadable(lazy(() => import('./components/Dashboard')));
 const PlanVisualizationLoadableWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationWeb')))
 const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
 const ClustersTableLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersTableAndQueryForm')));
 const ClustersListLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersList')))
+const PlanVisualizationComparisonWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationComparisonWeb')))
 
-
-// ==============================|| MAIN ROUTING ||============================== //
 
 const WebRoutes = () => ({
     path: '/',
-    element: <MainLayout/>,
+    element: <MainLayout headerContent={<HeaderContent/>}/>,
     children: [
         {
             path: '/',
@@ -31,12 +27,16 @@ const WebRoutes = () => ({
             path: '/plan',
             element: <PlanVisualizationLoadableWeb/>
         },
+        {
+            path: '/comparison',
+            element: <PlanVisualizationComparisonWeb/>
+        }
     ]
 });
 
 const SelfHostedRoutes = () => ({
     path: '/',
-    element: <MainLayout/>,
+    element: <MainLayout headerContent={<HeaderContentSelfHosted/>}/>,
     children: [
         {
             path: '/',

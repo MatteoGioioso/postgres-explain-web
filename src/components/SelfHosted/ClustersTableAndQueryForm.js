@@ -156,16 +156,18 @@ export const ClustersTableAndQueryForm = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        queryExplainerService.getQueryPlansList({
-            cluster_name: cluster_id
-        }).then(plansList => {
-            setPlansList(plansList)
-        })
-        analyticsService.getQueriesList({
-            cluster_name: cluster_id,
-        }).then((resp) => {
-            setQueriesList(resp)
-        })
+        Promise
+            .all([
+                queryExplainerService.getQueryPlansList({cluster_name: cluster_id}),
+                analyticsService.getQueriesList({cluster_name: cluster_id,})]
+            )
+            .then(responses => {
+                setPlansList(responses[0])
+                setQueriesList(responses[1])
+            })
+            .catch(e => {
+                console.error(e)
+            })
     }, []);
 
     const onClickRow = async (queryId, query, params) => {
@@ -175,7 +177,7 @@ export const ClustersTableAndQueryForm = () => {
                 query,
                 cluster_name: cluster_id,
                 database: "postgres",
-                parameters: params.split(","),
+                parameters: params,
             });
             navigate(`/clusters/${cluster_id}/plans/${planID}`)
         } catch (e) {
@@ -188,7 +190,7 @@ export const ClustersTableAndQueryForm = () => {
             <Grid container>
                 <Grid item xs={12}>
                     <Wrapper sx={{pr: 2, pt: 2}} title={"Queries list"}>
-                        {Boolean(queriesList.queries.length) && (
+                        {Boolean(queriesList?.queries?.length) && (
                             <QueriesListTable
                                 mappings={queriesList.mappings}
                                 queries={queriesList.queries}
@@ -207,7 +209,7 @@ export const ClustersTableAndQueryForm = () => {
                 </Grid>
                 <Grid item xs={4}>
                     <Wrapper sx={{pt: 2}} title="Plans">
-                        {Boolean(plansList.length) && (
+                        {Boolean(plansList?.length) && (
                             <PlansList items={plansList} clusterId={cluster_id}/>
                         )}
                     </Wrapper>

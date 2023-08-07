@@ -1,6 +1,6 @@
 import {PlanRow, Stats} from "../types";
 import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
-import {betterNumbers, betterTiming, getPercentageColor} from "../utils";
+import {betterNumbers, betterTiming, getPercentageColor} from "../../utils";
 import React, {memo, useContext, useEffect, useState} from "react";
 import {BufferHitsCell, BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
 import {useTheme} from "@mui/material/styles";

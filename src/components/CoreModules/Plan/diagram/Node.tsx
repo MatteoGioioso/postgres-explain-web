@@ -30,7 +30,7 @@ import {
     getEstimationColor,
     getPercentage,
     getPercentageColor,
-} from "../utils";
+} from "../../utils";
 import {PlanRow, Stats} from "../types";
 import {ExpandMore} from "../ExpandMore";
 import {useFocus, useNodeHover} from "../hooks";

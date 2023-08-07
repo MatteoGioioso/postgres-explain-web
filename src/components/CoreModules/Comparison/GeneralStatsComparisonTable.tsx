@@ -1,14 +1,16 @@
-import MainCard from "../MainCard";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React from "react";
-import {Stats} from "../types";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../../utils";
+import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
+import MainCard from "../Plan/MainCard";
+import {ComparisonGeneralStats, PropComparison} from "../Plan/types";
+import {ArrowDownOutlined, ArrowUpOutlined} from "@ant-design/icons";
+import {useTheme} from "@mui/material/styles";
 
-export interface GeneralStatsTableProps {
-    stats: Stats
+export interface GeneralStatsComparisonTableProps {
+    stats: ComparisonGeneralStats
 }
 
-export const GeneralStatsTable = ({stats}: GeneralStatsTableProps) => {
+export const GeneralStatsComparisonTable = ({stats}: GeneralStatsComparisonTableProps) => {
     return (
         <MainCard content={false} sx={{width: '40vw'}}>
             <TableContainer
@@ -34,10 +36,9 @@ export const GeneralStatsTable = ({stats}: GeneralStatsTableProps) => {
                 >
                     <TableHead>
                         <TableRow>
-                            {headCells().map((headCell) => (
+                            {headCells.map((headCell) => (
                                 <TableCell
                                     key={headCell.id}
-                                    sx={{fontSize: '18px'}}
                                 >
                                     {headCell.label}
                                 </TableCell>
@@ -55,7 +56,8 @@ export const GeneralStatsTable = ({stats}: GeneralStatsTableProps) => {
     )
 }
 
-const Row = ({name, data}: { name: string, data: number }) => {
+const Row = ({name, data}: { name: string, data: PropComparison }) => {
+    const theme = useTheme();
     // @ts-ignore
     const formattedName = capitalizeFirstLetter(name.replaceAll("_", " "))
     return (
@@ -71,31 +73,52 @@ const Row = ({name, data}: { name: string, data: number }) => {
                 {formattedName}
             </TableCell>
             <TableCell>
-                <b>{getMeasure(formattedName, data)}</b>
+                <b>{getMeasure(formattedName, data.previous)}</b>
             </TableCell>
             <TableCell>
-                {data}
+                <b>{getMeasure(formattedName, data.optimized)}</b>
+            </TableCell>
+            <TableCell>
+                {data.previous !== data.optimized ? (data.has_improved
+                    ? <ArrowUpOutlined style={{color: theme.palette.success.main}}/>
+                    : <ArrowDownOutlined style={{color: theme.palette.error.main}}/>
+                ): <div>-</div>}
+            </TableCell>
+            <TableCell>
+                {betterNumbers(data.previous - data.optimized)}
             </TableCell>
         </TableRow>
     )
 }
 
-const headCells = (areBuffersPresent?: boolean) => [
+const headCells = [
     {
         id: 'name',
-        label: 'General Stats',
+        label: 'Stat',
         align: 'left',
         description: ""
     },
     {
-        id: 'formatted',
-        label: '',
+        id: 'plan_prev',
+        label: 'Current Plan',
         align: 'left',
         description: ""
     },
     {
-        id: 'full',
-        label: '',
+        id: 'optimized_plan',
+        label: 'Optimized plan',
+        align: 'left',
+        description: ""
+    },
+    {
+        id: 'has_improved',
+        label: 'Outcome',
+        align: 'left',
+        description: ""
+    },
+    {
+        id: 'difference',
+        label: 'Difference',
         align: 'left',
         description: ""
     },

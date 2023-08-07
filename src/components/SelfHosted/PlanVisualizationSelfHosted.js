@@ -8,10 +8,10 @@ import {useParams} from "react-router-dom";
 import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
 import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
-import {IndexesStatsTable} from "../CoreModules/Plan/stats/IndexesStatsTable";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {queryExplainerService} from "./ioc";
 import {RawQuery} from "../CoreModules/Plan/stats/RawQuery";
+import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
 
 const PlanVisualizationSelfHosted = () => {
     const [error, setError] = useState()
@@ -37,7 +37,7 @@ const PlanVisualizationSelfHosted = () => {
         <Grid container>
             {error && <ErrorAlert error={error}/>}
             <Grid container>
-                <TableTabs tabs={["Diagram", "Table", "Stats", "Indexes", "Raw plan", "Query"]}>
+                <TableTabs tabs={["Diagram", "Table", "Stats", "Indexes", "Tables", "Nodes", "Raw plan", "Query"]}>
                     {Boolean(explained) && (
                         <SummaryDiagram
                             summary={explained.summary}
@@ -56,14 +56,20 @@ const PlanVisualizationSelfHosted = () => {
                         />)
                     }
                     {Boolean(explained) && (
-                        <IndexesStatsTable stats={explained.indexes_stats}/>
+                        <GenericStatsTable stats={explained.indexes_stats} headCells={indexesHeadCells}/>
+                    )}
+                    {Boolean(explained) && (
+                        <GenericStatsTable stats={explained.tables_stats} headCells={tablesHeadCells}/>
+                    )}
+                    {Boolean(explained) && (
+                        <GenericStatsTable stats={explained.nodes_stats} headCells={nodesHeadCells}/>
                     )}
 
                     {Boolean(explained) && (
                         <RawPlan plan={explained.original_plan}/>
                     )}
                     {Boolean(explained) && (
-                        <RawQuery query={explained.query} />
+                        <RawQuery query={explained.query}/>
                     )}
                 </TableTabs>
             </Grid>

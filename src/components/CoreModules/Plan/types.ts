@@ -141,12 +141,20 @@ export type Plans = {
     Plan: { [key: string]: any};
   }[];
 export interface IndexesStats {
-  indexes: IndexStats[];
+  stats: IndexStats[];
+}
+export interface TablesStats {
+  stats: TableStats[];
+}
+export interface NodesStats {
+  stats: NodeStats[];
 }
 export interface Explained {
   summary: PlanRow[];
   stats: Stats;
   indexes_stats: IndexesStats;
+  tables_stats: TablesStats;
+  nodes_stats: NodesStats;
 }
 export interface NodeScopes {
   table: string;
@@ -206,6 +214,7 @@ export interface Workers {
 }
 export interface PlanRow {
   node_id: string;
+  node_fingerprint: string;
   node_parent_id: string;
   operation: string;
   level: number /* int */;
@@ -241,11 +250,33 @@ export interface IndexNode {
   exclusive_time: number /* float64 */;
   condition: string;
 }
+export interface TableNode {
+  id: string;
+  type: string;
+  exclusive_time: number /* float64 */;
+}
 export interface IndexStats {
-  indexes: IndexNode[];
+  nodes: IndexNode[];
   total_time: number /* float64 */;
   percentage: number /* float64 */;
   name: string;
+}
+export interface TableStats {
+  nodes: TableNode[];
+  total_time: number /* float64 */;
+  percentage: number /* float64 */;
+  name: string;
+}
+export interface NodeStats {
+  nodes: NodeNode[];
+  total_time: number /* float64 */;
+  percentage: number /* float64 */;
+  name: string;
+}
+export interface NodeNode {
+  id: string;
+  type: string;
+  exclusive_time: number /* float64 */;
 }
 export interface Property {
   id: string;

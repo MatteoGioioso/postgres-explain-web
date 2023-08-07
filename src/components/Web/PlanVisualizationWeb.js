@@ -1,13 +1,5 @@
 import {useContext, useEffect, useState} from 'react';
-
-// material-ui
-import {
-    Box, Collapse,
-    Grid, Tab, Tabs,
-    Typography
-} from '@mui/material';
-
-// assets
+import {Grid} from '@mui/material';
 import {PlanContext} from "../../MainContext";
 import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
 import {PlanService} from "../CoreModules/Plan/parser";
@@ -17,8 +9,8 @@ import {useNavigate} from "react-router-dom";
 import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
 import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
-import {IndexesStatsTable} from "../CoreModules/Plan/stats/IndexesStatsTable";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
+import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
 
 const planService = new PlanService();
 
@@ -75,7 +67,7 @@ const PlanVisualizationWeb = () => {
         <Grid container>
             {error && <ErrorAlert error={error}/>}
             <Grid container>
-                <TableTabs tabs={["Diagram", "Table", "Stats", "Indexes", "Raw plan"]}>
+                <TableTabs tabs={["Diagram", "Table", "Stats", "Indexes", "Tables", "Nodes", "Raw plan"]}>
                     {Boolean(explained) && (
                         <SummaryDiagram
                             summary={explained.summary}
@@ -94,7 +86,13 @@ const PlanVisualizationWeb = () => {
                         />)
                     }
                     {Boolean(explained) && (
-                        <IndexesStatsTable stats={explained.indexes_stats}/>
+                        <GenericStatsTable stats={explained.indexes_stats} headCells={indexesHeadCells}/>
+                    )}
+                    {Boolean(explained) && (
+                        <GenericStatsTable stats={explained.tables_stats} headCells={tablesHeadCells}/>
+                    )}
+                    {Boolean(explained) && (
+                        <GenericStatsTable stats={explained.nodes_stats} headCells={nodesHeadCells}/>
                     )}
 
                     <RawPlan plan={plan && planService.fromSource(plan)}/>

@@ -1,8 +1,15 @@
 import MainCard from "../MainCard";
 import {Box, Collapse, Divider, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React, {useContext, useState} from "react";
-import {IndexesStats, IndexNode, IndexStats, Stats} from "../types";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, getColorFromPercentage, getPercentageColor} from "../utils";
+import {IndexesStats, IndexNode, IndexStats, NodeNode, NodesStats, NodeStats, Stats, TableNode, TablesStats, TableStats} from "../types";
+import {
+    betterDiskSizeFromBlocks,
+    betterNumbers,
+    betterTiming,
+    capitalizeFirstLetter,
+    getColorFromPercentage,
+    getPercentageColor
+} from "../utils";
 import {ExpandMore} from "../ExpandMore";
 import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
@@ -10,11 +17,12 @@ import {TableTabsContext} from "../Contexts";
 import {useTheme} from "@mui/material/styles";
 import {GenericDetailsPopover} from "../../GenericDetailsPopover";
 
-export interface IndexesStatsTableProps {
-    stats: IndexesStats
+export interface GenericStatsTableProps {
+    stats: IndexesStats | TablesStats | NodesStats
+    headCells: any[]
 }
 
-export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
+export const GenericStatsTable = ({stats, headCells}: GenericStatsTableProps) => {
     const theme = useTheme();
     return (
         <MainCard content={false} sx={{width: '40vw'}}>
@@ -41,10 +49,9 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
                 >
                     <TableHead>
                         <TableRow>
-                            {headCells().map((headCell) => (
+                            {headCells.map((headCell) => (
                                 <TableCell
                                     key={headCell.id}
-                                    sx={{fontSize: '18px'}}
                                 >
                                     {headCell.label}
                                 </TableCell>
@@ -52,7 +59,7 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {stats.indexes.map((index) => {
+                        {stats.stats.map((index) => {
                             return <Row data={index} theme={theme}/>
                         })}
                     </TableBody>
@@ -62,7 +69,7 @@ export const IndexesStatsTable = ({stats}: IndexesStatsTableProps) => {
     )
 }
 
-const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
+const Row = ({data, theme}: { data: IndexStats | TableStats | NodeStats, theme: any }) => {
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -86,9 +93,9 @@ const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
                 >
                     <DownOutlined style={{fontSize: '10px'}}/>
                 </ExpandMore>
-                {data.name}
+                {data.name} ({data.nodes.length})
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    {data.indexes.map(node => (
+                    {data.nodes.map(node => (
                         <NodeSubRow node={node}/>
                     ))}
                 </Collapse>
@@ -96,14 +103,14 @@ const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
             <TableCell>
                 <b>{betterTiming(data.total_time)}</b>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    {data.indexes.map(i => (
+                    {data.nodes.map(i => (
                         <Box sx={{pb: 1, pt: 1.5}}>{i.exclusive_time}</Box>
                     ))}
                 </Collapse>
             </TableCell>
             <TableCell style={{backgroundColor: getColorFromPercentage(data.percentage, theme)}}>
                 {betterNumbers(data.percentage)} %
-                {data.indexes.map(i => (
+                {data.nodes.map(i => (
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <Box sx={{pb: 1, pt: 1.5}}>0</Box>
                     </Collapse>
@@ -113,7 +120,7 @@ const Row = ({data, theme}: { data: IndexStats, theme: any }) => {
     )
 }
 
-const NodeSubRow = ({node}: { node: IndexNode }) => {
+const NodeSubRow = ({node}: { node: IndexNode | TableNode | NodeNode }) => {
     const {switchToNode} = useFocus(node.id);
     const {setTabIndex} = useContext(TableTabsContext);
 
@@ -121,7 +128,7 @@ const NodeSubRow = ({node}: { node: IndexNode }) => {
         <Box sx={{pb: 1, pt: 1.5}}>
             <IconButton onClick={() => {
                 setTabIndex(0)
-                setTimeout(()=> {
+                setTimeout(() => {
                     switchToNode(node.id)
                 })
             }}>
@@ -132,22 +139,64 @@ const NodeSubRow = ({node}: { node: IndexNode }) => {
     )
 }
 
-const headCells = (areBuffersPresent?: boolean) => [
+export const indexesHeadCells = [
     {
         id: 'name',
-        label: 'General Stats',
+        label: 'Index',
         align: 'left',
         description: ""
     },
     {
         id: 'formatted',
-        label: '',
+        label: 'Time',
         align: 'left',
         description: ""
     },
     {
         id: 'full',
-        label: '',
+        label: '%',
+        align: 'left',
+        description: ""
+    },
+]
+
+export const tablesHeadCells = [
+    {
+        id: 'name',
+        label: 'Table',
+        align: 'left',
+        description: ""
+    },
+    {
+        id: 'time',
+        label: 'Time',
+        align: 'left',
+        description: ""
+    },
+    {
+        id: 'full',
+        label: '%',
+        align: 'left',
+        description: ""
+    },
+]
+
+export const nodesHeadCells = [
+    {
+        id: 'name',
+        label: 'Node',
+        align: 'left',
+        description: ""
+    },
+    {
+        id: 'time',
+        label: 'Time',
+        align: 'left',
+        description: ""
+    },
+    {
+        id: 'full',
+        label: '%',
         align: 'left',
         description: ""
     },

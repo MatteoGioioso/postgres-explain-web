@@ -12,7 +12,7 @@ const PlanVisualizationLoadableWeb = Loadable(lazy(() => import('./components/We
 const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
 const ClustersTableLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersTableAndQueryForm')));
 const ClustersListLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersList')))
-const PlanVisualizationComparisonWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationComparisonWeb')))
+// const PlanVisualizationComparisonWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationComparisonWeb')))
 
 
 const WebRoutes = () => ({
@@ -29,7 +29,7 @@ const WebRoutes = () => ({
         },
         {
             path: '/comparison',
-            element: <PlanVisualizationComparisonWeb/>
+            element: <div/>
         }
     ]
 });

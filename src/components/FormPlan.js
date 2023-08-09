@@ -16,7 +16,7 @@ import {Formik} from 'formik';
 import {QUERY_PLAN_EXAMPLE_PLACEHOLDER} from "./utils";
 
 // project import
-import MainCard from './CoreModules/Plan/MainCard';
+import MainCard from './CoreModules/MainCard';
 import {PlanContext} from "../MainContext";
 
 

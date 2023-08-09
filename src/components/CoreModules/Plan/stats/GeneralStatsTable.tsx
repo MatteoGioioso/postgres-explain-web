@@ -1,4 +1,4 @@
-import MainCard from "../MainCard";
+import MainCard from "../../MainCard";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React from "react";
 import {Stats} from "../types";

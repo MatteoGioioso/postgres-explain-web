@@ -1,4 +1,4 @@
-import MainCard from "../MainCard";
+import MainCard from "../../MainCard";
 import {Box, Collapse, Divider, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React, {useContext, useState} from "react";
 import {IndexesStats, IndexNode, IndexStats, NodeNode, NodesStats, NodeStats, Stats, TableNode, TablesStats, TableStats} from "../types";

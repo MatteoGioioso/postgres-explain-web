@@ -1,7 +1,7 @@
 import {Box, Chip, Grid, Stack, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {infoService} from "./ioc";
-import MainCard from "../CoreModules/Plan/MainCard";
+import MainCard from "../CoreModules/MainCard";
 import {CheckOutlined, ExclamationOutlined, FallOutlined} from "@ant-design/icons";
 import {useTheme} from "@mui/material/styles";
 import {useNavigate} from "react-router-dom";

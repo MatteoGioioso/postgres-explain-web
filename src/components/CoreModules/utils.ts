@@ -1,3 +1,7 @@
+import {PlanRow, Stats} from "./Plan/types";
+import {Edge, Node, Position} from "reactflow";
+import {Theme} from "@mui/material";
+
 export const betterNumbers = (num: number): string => {
     const ONE_MILLION = 1000000
     const THOUSAND = 1000
@@ -155,3 +159,86 @@ export const areRowsOverEstimated = (direction: string): boolean => {
 export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export const calculateNodes = (summary: PlanRow[], stats: Stats, theme: Theme, nodeOptions: any = {}) => {
+    const initialNodes = []
+    const initialEdges = []
+
+    function getStrokeWidth(row: PlanRow, stats: Stats) {
+        if (!stats) {
+            return 1
+        }
+        return Math.max((getPercentage(row.rows.total * (row.workers.launched + 1), stats.max_rows) / 2), 1);
+    }
+
+    for (let i = 0; i < summary.length; i++) {
+        const row: PlanRow = summary[i]
+
+        const node: Node = {
+            id: row.node_id,
+            data: {
+                row,
+                stats,
+            },
+            targetPosition: Position.Bottom,
+            sourcePosition: Position.Top,
+            type: 'special',
+            draggable: true,
+            position: {x: 0, y: 0},
+            ...nodeOptions
+        }
+
+        initialNodes.push(node)
+
+        if (row.node_parent_id === "") continue
+
+        const edge: Edge = {
+            id: `${row.node_id}-${row.node_parent_id}`,
+            source: row.node_id,
+            target: row.node_parent_id,
+            style: {
+                strokeWidth: getStrokeWidth(row, stats),
+                stroke: theme.palette.primary[200]
+            },
+            data: {
+                rows: row.rows.total,
+            },
+            type: 'special',
+        }
+
+        initialEdges.push(edge)
+    }
+
+    return {
+        initialNodes, initialEdges
+    }
+}
+
+
+
+export const getLayoutedElements = (elk: any, nodes: Node[], edges: Edge[], options = {}, theme: any) => {
+    const graph = {
+        id: 'root',
+        layoutOptions: options,
+        children: nodes.map((node) => ({
+            ...node,
+            targetPosition: 'bottom',
+            sourcePosition: 'top',
+            width: theme.diagram.node.width,
+            height: theme.diagram.node.height,
+        })),
+        edges: edges,
+    };
+
+    return elk
+        .layout(graph)
+        .then((layoutedGraph) => ({
+            nodes: layoutedGraph.children.map((node) => ({
+                ...node,
+                position: {x: -node.x, y: -node.y},
+            })),
+
+            edges: layoutedGraph.edges,
+        }))
+        .catch(console.error);
+};

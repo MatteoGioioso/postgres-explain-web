@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {useTheme} from "@mui/material/styles";
-import MainCard from "../MainCard";
+import MainCard from "../../MainCard";
 import {Box, Chip, Collapse, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import {
     betterDiskSizeFromBlocks,

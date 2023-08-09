@@ -1,4 +1,4 @@
-import MainCard from "../MainCard";
+import MainCard from "../../MainCard";
 import ReactJson from 'react-json-view'
 import {Box} from "@mui/material";
 import {CopyToClipboardButton} from "../../CopyToClipboard";

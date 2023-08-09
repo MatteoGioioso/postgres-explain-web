@@ -61,7 +61,7 @@ export const Row = memo(({row, stats}: RowProps) => {
 
             <RowsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
-            <RowsEstimationCell row={row} expanded={expanded} stats={stats}/>
+            <RowsEstimationCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
             <TableCell align="right">
                 {betterNumbers(row.loops)} / {row.workers.launched + 1}

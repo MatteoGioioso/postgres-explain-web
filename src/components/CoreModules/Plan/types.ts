@@ -106,6 +106,8 @@ export const HASH_JOIN = "Hash Join";
 export const HASH_AGGREGATE = "HashAggregate";
 export const SORT = "Sort";
 export const FUNCTION_SCAN = "Function Scan";
+export const INCREMENTAL_SORT = "Incremental Sort";
+export const NESTED_LOOP_JOIN = "Nested Loop Join";
 export const GROUP_AGGREGATE = "GroupAggregate";
 export const X_POSITION_FACTOR = "*X Position Factor";
 export const Y_POSITION_FACTOR = "*Y Position Factor";
@@ -219,7 +221,6 @@ export interface PlanRow {
   node_parent_id: string;
   operation: string;
   level: number /* int */;
-  branch: string;
   scopes: NodeScopes;
   inclusive: number /* float64 */;
   loops: number /* float64 */;
@@ -299,12 +300,54 @@ export interface ComparisonGeneralStats {
   max_blocks_written: PropComparison;
   max_blocks_hit: PropComparison;
 }
+export interface NodeComparison {
+  node_id: string;
+  node_parent_id: string;
+  operation: string;
+  level: number /* int */;
+  scopes: NodeScopesComparison;
+  inclusive: PropComparison;
+  loops: PropComparison;
+  rows: RowsComparison;
+  costs: CostsComparison;
+  exclusive: PropComparison;
+  execution_time: PropComparison;
+  buffers: BuffersComparison;
+}
+export interface NodeScopesComparison {
+  table: PropStringComparison;
+  filters: PropStringComparison;
+  index: PropStringComparison;
+  key: PropStringComparison;
+  condition: PropStringComparison;
+}
+export interface RowsComparison {
+  total: PropComparison;
+  planned_rows: PropComparison;
+  removed: PropComparison;
+  estimation_factor: PropComparison;
+}
+export interface BuffersComparison {
+  effective_blocks_read: PropComparison;
+  effective_blocks_written: PropComparison;
+  effective_blocks_hits: PropComparison;
+}
+export interface CostsComparison {
+  startup_cost: PropComparison;
+  total_cost: PropComparison;
+  plan_width: PropComparison;
+}
 export interface Comparison {
   general_stats: ComparisonGeneralStats;
+  nodes: NodeComparison;
 }
 export interface PropComparison {
   previous: number /* float64 */;
   optimized: number /* float64 */;
   has_improved: boolean;
   percentage_improved: number /* float64 */;
+}
+export interface PropStringComparison {
+  previous: string;
+  optimized: string;
 }

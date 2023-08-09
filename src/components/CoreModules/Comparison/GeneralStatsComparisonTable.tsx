@@ -1,7 +1,7 @@
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React from "react";
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
-import MainCard from "../Plan/MainCard";
+import MainCard from "../MainCard";
 import {ComparisonGeneralStats, PropComparison} from "../Plan/types";
 import {ArrowDownOutlined, ArrowUpOutlined} from "@ant-design/icons";
 import {useTheme} from "@mui/material/styles";

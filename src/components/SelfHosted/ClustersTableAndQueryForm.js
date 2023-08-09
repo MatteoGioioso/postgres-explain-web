@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import {QUERY_EXAMPLE_PLACEHOLDER} from "../utils";
 import {Formik} from "formik";
-import MainCard from "../CoreModules/Plan/MainCard";
+import MainCard from "../CoreModules/MainCard";
 import {useNavigate, useParams} from "react-router-dom";
 import {analyticsService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";

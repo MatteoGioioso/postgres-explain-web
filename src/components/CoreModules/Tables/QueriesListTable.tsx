@@ -16,7 +16,7 @@ import Highlight from 'react-highlight'
 import {MetricInfo, Query} from "../../SelfHosted/proto/analytics.pb";
 import {GenericDetailsPopover} from "../GenericDetailsPopover";
 import {truncateText} from "../utils";
-import MainCard from "../Plan/MainCard";
+import MainCard from "../MainCard";
 import {Formik} from "formik";
 
 export interface MetricsTableProps {

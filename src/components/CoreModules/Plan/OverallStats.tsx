@@ -1,4 +1,4 @@
-import MainCard from "./MainCard";
+import MainCard from "../MainCard";
 import {Stats} from "./types"
 import {Box, Grid, Table, TableBody, TableCell, TableContainer, TableRow, Typography} from "@mui/material";
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming} from "../utils";

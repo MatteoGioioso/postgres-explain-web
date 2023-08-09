@@ -1,4 +1,4 @@
-import MainCard from "../MainCard";
+import MainCard from "../../MainCard";
 import {Box} from "@mui/material";
 import {CopyToClipboardButton} from "../../CopyToClipboard";
 import Highlight from 'react-highlight'

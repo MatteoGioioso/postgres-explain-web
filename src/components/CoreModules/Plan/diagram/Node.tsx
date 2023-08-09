@@ -12,7 +12,7 @@ import {
     Typography,
 } from '@mui/material';
 // project import
-import MainCard from '../MainCard';
+import MainCard from '../../MainCard';
 
 // assets
 import {

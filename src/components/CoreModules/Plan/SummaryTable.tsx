@@ -3,7 +3,7 @@ import {SummaryTableProps} from './interfaces'
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@mui/material';
 import {headCells} from "./table/Cells";
 import {Row} from "./table/Row";
-import MainCard from "./MainCard";
+import MainCard from "../MainCard";
 import {GenericDetailsPopover} from "../GenericDetailsPopover";
 
 

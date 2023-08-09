@@ -11,7 +11,7 @@ import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
-import {planService} from "./ioc";
+import {planService, waitWebAssembly} from "./ioc";
 
 const PlanVisualizationWeb = () => {
     const {plan} = useContext(PlanContext);
@@ -49,7 +49,9 @@ const PlanVisualizationWeb = () => {
 
     useEffect(() => {
         if (plan) {
-            fetchQueryPlan(plan)
+            waitWebAssembly().then(() => {
+                fetchQueryPlan(plan)
+            })
         } else {
             navigate('/')
         }

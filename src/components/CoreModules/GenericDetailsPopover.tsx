@@ -1,7 +1,9 @@
 import React from "react";
 import {Box, Popover} from "@mui/material";
+import {useTheme} from "@mui/material/styles";
 
 export const GenericDetailsPopover = (props: { name: string, content: any, children: any, keepCloseCondition?: boolean, style?: any }) => {
+    const theme = useTheme();
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
     const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -20,11 +22,17 @@ export const GenericDetailsPopover = (props: { name: string, content: any, child
             <span
                 aria-owns={open ? 'mouse-over-popover' : undefined}
                 aria-haspopup="true"
-                onMouseEnter={handlePopoverOpen}
+                onClick={handlePopoverOpen}
+                style={props.keepCloseCondition ? {} : {
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    textDecorationColor: theme.palette.secondary.light
+                }}
             >
                 {props.children}
             </span>
             <Popover
+                transitionDuration={1000}
                 id="mouse-over-popover"
                 sx={{
                     width: '1200px',
@@ -36,13 +44,7 @@ export const GenericDetailsPopover = (props: { name: string, content: any, child
                     vertical: 'bottom',
                     horizontal: 'left',
                 }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
                 onClose={handlePopoverClose}
-                disableRestoreFocus
-                slotProps={{paper: {onMouseLeave: handlePopoverClose}}}
             >
                 <Box sx={{p: 1.2}}>
                     {props.content}

@@ -216,6 +216,11 @@ export interface Workers {
   planned: number /* float64 */;
   list: Worker[];
 }
+export interface Timings {
+  inclusive: number /* float64 */;
+  exclusive: number /* float64 */;
+  execution_time: number /* float64 */;
+}
 export interface PlanRow {
   node_id: string;
   node_fingerprint: string;
@@ -224,6 +229,7 @@ export interface PlanRow {
   level: number /* int */;
   scopes: NodeScopes;
   inclusive: number /* float64 */;
+  timings: Timings;
   loops: number /* float64 */;
   rows: Rows;
   costs: Costs;

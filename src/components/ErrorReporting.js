@@ -20,7 +20,9 @@ export const ErrorAlert = ({error}) => {
 
                 <Box pt={3}>
                     <Typography variant='h6'>Stack: </Typography>
-                    <div>{stackTrace ? stackTrace.split("\n\t").map((line, i) => <p style={{margin: "1px", fontSize: "12px"}}>{`.`.repeat(i)}{line}</p>) : '-'}</div>
+                    <div>{stackTrace ? stackTrace
+                        .split("\n")
+                        .map((line, i) => <p key={i} style={{margin: "1px", fontSize: "12px", paddingLeft: 10*i}}>{line}</p>) : '-'}</div>
                 </Box>
             </Alert>
         </div>

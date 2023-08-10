@@ -44,6 +44,9 @@ const Wrapper = ({children, title, sx = {}, other}) => (
 
 export function PlansList(props) {
     const navigate = useNavigate();
+    const onClick = (item) => {
+        navigate(`/clusters/${props.clusterId}/plans/${item.id}`)
+    }
 
     return (
         <List
@@ -51,9 +54,7 @@ export function PlansList(props) {
         >
             {props.items.map(item => (
                 <ListItem disablePadding>
-                    <ListItemButton onClick={() => {
-                        navigate(`/clusters/${props.clusterId}/plans/${item.id}`)
-                    }}>
+                    <ListItemButton onClick={() => props.onClick ? props.onClick(item) : onClick(item)}>
                         <ListItemText primary={item.id} secondary={item.period_start.toISOString()}/>
                     </ListItemButton>
                     <GenericDetailsPopover

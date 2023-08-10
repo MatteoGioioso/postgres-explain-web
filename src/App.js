@@ -1,6 +1,6 @@
 import ThemeCustomization from './themes';
 import Router from "./Router";
-import {AppFunctionalityProvider, PlanProvider} from "./MainContext";
+import {AppFunctionalityProvider} from "./MainContext";
 import {ReactFlowProvider} from "reactflow";
 import {NodeProvider, TableTabsProvider} from "./components/CoreModules/Plan/Contexts";
 import "highlight.js/styles/default.css"
@@ -9,7 +9,6 @@ function App() {
     return (
         <ThemeCustomization>
             <ReactFlowProvider>
-                <PlanProvider>
                     <TableTabsProvider>
                         <NodeProvider>
                             <AppFunctionalityProvider>
@@ -17,7 +16,6 @@ function App() {
                             </AppFunctionalityProvider>
                         </NodeProvider>
                     </TableTabsProvider>
-                </PlanProvider>
             </ReactFlowProvider>
         </ThemeCustomization>
     );

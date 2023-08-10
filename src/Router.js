@@ -7,6 +7,7 @@ import {getMode, SELF_HOSTED, WEB} from "./config";
 import HeaderContent from "./components/MainLayout/Header/HeaderContent";
 import HeaderContentSelfHosted from "./components/MainLayout/Header/HeaderContent/HeaderContentSelfHosted";
 
+
 const DashboardDefault = Loadable(lazy(() => import('./components/Dashboard')));
 const PlanVisualizationLoadableWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationWeb')))
 const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
@@ -17,20 +18,22 @@ const ClustersListLoadable = Loadable(lazy(() => import('./components/SelfHosted
 
 const WebRoutes = () => ({
     path: '/',
-    element: <MainLayout headerContent={<HeaderContent/>}/>,
+    element: (
+        <MainLayout headerContent={<HeaderContent/>}/>
+    ),
     children: [
         {
             path: '/',
             element: <DashboardDefault/>
         },
         {
-            path: '/plan',
+            path: '/plan/:plan_id',
             element: <PlanVisualizationLoadableWeb/>
         },
-        {
-            path: '/comparison',
-            element: <div/>
-        }
+        // {
+        //     path: '/comparison',
+        //     element: <PlanVisualizationComparisonWeb/>
+        // }
     ]
 });
 

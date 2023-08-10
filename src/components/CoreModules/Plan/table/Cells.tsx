@@ -134,7 +134,6 @@ export const RowsCell = ({row, expanded, theme}: CellProps) => {
 export const RowsCellCollapsedContent = ({row}: CellProps) => {
     const getAvgText = (data: PlanRow): string => {
         return data.workers.launched > 0 ? "Worker" : "Loop";
-
     }
 
     return (

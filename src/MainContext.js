@@ -1,18 +1,6 @@
-import {createContext, useState} from "react";
+import {createContext} from "react";
 
 import {getMode} from "./config";
-
-export const PlanContext = createContext({});
-
-export function PlanProvider(props) {
-    const [plan, setPlan] = useState();
-
-    return (
-        <PlanContext.Provider value={{plan, setPlan}}>
-            {props.children}
-        </PlanContext.Provider>
-    );
-}
 
 export const AppFunctionalityContext = createContext({})
 export const AppFunctionalityProvider = (props) => {
@@ -24,3 +12,4 @@ export const AppFunctionalityProvider = (props) => {
         </AppFunctionalityContext.Provider>
     )
 }
+

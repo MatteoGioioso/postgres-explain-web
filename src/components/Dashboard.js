@@ -1,4 +1,4 @@
-import FormPlan from "./FormPlan";
+import FormPlan from "./Web/FormPlan";
 
 const DashboardDefault = () => {
     return (

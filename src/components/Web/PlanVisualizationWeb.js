@@ -1,45 +1,25 @@
 import {useContext, useEffect, useState} from 'react';
 import {Grid} from '@mui/material';
-import {PlanContext} from "../../MainContext";
 import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
-import {PlanService} from "../CoreModules/Plan/parser";
 import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
 import {ErrorAlert} from "../ErrorReporting";
-import {useNavigate} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
 import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
-import {planService, waitWebAssembly} from "./ioc";
+import {queryExplainerService} from "./ioc";
 
 const PlanVisualizationWeb = () => {
-    const {plan} = useContext(PlanContext);
-    const [error, setError] = useState()
-    const navigate = useNavigate();
+    const [error, setError] = useState();
+    const {plan_id} = useParams();
     const {setExplained, explained} = useContext(NodeContext);
 
-    function fetchQueryPlan(queryPlan) {
-        if (!queryPlan) return
-
-        const plan = planService.fromSource(queryPlan);
-        console.log(JSON.parse(plan))
+    function fetchQueryPlan(planID) {
         try {
-            const out = global.explain(plan)
-
-            if (out.error) {
-                console.error(`${out.error}: ${out.error_details}`)
-
-                setError({
-                    message: out.error,
-                    error_details: out.error_details,
-                    stackTrace: out.error_stack,
-                })
-            } else {
-                const parsedExplained = JSON.parse(out.explained);
-                console.log(parsedExplained)
-                setExplained(parsedExplained)
-            }
+            const response = queryExplainerService.getQueryPlan(planID);
+            setExplained(response.query_plan)
         } catch (e) {
             setError({
                 message: e.message,
@@ -48,13 +28,7 @@ const PlanVisualizationWeb = () => {
     }
 
     useEffect(() => {
-        if (plan) {
-            waitWebAssembly().then(() => {
-                fetchQueryPlan(plan)
-            })
-        } else {
-            navigate('/')
-        }
+        fetchQueryPlan(plan_id)
     }, [])
 
     return (
@@ -89,7 +63,7 @@ const PlanVisualizationWeb = () => {
                         <GenericStatsTable stats={explained.nodes_stats} headCells={nodesHeadCells}/>
                     )}
 
-                    <RawPlan plan={plan && planService.fromSource(plan)}/>
+                    {/*<RawPlan plan={}/>*/}
                 </TableTabs>
             </Grid>
         </Grid>

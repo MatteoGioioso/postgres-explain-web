@@ -43,6 +43,7 @@ export const NodeWidget = memo(({data}: NodeWidgetProps) => {
                 type="target"
                 position={Position.Bottom}
                 isConnectable={false}
+                style={{backgroundColor: 'transparent', color: 'transparent'}}
             />
         </>
     )

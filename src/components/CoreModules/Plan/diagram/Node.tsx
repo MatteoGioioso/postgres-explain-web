@@ -19,7 +19,7 @@ import {
     DollarOutlined,
     DownOutlined,
     FallOutlined,
-    FieldTimeOutlined, ForkOutlined,
+    FieldTimeOutlined, ForkOutlined, Loading3QuartersOutlined,
     RiseOutlined, TableOutlined,
     ZoomInOutlined
 } from '@ant-design/icons';
@@ -128,6 +128,15 @@ const Node = ({data, stats, theme}: NodeProps) => {
                                         size="small"
                                     />
                                 )}
+                                {Boolean(data.loops > 1) && (
+                                    <Chip
+                                        style={{backgroundColor: theme.palette.primary['100']}}
+                                        icon={<Loading3QuartersOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                        sx={{ml: 1.25, pl: 1}}
+                                        label={betterNumbers(data.loops / (data.workers.launched + 1))}
+                                        size="small"
+                                    />
+                                )}
                                 {showChipsBasedOnPercentage(getPercentage(data.exclusive, data.execution_time)) && (
                                     <Chip
                                         style={{backgroundColor: exclusiveTimeColor}}
@@ -192,7 +201,7 @@ const Node = ({data, stats, theme}: NodeProps) => {
                     <Box sx={{pt: 1}}>
                         <Typography sx={{color: `${exclusiveTimeColor || 'primary'}.main`}}>
                             Rows returned: {` `}
-                            <b>{betterNumbers(data.rows.total * (data.workers.launched + 1))}</b>
+                            <b>{betterNumbers(data.rows.total)}</b>
                         </Typography>{' '}
                     </Box>
                 </MainCard>

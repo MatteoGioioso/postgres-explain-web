@@ -108,6 +108,7 @@ export const SORT = "Sort";
 export const FUNCTION_SCAN = "Function Scan";
 export const INCREMENTAL_SORT = "Incremental Sort";
 export const NESTED_LOOP_JOIN = "Nested Loop Join";
+export const MERGE_JOIN = "Merge Join";
 export const GROUP_AGGREGATE = "GroupAggregate";
 export const X_POSITION_FACTOR = "*X Position Factor";
 export const Y_POSITION_FACTOR = "*Y Position Factor";
@@ -173,7 +174,7 @@ export interface Costs {
 }
 export interface Rows {
   total: number /* float64 */;
-  total_per_node: number /* float64 */;
+  total_avg: number /* float64 */;
   planned_rows: number /* float64 */;
   removed: number /* float64 */;
   estimation_factor: number /* float64 */;

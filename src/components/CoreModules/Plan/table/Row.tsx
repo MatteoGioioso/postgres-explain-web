@@ -42,25 +42,12 @@ export const Row = memo(({row, stats}: RowProps) => {
             id={row.node_id}
             style={getRowStyle()}
         >
-            <TableCell
-                component="th"
-                style={{
-                    backgroundColor: getPercentageColor(row.exclusive, row.execution_time, theme)
-                }}>
-                {betterTiming(row.exclusive)}
-                <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Box sx={{pt: 1}}>
-                        <Typography variant='subtitle2'>
-                            Total: {betterTiming(row.exclusive * (row.workers.launched + 1))}
-                        </Typography>
-                    </Box>
-                </Collapse>
-            </TableCell>
+            <TimingCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'}/>
 
             <TimingCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'}/>
 
             <RowsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
-
+            
             <RowsEstimationCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
             <TableCell align="right">

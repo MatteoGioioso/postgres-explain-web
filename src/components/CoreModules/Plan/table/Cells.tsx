@@ -57,7 +57,7 @@ export const headCells = (areBuffersPresent?: boolean) => [
         label: 'Rows',
         align: 'left',
         disablePadding: false,
-        description: <div>Total average rows returned per worker.{` `} <br/>
+        description: <div>Total rows returned per node.{` `} <br/>
             <b>NOTE</b>: When the parallel portion of the plan generates only a small number of tuples,
             the leader will often behave very much like an additional worker,
             speeding up query execution. Conversely, when the parallel portion of the plan generates a large number of tuples,
@@ -121,8 +121,8 @@ export interface CellProps {
 export const RowsCell = ({row, expanded, theme}: CellProps) => {
     return (
         <TableCell align="left" style={{wordWrap: 'break-word', whiteSpace: 'normal', width: '200px'}}>
-            {row.scopes.filters && (
-                <FilterOutlined style={{color: theme.palette.primary.light, fontSize: '12px'}}/>)} {betterNumbers(row.rows.total)}
+            {row.scopes.filters && (<FilterOutlined style={{color: theme.palette.primary.light, fontSize: '12px'}}/>)}
+            {betterNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <RowsCellCollapsedContent row={row} expanded={expanded} stats={null}/>
             </Collapse>
@@ -132,21 +132,25 @@ export const RowsCell = ({row, expanded, theme}: CellProps) => {
 }
 
 export const RowsCellCollapsedContent = ({row}: CellProps) => {
+    const getAvgText = (data: PlanRow): string => {
+        return data.workers.launched > 0 ? "Worker" : "Loop";
+
+    }
+
     return (
         <Box sx={{pt: 1}}>
-            <Typography><b>Total</b>: {' '}
-                <GenericDetailsPopover name={"Rows"} content={row.rows.total}>
-                    {betterNumbers(row.rows.total * (row.workers.launched + 1))}
+            <Typography><b>Avg per {getAvgText(row)}</b>: {' '}
+                <GenericDetailsPopover name={"Rows"} content={row.rows.total_avg}>
+                    {betterNumbers(row.rows.total_avg)}
                 </GenericDetailsPopover>
             </Typography>
             <Typography><b>Planned</b>: {' '}
                 <GenericDetailsPopover name={"Planned rows"} content={row.rows.planned_rows}>
-
                     {betterNumbers(row.rows.planned_rows)}
                 </GenericDetailsPopover>
             </Typography>
             {
-                row.scopes.filters && (
+                Boolean(row.rows.removed) && (
                     <>
                         <b>Removed: </b>
                         <GenericDetailsPopover name={"rows removed"} content={row.rows.removed}>

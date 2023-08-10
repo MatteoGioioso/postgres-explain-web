@@ -37,7 +37,7 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
             <TableContainer
                 sx={{
                     width: '100vw',
-                    overflowX: 'auto',
+                    maxHeight: '80vh',
                     position: 'relative',
                     display: 'block',
                     maxWidth: '100%',
@@ -45,6 +45,7 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
                 }}
             >
                 <Table
+                    stickyHeader
                     aria-labelledby="tableTitle"
                     sx={{
                         '& .MuiTableCell-root:first-of-type': {

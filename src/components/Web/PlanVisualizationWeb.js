@@ -10,16 +10,20 @@ import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
 import {queryExplainerService} from "./ioc";
+import {useFocus} from "../CoreModules/Plan/hooks";
 
 const PlanVisualizationWeb = () => {
     const [error, setError] = useState();
     const {plan_id} = useParams();
     const {setExplained, explained} = useContext(NodeContext);
+    const [originalPlan, setOriginalPlan] = useState("{}")
+    const {closeFocusNavigation} = useFocus();
 
     function fetchQueryPlan(planID) {
         try {
             const response = queryExplainerService.getQueryPlan(planID);
             setExplained(response.query_plan)
+            setOriginalPlan(response.query_original_plan)
         } catch (e) {
             setError({
                 message: e.message,
@@ -29,7 +33,8 @@ const PlanVisualizationWeb = () => {
 
     useEffect(() => {
         fetchQueryPlan(plan_id)
-    }, [])
+        closeFocusNavigation()
+    }, [plan_id])
 
     return (
         <Grid container>
@@ -63,11 +68,11 @@ const PlanVisualizationWeb = () => {
                         <GenericStatsTable stats={explained.nodes_stats} headCells={nodesHeadCells}/>
                     )}
 
-                    {/*<RawPlan plan={}/>*/}
+                    <RawPlan plan={originalPlan}/>
                 </TableTabs>
             </Grid>
         </Grid>
     );
-};
+}
 
 export default PlanVisualizationWeb;

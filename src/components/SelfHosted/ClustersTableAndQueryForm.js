@@ -1,27 +1,12 @@
-import {
-    Box,
-    Button,
-    FormHelperText,
-    Grid,
-    List,
-    ListItem,
-    ListItemButton, ListItemIcon,
-    ListItemText,
-    Stack,
-    TextField,
-    Typography
-} from "@mui/material";
+import {Box, Button, FormHelperText, Grid, Stack, TextField, Typography} from "@mui/material";
 import {QUERY_EXAMPLE_PLACEHOLDER} from "../utils";
 import {Formik} from "formik";
 import MainCard from "../CoreModules/MainCard";
 import {useNavigate, useParams} from "react-router-dom";
 import {analyticsService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
-import {ConsoleSqlOutlined} from "@ant-design/icons";
-import Highlight from 'react-highlight'
-import {GenericDetailsPopover} from "../CoreModules/GenericDetailsPopover";
 import {QueriesListTable} from "../CoreModules/Tables/QueriesListTable";
-import {CopyToClipboardButton} from "../CoreModules/CopyToClipboard";
+import {PlansList} from "../CoreModules/PlansList";
 
 const Wrapper = ({children, title, sx = {}, other}) => (
     <>
@@ -41,44 +26,6 @@ const Wrapper = ({children, title, sx = {}, other}) => (
         </Box>
     </>
 );
-
-export function PlansList(props) {
-    const navigate = useNavigate();
-    const onClick = (item) => {
-        navigate(`/clusters/${props.clusterId}/plans/${item.id}`)
-    }
-
-    return (
-        <List
-            sx={{width: '100%', bgcolor: 'background.paper'}}
-        >
-            {props.items.map(item => (
-                <ListItem disablePadding>
-                    <ListItemButton onClick={() => props.onClick ? props.onClick(item) : onClick(item)}>
-                        <ListItemText primary={item.id} secondary={item.period_start.toISOString()}/>
-                    </ListItemButton>
-                    <GenericDetailsPopover
-                        name={"query"}
-                        content={
-                            <>
-                                <Box sx={{pb: 2}}>
-                                    <CopyToClipboardButton data={item.query}/>
-                                </Box>
-                                <Highlight className='sql'>
-                                    {item.query}
-                                </Highlight>
-                            </>
-                        }
-                    >
-                        <ListItemIcon>
-                            <ConsoleSqlOutlined/>
-                        </ListItemIcon>
-                    </GenericDetailsPopover>
-                </ListItem>
-            ))}
-        </List>
-    );
-}
 
 const QueryForm = ({cluster_id}) => {
     const navigate = useNavigate();

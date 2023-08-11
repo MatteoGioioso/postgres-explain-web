@@ -18,6 +18,7 @@ export interface QueryPlan {
     queryId?: string;
     id?: string;
     period_start?: Date
+    alias?: string
 }
 
 export class QueryExplainerService {

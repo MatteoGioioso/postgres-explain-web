@@ -35,6 +35,7 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
     return (
         <MainCard content={false}>
             <TableContainer
+                id='summary-table-container'
                 sx={{
                     width: '100vw',
                     maxHeight: '80vh',
@@ -53,7 +54,8 @@ export function SummaryTable({summary, stats}: SummaryTableProps) {
                         },
                         '& .MuiTableCell-root:last-of-type': {
                             pr: 3
-                        }
+                        },
+                        borderCollapse: 'collapse',
                     }}
                 >
                     <OrderTableHead order={order} orderBy={orderBy}/>

@@ -9,11 +9,13 @@ import {
     TextField, Typography
 } from '@mui/material';
 import {Formik} from 'formik';
-import {QUERY_PLAN_EXAMPLE_PLACEHOLDER} from "../utils";
+import {QUERY_EXAMPLE_PLACEHOLDER, QUERY_PLAN_EXAMPLE_PLACEHOLDER} from "../utils";
 import MainCard from '../CoreModules/MainCard';
 import {queryExplainerService} from "./ioc";
 import {ErrorAlert} from "../ErrorReporting";
-import {PlansList} from "../SelfHosted/ClustersTableAndQueryForm";
+
+import {PlansList} from "../CoreModules/PlansList";
+import InputLabel from "@mui/material/InputLabel";
 
 
 const FormWrapper = ({children}) => (
@@ -54,21 +56,26 @@ const FormPlan = () => {
                     )}
                     <Formik
                         initialValues={{
-                            plan: ''
+                            plan: '',
+                            alias: '',
+                            query: ''
                         }}
                         onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
                             try {
                                 const planId = await queryExplainerService.saveQueryPlan({
-                                    plan: values.plan
+                                    plan: values.plan,
+                                    alias: values.alias,
+                                    query: values.query,
                                 });
-                                navigate(`/plan/${planId}`)
+                                navigate(`/plans/${planId}`)
                             } catch (e) {
                                 try {
-                                    const out = JSON.parse(e);
+                                    const out = JSON.parse(e.message);
+
                                     setError({
                                         message: out.error,
                                         error_details: out.error_details,
-                                        stackTrace: out.error_stack,
+                                        stackTrace: out.stackTrace,
                                     })
                                 } catch (_) {
                                     setError({
@@ -91,21 +98,58 @@ const FormPlan = () => {
                             <form noValidate onSubmit={handleSubmit}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12}>
-                                        <Stack spacing={1}>
-                                            <TextField
-                                                fullWidth
-                                                error={Boolean(touched.plan && errors.plan)}
-                                                id="plan"
-                                                type="text"
-                                                value={values.query}
-                                                name="plan"
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                placeholder={QUERY_PLAN_EXAMPLE_PLACEHOLDER}
-                                                inputProps={{}}
-                                                multiline
-                                                maxRows={100}
-                                            />
+                                        <Stack spacing={2}>
+                                            <Stack spacing={0}>
+                                                <InputLabel htmlFor="alias">Alias</InputLabel>
+                                                <TextField
+                                                    fullWidth
+                                                    id="alias"
+                                                    type="text"
+                                                    value={values.query}
+                                                    name="alias"
+                                                    onBlur={handleBlur}
+                                                    onChange={handleChange}
+                                                    placeholder={'Plan alias'}
+                                                    inputProps={{}}
+                                                    rows={1}
+                                                />
+                                            </Stack>
+
+                                            <Stack spacing={0}>
+                                                <InputLabel htmlFor="plan">Plan*</InputLabel>
+                                                <TextField
+                                                    fullWidth
+                                                    error={Boolean(touched.plan && errors.plan)}
+                                                    id="plan"
+                                                    type="text"
+                                                    value={values.query}
+                                                    name="plan"
+                                                    onBlur={handleBlur}
+                                                    onChange={handleChange}
+                                                    placeholder={QUERY_PLAN_EXAMPLE_PLACEHOLDER}
+                                                    inputProps={{}}
+                                                    multiline
+                                                    rows={15}
+                                                />
+                                            </Stack>
+
+                                            <Stack spacing={0}>
+                                                <InputLabel htmlFor="query">Query</InputLabel>
+                                                <TextField
+                                                    fullWidth
+                                                    id="query"
+                                                    type="text"
+                                                    value={values.query}
+                                                    name="query"
+                                                    onBlur={handleBlur}
+                                                    onChange={handleChange}
+                                                    placeholder={QUERY_EXAMPLE_PLACEHOLDER}
+                                                    inputProps={{}}
+                                                    multiline
+                                                    rows={4}
+                                                />
+                                            </Stack>
+
                                             {touched.plan && errors.plan && (
                                                 <FormHelperText error id="helper-text-plan-signup">
                                                     {errors.plan}
@@ -150,7 +194,7 @@ const FormPlan = () => {
                     <PlansList
                         items={plansList}
                         onClick={(item) => {
-                            navigate(`/plan/${item.id}`)
+                            navigate(`/plans/${item.id}`)
                         }}
                     />
                 </Box>

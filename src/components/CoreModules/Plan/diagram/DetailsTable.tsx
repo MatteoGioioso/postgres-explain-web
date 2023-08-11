@@ -1,7 +1,20 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useTheme} from "@mui/material/styles";
 import MainCard from "../../MainCard";
-import {Box, Chip, Collapse, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
+import {
+    Box,
+    Chip,
+    Collapse,
+    IconButton,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
+} from "@mui/material";
 import {
     betterDiskSizeFromBlocks,
     betterNumbers,
@@ -17,14 +30,26 @@ import {
     RowsCellCollapsedContent,
 } from "../table/Cells";
 import {ExpandMore} from "../ExpandMore";
-import {DownOutlined, WarningOutlined} from "@ant-design/icons";
-import {useNodeDataProvider} from "../hooks";
+import {CloseOutlined, DownOutlined, WarningOutlined} from "@ant-design/icons";
+import {useFocus} from "../hooks";
 import {GenericDetailsPopover} from "../../GenericDetailsPopover";
+import {queryExplainerService} from "../../../Web/ioc";
+import {useParams} from "react-router-dom";
+import {NodeData} from "../Contexts";
 
 export const DetailsTable = () => {
     const theme = useTheme();
-    const {getNodeData} = useNodeDataProvider();
-    const data = getNodeData()
+    const {plan_id} = useParams();
+    const [data, setData] = useState<NodeData>()
+    const {closeFocusNavigation, focusedNodeId} = useFocus();
+
+    useEffect(() => {
+        if (focusedNodeId) {
+            setData(queryExplainerService.getQueryPlanNode(plan_id, focusedNodeId))
+        } else {
+            setData(null)
+        }
+    }, [focusedNodeId])
 
     return (
         <Collapse in={Boolean(data)} orientation='horizontal' unmountOnExit mountOnEnter>
@@ -52,7 +77,12 @@ export const DetailsTable = () => {
                         >
                             <TableHead>
                                 <TableCell sx={{maxWidth: '50px'}}>
-                                    <Typography variant="h4">{data.row.operation}</Typography>
+                                    <Stack direction='row' justifyContent='space-between' spacing={3}>
+                                        <Typography variant="h4">{data.row.operation}</Typography>
+                                        <IconButton onClick={closeFocusNavigation}>
+                                            <CloseOutlined style={{fontSize: '0.90rem', color: 'inherit'}}/>
+                                        </IconButton>
+                                    </Stack>
                                 </TableCell>
                             </TableHead>
                             <TableBody>

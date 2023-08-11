@@ -19,7 +19,9 @@ export const Row = memo(({row, stats}: RowProps) => {
     const theme = useTheme();
     const {isFocused, switchToNode, isUnfocused, closeFocusNavigation, focus} = useFocus(row.node_id);
     const [expanded, setExpanded] = useState(isFocused);
+    const [rowHovered, setRowHovered] = React.useState(false);
     const {setTabIndex} = useContext(TableTabsContext);
+
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
@@ -32,23 +34,42 @@ export const Row = memo(({row, stats}: RowProps) => {
         return {}
     }
 
+    useEffect(() => {
+        setExpanded(isFocused)
+    }, [isFocused])
+
+
+    const handleRowHover = () => {
+        setRowHovered(true);
+    };
+
+    const handleRowLeave = () => {
+        setRowHovered(false);
+    };
+
     return (
         <TableRow
-            hover
             role="checkbox"
-            sx={{'&:last-child td, &:last-child th': {border: 0}}}
+            sx={{
+                '&:last-child td, &:last-child th': {border: 0},
+                '&:hover': {
+                    backgroundColor: theme.palette.secondary[200]
+                }
+            }}
             tabIndex={-1}
             key={row.node_id}
             id={row.node_id}
             style={getRowStyle()}
+            onMouseEnter={handleRowHover}
+            onMouseLeave={handleRowLeave}
         >
-            <TimingCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'}/>
+            <TimingCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'} hovered={rowHovered}/>
 
-            <TimingCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'}/>
+            <TimingCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'} hovered={rowHovered}/>
 
             <RowsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
-            
-            <RowsEstimationCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+
+            <RowsEstimationCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
 
             <TableCell align="right">
                 {betterNumbers(row.loops)} / {row.workers.launched + 1}
@@ -66,9 +87,9 @@ export const Row = memo(({row, stats}: RowProps) => {
                 </Collapse>
             </TableCell>
 
-            <BufferReadsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+            <BufferReadsCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
 
-            <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+            <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
 
             <BufferHitsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 

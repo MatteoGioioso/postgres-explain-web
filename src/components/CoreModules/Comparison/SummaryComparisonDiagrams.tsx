@@ -65,7 +65,7 @@ export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagrams
 
     return (
         <Grid container>
-            <Grid xs={6} sx={{pt: 2, pr: 1}}>
+            <Grid item xs={6} sx={{pt: 2, pr: 1}}>
                 <Typography variant='h5'>
                     Previous Plan: 10902903903
                 </Typography>
@@ -83,7 +83,7 @@ export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagrams
                     </ReactFlow>
                 </div>
             </Grid>
-            <Grid xs={6} sx={{pt: 2, pl: 1}}>
+            <Grid item xs={6} sx={{pt: 2, pl: 1}}>
                 <Typography variant='h5'>
                     Optimized Plan: 10902903903
                 </Typography>

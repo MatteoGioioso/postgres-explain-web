@@ -1,8 +1,8 @@
 import {useReactFlow} from "reactflow";
 import {useContext, useEffect, useState} from "react";
-import {NodeContext, NodeData} from "./Contexts";
+import {NodeContext} from "./Contexts";
 
-export const useFocus = (nodeId: string) => {
+export const useFocus = (nodeId?: string) => {
     const {focusedNodeId, setFocusedNodeId} = useContext(NodeContext);
     const [isFocused, setIsFocused] = useState<boolean>(false);
     const [nodeIdFromHash, setNodeIdFromHash] = useState<string>();
@@ -25,11 +25,11 @@ export const useFocus = (nodeId: string) => {
     }
 
     const scrollToElement = (id: string): void => {
-        const yOffset = -100;
+        const yOffset = -200;
         const element = document.getElementById(id);
-        const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-
-        window.scrollTo({top: y, behavior: 'smooth'});
+        const tableContainer = document.getElementById('summary-table-container')
+        const y = element.getBoundingClientRect().top + yOffset;
+        tableContainer.scrollTo({top: y, behavior: 'smooth'});
     }
 
     return {
@@ -58,46 +58,5 @@ export const useFocus = (nodeId: string) => {
             scrollToElement(nodeId)
         },
         focusedNodeId
-    }
-}
-
-export const useNodeHover = (nodeId: string) => {
-    const {hoverNodeId, setHoverNodeId} = useContext(NodeContext);
-
-    return {
-        setHover: () => {
-            setHoverNodeId(nodeId)
-        },
-        unsetHover: () => {
-            setHoverNodeId('')
-        },
-        isHovered: (nodeId: string): boolean => {
-            return nodeId === hoverNodeId
-        }
-    }
-}
-
-export const useNodeDataProvider = () => {
-    const {nodeData, setNodeData, focusedNodeId, explained, setExplained} = useContext(NodeContext);
-
-    useEffect(() => {
-        if (explained && focusedNodeId) {
-            const planRow = explained.summary.find(node => node.node_id === focusedNodeId);
-            setNodeData({
-                row: planRow,
-                stats: explained.stats
-            })
-        }
-
-        if (focusedNodeId === "") {
-            setNodeData(null)
-        }
-
-    }, [explained, focusedNodeId])
-
-    return {
-        getNodeData: (): NodeData => {
-            return nodeData
-        },
     }
 }

@@ -25,14 +25,15 @@ export const getRowEstimateDirectionSymbol = (direction: string): string => {
     }
 }
 
-export const TimingCell = ({prop, totalProp, name}: { prop: number, totalProp: number, name?: string }) => {
+export const TimingCell = ({prop, totalProp, name, hovered}: { prop: number, totalProp: number, name?: string, hovered: boolean }) => {
     const theme = useTheme();
+
     return (
         <TableCell
-            component="th"
             style={{
-                backgroundColor: getPercentageColor(prop, totalProp, theme)
-            }}>
+                backgroundColor: getPercentageColor(prop, totalProp, theme, hovered)
+            }}
+        >
             {betterTiming(prop)}
         </TableCell>
     )
@@ -116,6 +117,7 @@ export interface CellProps {
     expanded: boolean
     stats: Stats
     theme?: any
+    hovered?: boolean
 }
 
 export const RowsCell = ({row, expanded, theme}: CellProps) => {
@@ -163,10 +165,10 @@ export const RowsCellCollapsedContent = ({row}: CellProps) => {
 }
 
 export const BufferReadsCell = ({
-                                    expanded, row, stats, theme
+                                    expanded, row, stats, theme, hovered
                                 }: CellProps) => {
     return (
-        <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme)}}>
+        <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme, hovered)}}>
             {betterDiskSizeFromBlocks(row.buffers.effective_blocks_read)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferReadsCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
@@ -200,10 +202,10 @@ export const BufferReadsCellCollapsedContent = ({row}: CellProps) => {
 }
 
 export const BufferWrittenCell = ({
-                                      expanded, theme, row, stats
+                                      expanded, theme, row, stats, hovered
                                   }: CellProps) => {
     return (
-        <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme)}}>
+        <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme, hovered)}}>
             {betterDiskSizeFromBlocks(row.buffers.effective_blocks_written)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferWrittenCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
@@ -266,11 +268,9 @@ export const BufferHitsCellCollapsedContent = ({row}: CellProps) => {
 }
 
 
-export const RowsEstimationCell = ({
-                                       row, theme, expanded
-                                   }: CellProps) => {
+export const RowsEstimationCell = ({row, theme, expanded, hovered}: CellProps) => {
     return (
-        <TableCell align="left" style={{backgroundColor: getEstimationColor(row.rows.estimation_factor, theme)}}>
+        <TableCell align="left" style={{backgroundColor: getEstimationColor(row.rows.estimation_factor, theme, hovered)}}>
             {getRowEstimateDirectionSymbol(row.rows.estimation_direction) + ' '}
             <GenericDetailsPopover
                 content={Math.round(row.rows.estimation_factor * 1000) / 1000}

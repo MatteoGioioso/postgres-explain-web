@@ -1,29 +1,20 @@
-// material-ui
 import {
     Box,
-    CardContent,
     Chip,
-    Collapse,
-    Divider,
     Grid,
     LinearProgress,
     LinearProgressProps,
     Stack,
     Typography,
 } from '@mui/material';
-// project import
 import MainCard from '../../MainCard';
-
-// assets
 import {
     DollarOutlined,
-    DownOutlined,
     FallOutlined,
     FieldTimeOutlined, ForkOutlined, Loading3QuartersOutlined,
     RiseOutlined, TableOutlined,
-    ZoomInOutlined
 } from '@ant-design/icons';
-import React, {useContext, useState} from "react";
+import React, {useContext} from "react";
 import {
     areRowsOverEstimated,
     betterNumbers, betterTiming,
@@ -32,8 +23,7 @@ import {
     getPercentageColor,
 } from "../../utils";
 import {PlanRow, Stats} from "../types";
-import {ExpandMore} from "../ExpandMore";
-import {useFocus, useNodeHover} from "../hooks";
+import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
 
 interface NodeProps {
@@ -46,7 +36,7 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number, t
     return (
         <Box sx={{display: 'flex', alignItems: 'center'}}>
             <Box sx={{width: '75%', mr: 1, position: 'relative'}}>
-                <LinearProgress variant="determinate" {...props} sx={{
+                <LinearProgress variant="determinate" value={props.value} sx={{
                     backgroundColor: props.theme.palette.secondary.lighter,
                     height: "20px",
                     '& .MuiLinearProgress-bar': {
@@ -183,7 +173,7 @@ const Node = ({data, stats, theme}: NodeProps) => {
                                     size="medium"
                                     onClick={async () => {
                                         // If the tab is set to, for example, Indexes, the app will crash because it won't find the row id
-                                        // of the main table. Moreover the switchToRow cannot happen asynchronously, thus we must wait
+                                        // of the main table. Moreover, the switchToRow cannot happen asynchronously, thus we must wait
                                         // that setTabIndex has finished
                                         await setTabIndex(1)
                                         switchToRow()
@@ -194,8 +184,12 @@ const Node = ({data, stats, theme}: NodeProps) => {
                     </Stack>
                     {/*{showChipsBasedOnPercentage(exclusiveTimePercentage) && (*/}
                     <Box sx={{pt: 2, pb: 2}}>
-                        <LinearProgressWithLabel cellWarningColor={exclusiveTimeColor} theme={theme} value={exclusiveTimePercentage}
-                                                 time={data.exclusive}/>
+                        <LinearProgressWithLabel
+                            cellWarningColor={exclusiveTimeColor}
+                            theme={theme}
+                            value={exclusiveTimePercentage}
+                            time={data.exclusive}
+                        />
                     </Box>
                     {/*)}*/}
                     <Box sx={{pt: 1}}>

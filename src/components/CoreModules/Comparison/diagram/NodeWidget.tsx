@@ -3,12 +3,7 @@ import {Handle, Position} from 'reactflow'
 import Node from "./Node";
 import {useTheme} from "@mui/material/styles";
 import {PlanRow, Stats} from "../../Plan/types";
-
-
-export interface NodeData {
-    row: PlanRow
-    stats: Stats
-}
+import {NodeData} from "../../Plan/Contexts";
 
 export interface NodeWidgetProps {
     data: NodeData

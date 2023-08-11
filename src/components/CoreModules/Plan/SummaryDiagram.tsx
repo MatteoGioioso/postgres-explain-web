@@ -47,11 +47,11 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
 
     return (
         <Grid container>
-            <Grid xs={4} sx={{pt: 2, pr: 2}} position='absolute' zIndex='999'>
+            <Grid item xs={4} sx={{pt: 2, pr: 2}} position='absolute' zIndex='999'>
                 <DetailsTable/>
             </Grid>
 
-            <Grid xs={12} sx={{pt: 2}}>
+            <Grid item xs={12} sx={{pt: 2}}>
                 <div style={{height: '82vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
                     <ReactFlow
                         fitView

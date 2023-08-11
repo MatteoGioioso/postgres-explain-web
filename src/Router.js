@@ -27,7 +27,7 @@ const WebRoutes = () => ({
             element: <DashboardDefault/>
         },
         {
-            path: '/plan/:plan_id',
+            path: '/plans/:plan_id',
             element: <PlanVisualizationLoadableWeb/>
         },
         // {

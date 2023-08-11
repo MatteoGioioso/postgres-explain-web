@@ -93,47 +93,47 @@ export const getFunctionFromKind = (kind: string) => {
     return kindMap[kind]
 }
 
-export function getPercentageColor(reference: number, total: number, theme?: any): string {
-    if (total === 0 || total === undefined) return '#fff'
+export function getPercentageColor(reference: number, total: number, theme?: any, hovered?: boolean): string {
+    if (total === 0 || total === undefined) return !hovered ? theme.palette.secondary.A100 : theme.palette.secondary[200]
 
     const percentage = getPercentage(reference, total)
-    return getColorFromPercentage(percentage, theme);
+    return getColorFromPercentage(percentage, theme, hovered);
 }
 
-export function getColorFromPercentage(percentage: number, theme): string {
+export function getColorFromPercentage(percentage: number, theme, hovered?: any): string {
     if (percentage <= 10) {
-        return theme.palette.secondary.A100
+        return !hovered ? theme.palette.secondary.A100 : theme.palette.secondary[200]
     }
 
     if (percentage > 10 && percentage < 50) {
-        return theme.palette.warning.light
+        return !hovered ? theme.palette.warning.light : theme.palette.warning.main
     }
 
     if (percentage > 50 && percentage < 90) {
-        return theme.palette.warning.main
+        return !hovered ? theme.palette.warning.main : theme.palette.warning.dark
     }
 
     if (percentage > 90) {
-        return theme.palette.error.main
+        return !hovered ? theme.palette.error.main : theme.palette.error.dark
     }
 
-    return '#fff'
+    return !hovered ? theme.palette.secondary.A100 : theme.palette.secondary[200]
 }
 
-export function getEstimationColor(estimationFactor: number, theme?: any): string {
+export function getEstimationColor(estimationFactor: number, theme?: any, hovered?: boolean): string {
     if (estimationFactor >= 10 && estimationFactor < 100) {
-        return theme.palette.warning.light
+        return !hovered ? theme.palette.warning.light : theme.palette.warning.main
     }
 
     if (estimationFactor >= 100 && estimationFactor < 1000) {
-        return theme.palette.warning.main
+        return !hovered ? theme.palette.warning.main : theme.palette.warning.dark
     }
 
     if (estimationFactor >= 1000) {
-        return theme.palette.error.main
+        return !hovered ? theme.palette.error.main : theme.palette.error.dark
     }
 
-    return '#fff'
+    return !hovered ? theme.palette.secondary.A100 : theme.palette.secondary[200]
 }
 
 export function getPercentage(reference: number, total: number): number {

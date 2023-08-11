@@ -91,6 +91,7 @@ const FormPlan = () => {
                             if (!values.plan) {
                                 errors.plan = 'Required';
                             }
+                    
                             return errors;
                         }}
                     >
@@ -105,7 +106,7 @@ const FormPlan = () => {
                                                     fullWidth
                                                     id="alias"
                                                     type="text"
-                                                    value={values.query}
+                                                    value={values.alias}
                                                     name="alias"
                                                     onBlur={handleBlur}
                                                     onChange={handleChange}
@@ -122,7 +123,7 @@ const FormPlan = () => {
                                                     error={Boolean(touched.plan && errors.plan)}
                                                     id="plan"
                                                     type="text"
-                                                    value={values.query}
+                                                    value={values.plan}
                                                     name="plan"
                                                     onBlur={handleBlur}
                                                     onChange={handleChange}

@@ -1,23 +1,20 @@
 import MainCard from "../../MainCard";
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import React from "react";
-import {Stats} from "../types";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../../utils";
+import {JIT} from "../types";
+import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, getPercentageColor} from "../../utils";
 
 export interface JITStatsTableProps {
-    stats: Stats
+    stats: JIT
+    executionTime: number
 }
 
-export const JITStatsTable = ({stats}: JITStatsTableProps) => {
+export const JITStatsTable = ({stats, executionTime}: JITStatsTableProps) => {
     return (
-        <MainCard content={false} sx={{width: '50vw'}}>
+        <MainCard content={false} sx={{width: '40vw'}}>
             <TableContainer
                 sx={{
-                    overflowX: 'auto',
-                    position: 'relative',
-                    display: 'block',
-                    maxWidth: '100%',
-                    '& td, & th': {whiteSpace: 'nowrap'}
+                    '& td, & th': {whiteSpace: 'nowrap'},
                 }}
             >
                 <Table
@@ -33,19 +30,18 @@ export const JITStatsTable = ({stats}: JITStatsTableProps) => {
                 >
                     <TableHead>
                         <TableRow>
-                            {headCells().map((headCell) => (
-                                <TableCell
-                                    key={headCell.id}
-                                    sx={{pt: 1.5, pb: 1.5}}
-                                >
-                                    {headCell.label}
-                                </TableCell>
-                            ))}
+                            <TableCell
+                                sx={{pt: 1.5, pb: 1.5}}
+                            >
+                                <Typography variant='h4'>
+                                    JIT
+                                </Typography>
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {Object.keys(stats).map((s) => {
-                            return <Row name={s} data={stats[s]}/>
+                            return <Row name={s} data={stats[s]} executionTime={executionTime}/>
                         })}
                     </TableBody>
                 </Table>
@@ -54,58 +50,40 @@ export const JITStatsTable = ({stats}: JITStatsTableProps) => {
     )
 }
 
-const Row = ({name, data}: { name: string, data: number }) => {
-    // @ts-ignore
-    const formattedName = capitalizeFirstLetter(name.replaceAll("_", " "))
+const Row = ({name, data, executionTime}: { name: string, data: any, executionTime: number }) => {
     return (
         <TableRow
-            hover
-            role="checkbox"
             sx={{'&:last-child td, &:last-child th': {border: 0}}}
-            tabIndex={-1}
             key={name}
             id={name}
         >
             <TableCell>
-                {formattedName}
-            </TableCell>
-            <TableCell>
-                <b>{getMeasure(formattedName, data)}</b>
-            </TableCell>
-            <TableCell>
-                {data}
+                <Stack direction='row'>
+                    <Typography variant='h5'>
+                        {name}:
+                    </Typography>
+                    <Box sx={{pl: 2}}>{name === "Functions" && data}</Box>
+                </Stack>
+                <TableBody>
+                    {Object.keys(data).map(k => (
+                        <TableRow>
+                            <TableCell>
+                                <Typography variant='h5'>
+                                    {k}:
+                                </Typography>
+                            </TableCell>
+                            <TableCell
+                                sx={{backgroundColor: (theme) => isTiming(data[k]) ? getPercentageColor(data[k], executionTime, theme) : 'inherit'}}>
+                                {isTiming(data[k]) ? data[k].toString() : betterTiming(data[k])}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
             </TableCell>
         </TableRow>
     )
 }
 
-const headCells = (areBuffersPresent?: boolean) => [
-    {
-        id: 'name',
-        label: 'Name',
-        align: 'left',
-        description: ""
-    },
-    {
-        id: 'formatted',
-        label: '',
-        align: 'left',
-        description: ""
-    },
-    {
-        id: 'full',
-        label: '',
-        align: 'left',
-        description: ""
-    },
-]
-
-const getMeasure = (name: string, data: number): string => {
-    if (name.includes("time") || name.includes("duration")) {
-        return betterTiming(data)
-    } else if (name.includes("blocks")) {
-        return betterDiskSizeFromBlocks(data)
-    }
-
-    return betterNumbers(data)
+function isTiming(value: number | boolean): boolean {
+    return typeof value !== "boolean"
 }

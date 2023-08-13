@@ -120,6 +120,22 @@ export const DOES_CONTAIN_BUFFERS = "Does contain buffers";
 // source: types.go
 
 export type Node = { [key: string]: any};
+export interface JIT {
+  Functions: number /* int */;
+  Options: {
+    Inlining: boolean;
+    Optimization: boolean;
+    Expressions: boolean;
+    Deforming: boolean;
+  };
+  Timing: {
+    Generation: number /* float64 */;
+    Inlining: number /* float64 */;
+    Optimization: number /* float64 */;
+    Emission: number /* float64 */;
+    Total: number /* float64 */;
+  };
+}
 /**
  * StatsFromPlan Statistic can be found in different forms
  */
@@ -130,6 +146,12 @@ export interface StatsFromPlan {
   };
   'Execution Time': number /* float64 */;
   'Planning Time': number /* float64 */;
+  JIT?: JIT;
+  Triggers?: {
+    'Trigger Name': string;
+    Time: number /* float64 */;
+    Calls: string;
+  }[];
 }
 export interface Stats {
   execution_time: number /* float64 */;
@@ -159,6 +181,8 @@ export interface Explained {
   indexes_stats: IndexesStats;
   tables_stats: TablesStats;
   nodes_stats: NodesStats;
+  jit_stats?: JIT;
+  triggers_stats: Trigger[];
 }
 export interface NodeScopes {
   table: string;
@@ -357,4 +381,10 @@ export interface PropComparison {
 export interface PropStringComparison {
   previous: string;
   optimized: string;
+}
+export interface Trigger {
+  name: string;
+  time: number /* float64 */;
+  calls: number /* float64 */;
+  avg_time: number /* float64 */;
 }

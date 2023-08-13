@@ -1,5 +1,5 @@
 import MainCard from "../../MainCard";
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import React from "react";
 import {Stats} from "../types";
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../../utils";
@@ -34,14 +34,13 @@ export const GeneralStatsTable = ({stats}: GeneralStatsTableProps) => {
                 >
                     <TableHead>
                         <TableRow>
-                            {headCells().map((headCell) => (
-                                <TableCell
-                                    key={headCell.id}
-                                    sx={{fontSize: '18px'}}
-                                >
-                                    {headCell.label}
-                                </TableCell>
-                            ))}
+                            <TableCell>
+                                <Typography variant='h4'>
+                                    General Stats
+                                </Typography>
+                            </TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -79,27 +78,6 @@ const Row = ({name, data}: { name: string, data: number }) => {
         </TableRow>
     )
 }
-
-const headCells = (areBuffersPresent?: boolean) => [
-    {
-        id: 'name',
-        label: 'General Stats',
-        align: 'left',
-        description: ""
-    },
-    {
-        id: 'formatted',
-        label: '',
-        align: 'left',
-        description: ""
-    },
-    {
-        id: 'full',
-        label: '',
-        align: 'left',
-        description: ""
-    },
-]
 
 const getMeasure = (name: string, data: number): string => {
     if (name.includes("time") || name.includes("duration")) {

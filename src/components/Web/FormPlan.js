@@ -45,6 +45,11 @@ const FormPlan = () => {
         setPlansList(queryExplainerService.getQueryPlansList());
     }, []);
 
+    const onDeleteQueryPlan = (item) => {
+        queryExplainerService.deleteQueryPlanById(item.id)
+        setPlansList(queryExplainerService.getQueryPlansList());
+    }
+
     return (
         <Grid container>
             <Grid item xs={8}>
@@ -197,6 +202,7 @@ const FormPlan = () => {
                         onClick={(item) => {
                             navigate(`/plans/${item.id}`)
                         }}
+                        onDelete={onDeleteQueryPlan}
                     />
                 </Box>
             </Grid>

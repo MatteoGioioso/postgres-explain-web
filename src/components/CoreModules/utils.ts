@@ -56,6 +56,19 @@ export function betterTiming(milliseconds: number): string {
     }
 }
 
+export function betterDate(date: string | Date): string {
+    const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+    } as Intl.DateTimeFormatOptions;
+    const d = new Date(date);
+    return d.toLocaleDateString("en-US", options)
+}
+
 export function betterDiskSizeFromBlocks(blocks: number): string {
     const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     let size = blocks * 8192;
@@ -213,7 +226,6 @@ export const calculateNodes = (summary: PlanRow[], stats: Stats, theme: Theme, n
         initialNodes, initialEdges
     }
 }
-
 
 
 export const getLayoutedElements = (elk: any, nodes: Node[], edges: Edge[], options = {}, theme: any) => {

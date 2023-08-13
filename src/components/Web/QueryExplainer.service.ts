@@ -69,4 +69,8 @@ export class QueryExplainerService {
             alias: plan.alias,
         }))
     }
+
+    deleteQueryPlanById(planId: string): void {
+        this.plansStore.remove(planId)
+    }
 }

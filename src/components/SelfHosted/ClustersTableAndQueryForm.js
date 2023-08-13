@@ -7,6 +7,7 @@ import {analyticsService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
 import {QueriesListTable} from "../CoreModules/Tables/QueriesListTable";
 import {PlansList} from "../CoreModules/PlansList";
+import {QueryPlan} from "./services/QueryExplainer.service";
 
 const Wrapper = ({children, title, sx = {}, other}) => (
     <>
@@ -133,6 +134,11 @@ export const ClustersTableAndQueryForm = () => {
         }
     }
 
+    const onClickPlansList = (item) => {
+        navigate(`/clusters/${cluster_id}/plans/${item.id}`)
+    }
+
+
     return (
         <>
             <Grid container>
@@ -158,7 +164,7 @@ export const ClustersTableAndQueryForm = () => {
                 <Grid item xs={4}>
                     <Wrapper sx={{pt: 2}} title="Plans">
                         {Boolean(plansList?.length) && (
-                            <PlansList items={plansList} clusterId={cluster_id}/>
+                            <PlansList items={plansList} clusterId={cluster_id} onClick={onClickPlansList}/>
                         )}
                     </Wrapper>
                 </Grid>

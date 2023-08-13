@@ -3,28 +3,26 @@ import {Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typogra
 import {GenericDetailsPopover} from "./GenericDetailsPopover";
 import {CopyToClipboardButton} from "./CopyToClipboard";
 import Highlight from "react-highlight";
-import {ConsoleSqlOutlined} from "@ant-design/icons";
+import {ConsoleSqlOutlined, DeleteOutlined} from "@ant-design/icons";
 import React from "react";
 import {QueryPlan} from "../SelfHosted/services/QueryExplainer.service";
+import {betterDate} from "./utils";
 
 interface PlansListProps {
     items: QueryPlan[]
     clusterId?: string
     onClick?: (item: QueryPlan) => void
+    onDelete?: (item: QueryPlan) => void
 }
 
 export function PlansList(props: PlansListProps) {
     const navigate = useNavigate();
-    const onClick = (item: QueryPlan) => {
-        navigate(`/clusters/${props.clusterId}/plans/${item.id}`)
-    }
-
     const getPrimaryText = (item: QueryPlan) => {
-      if (item.alias) {
-          return <>{item.alias} ({item.id})</>
-      }
+        if (item.alias) {
+            return <>{item.alias} ({item.id})</>
+        }
 
-      return <>{item.id}</>
+        return <>{item.id}</>
     }
 
     return (
@@ -32,10 +30,28 @@ export function PlansList(props: PlansListProps) {
             sx={{width: '100%', bgcolor: 'background.paper'}}
         >
             {props.items.map(item => (
-                <ListItem key={item.id} disablePadding>
-                    <ListItemButton onClick={() => props.onClick ? props.onClick(item) : onClick(item)}>
-                        <ListItemText primary={getPrimaryText(item)} secondary={item.period_start.toISOString()}/>
-                    </ListItemButton>
+                <ListItem key={item.id} alignItems='flex-start'>
+                    <ListItemText
+                        primary={
+                            <Typography
+                                onClick={() => props.onClick(item)}
+                                sx={{
+                                    cursor: 'pointer',
+                                    color: (theme) => theme.palette.primary.main,
+                                    '&:hover': {
+                                        color: (theme) => theme.palette.primary.dark,
+                                        textDecoration: 'underline'
+                                    }
+                                }}
+                            >
+                                {getPrimaryText(item)}
+                            </Typography>
+                        }
+                        secondary={betterDate(item.period_start)}
+                    />
+                    <ListItemIcon sx={{pr: 4}}>
+                        <DeleteOutlined onClick={() => props.onDelete(item)} />
+                    </ListItemIcon>
                     <GenericDetailsPopover
                         name={"query"}
                         content={
@@ -53,6 +69,7 @@ export function PlansList(props: PlansListProps) {
                             <ConsoleSqlOutlined/>
                         </ListItemIcon>
                     </GenericDetailsPopover>
+
                 </ListItem>
             ))}
         </List>

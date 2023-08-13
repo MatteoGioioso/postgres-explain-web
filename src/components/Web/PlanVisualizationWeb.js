@@ -11,6 +11,7 @@ import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
 import {queryExplainerService} from "./ioc";
 import {useFocus} from "../CoreModules/Plan/hooks";
+import {GeneralStats} from "../CoreModules/Plan/stats/GeneralStats";
 
 const PlanVisualizationWeb = () => {
     const [error, setError] = useState();
@@ -54,8 +55,10 @@ const PlanVisualizationWeb = () => {
                         />)
                     }
                     {Boolean(explained) && (
-                        <GeneralStatsTable
+                        <GeneralStats
                             stats={explained.stats}
+                            jitStats={explained.jit_stats}
+                            triggers={explained.triggers_stats}
                         />)
                     }
                     {Boolean(explained) && (

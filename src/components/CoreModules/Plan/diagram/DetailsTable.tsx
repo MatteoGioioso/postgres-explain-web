@@ -128,31 +128,37 @@ export const DetailsTable = () => {
                                     </GenericDetailsPopover>
                                 </Row>
 
-                                <Row
-                                    name="Reads"
-                                    color={getPercentageColor(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read, theme)}
-                                    mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_read)}
-                                    showWarning={getPercentage(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read) >= 25}
-                                >
-                                    <BufferReadsCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
-                                </Row>
+                                {data.row.does_contain_buffers && (
+                                    <>
+                                        <Row
+                                            name="Reads"
+                                            color={getPercentageColor(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read, theme)}
+                                            mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_read)}
+                                            showWarning={getPercentage(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read) >= 25}
+                                        >
+                                            <BufferReadsCellCollapsedContent row={data.row} expanded={true} stats={data.stats}
+                                                                             theme={theme}/>
+                                        </Row>
 
-                                <Row
-                                    name="Written"
-                                    color={getPercentageColor(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written, theme)}
-                                    mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_written)}
-                                    showWarning={getPercentage(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written) > 25}
-                                >
-                                    <BufferWrittenCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
-                                </Row>
+                                        <Row
+                                            name="Written"
+                                            color={getPercentageColor(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written, theme)}
+                                            mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_written)}
+                                            showWarning={getPercentage(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written) > 25}
+                                        >
+                                            <BufferWrittenCellCollapsedContent row={data.row} expanded={true} stats={data.stats}
+                                                                               theme={theme}/>
+                                        </Row>
 
-                                <Row
-                                    name="Cache"
-                                    mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_hits)}
-                                >
-                                    <BufferHitsCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
-                                </Row>
-
+                                        <Row
+                                            name="Cache"
+                                            mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_hits)}
+                                        >
+                                            <BufferHitsCellCollapsedContent row={data.row} expanded={true} stats={data.stats}
+                                                                            theme={theme}/>
+                                        </Row>
+                                    </>
+                                )}
 
                                 <Row name="Info">
                                     <NodeStats row={data.row} expanded={true} stats={data.stats} theme={theme}/>

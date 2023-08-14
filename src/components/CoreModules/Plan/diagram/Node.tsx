@@ -25,6 +25,7 @@ import {
 import {PlanRow, Stats} from "../types";
 import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
+import {GenericDetailsPopover} from "../../GenericDetailsPopover";
 
 interface NodeProps {
     data: PlanRow
@@ -110,30 +111,49 @@ const Node = ({data, stats, theme}: NodeProps) => {
                             </Typography>
                             <Grid item>
                                 {Boolean(data.workers.launched) && (
-                                    <Chip
-                                        style={{backgroundColor: theme.palette.primary['100']}}
-                                        icon={<ForkOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                                        sx={{ml: 1.25, pl: 1}}
-                                        label={data.workers.launched + 1}
-                                        size="small"
-                                    />
+                                    <GenericDetailsPopover
+                                        name={"workers"}
+                                        content={`Number of workers`}
+                                        keepCloseCondition={!isFocused}
+                                    >
+                                        <Chip
+                                            style={{backgroundColor: theme.palette.primary['100'], cursor: 'inherit'}}
+                                            icon={<ForkOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                            sx={{ml: 1.25, pl: 1}}
+                                            label={data.workers.launched + 1}
+                                            size="small"
+                                        />
+                                    </GenericDetailsPopover>
                                 )}
                                 {Boolean(data.loops > 1) && (
-                                    <Chip
-                                        style={{backgroundColor: theme.palette.primary['100']}}
-                                        icon={<Loading3QuartersOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                                        sx={{ml: 1.25, pl: 1}}
-                                        label={betterNumbers(data.loops / (data.workers.launched + 1))}
-                                        size="small"
-                                    />
+                                    <GenericDetailsPopover
+                                        name={"loops"}
+                                        content={`Number of loops per workers`}
+                                        keepCloseCondition={!isFocused}
+                                    >
+                                        <Chip
+                                            style={{backgroundColor: theme.palette.primary['100'], cursor: 'inherit'}}
+                                            icon={<Loading3QuartersOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                            sx={{ml: 1.25, pl: 1}}
+                                            label={betterNumbers(data.loops / (data.workers.launched + 1))}
+                                            size="small"
+                                        />
+                                    </GenericDetailsPopover>
+
                                 )}
                                 {showChipsBasedOnPercentage(getPercentage(data.exclusive, data.execution_time)) && (
-                                    <Chip
-                                        style={{backgroundColor: exclusiveTimeColor}}
-                                        icon={<FieldTimeOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                                        sx={{ml: 1.25, pl: 1}}
-                                        size="small"
-                                    />
+                                    <GenericDetailsPopover
+                                        name={"timing"}
+                                        content={'Time'}
+                                        keepCloseCondition={!isFocused}
+                                    >
+                                        <Chip
+                                            style={{backgroundColor: exclusiveTimeColor, cursor: 'inherit'}}
+                                            icon={<FieldTimeOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                            sx={{ml: 1.25, pl: 1}}
+                                            size="small"
+                                        />
+                                    </GenericDetailsPopover>
                                 )}
                                 {showChipsBasedOnPercentage(getPercentage(data.costs.total_cost, stats.max_cost)) && (
                                     <Chip
@@ -182,16 +202,18 @@ const Node = ({data, stats, theme}: NodeProps) => {
                             </Grid>
                         </Grid>
                     </Stack>
-                    {/*{showChipsBasedOnPercentage(exclusiveTimePercentage) && (*/}
-                    <Box sx={{pt: 2, pb: 2}}>
-                        <LinearProgressWithLabel
-                            cellWarningColor={exclusiveTimeColor}
-                            theme={theme}
-                            value={exclusiveTimePercentage}
-                            time={data.exclusive}
-                        />
-                    </Box>
-                    {/*)}*/}
+
+                    {Boolean(data.exclusive) && (
+                        <Box sx={{pt: 2, pb: 2}}>
+                            <LinearProgressWithLabel
+                                cellWarningColor={exclusiveTimeColor}
+                                theme={theme}
+                                value={exclusiveTimePercentage}
+                                time={data.exclusive}
+                            />
+                        </Box>
+                    )}
+
                     <Box sx={{pt: 1}}>
                         <Typography sx={{color: `${exclusiveTimeColor || 'primary'}.main`}}>
                             Rows returned: {` `}

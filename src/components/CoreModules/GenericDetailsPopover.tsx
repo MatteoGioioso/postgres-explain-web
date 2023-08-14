@@ -32,7 +32,7 @@ export const GenericDetailsPopover = (props: { name: string, content: any, child
                 {props.children}
             </span>
             <Popover
-                transitionDuration={1000}
+                transitionDuration={200}
                 id="mouse-over-popover"
                 sx={{
                     width: '1200px',

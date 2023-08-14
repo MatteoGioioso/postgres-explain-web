@@ -6,12 +6,12 @@ import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
 import {ErrorAlert} from "../ErrorReporting";
 import {useParams} from "react-router-dom";
 import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
-import {GeneralStatsTable} from "../CoreModules/Plan/stats/GeneralStatsTable";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {queryExplainerService} from "./ioc";
 import {RawQuery} from "../CoreModules/Plan/stats/RawQuery";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
+import {GeneralStats} from "../CoreModules/Plan/stats/GeneralStats";
 
 const PlanVisualizationSelfHosted = () => {
     const [error, setError] = useState()
@@ -37,41 +37,58 @@ const PlanVisualizationSelfHosted = () => {
         <Grid container>
             {error && <ErrorAlert error={error}/>}
             <Grid container>
-                <TableTabs tabs={["Diagram", "Table", "Stats", "Indexes", "Tables", "Nodes", "Raw plan", "Query"]}>
-                    {Boolean(explained) && (
-                        <SummaryDiagram
+                <TableTabs tabs={[
+                    {
+                        name: "Diagram", component: () => <SummaryDiagram
                             summary={explained.summary}
                             stats={explained.stats}
-                        />)
-                    }
-                    {Boolean(explained) && (
-                        <SummaryTable
+                        />,
+                        show: Boolean(explained)
+                    },
+                    {
+                        name: "Table",
+                        component: () => <SummaryTable
                             summary={explained.summary}
                             stats={explained.stats}
-                        />)
-                    }
-                    {Boolean(explained) && (
-                        <GeneralStatsTable
+                        />,
+                        show: Boolean(explained)
+                    },
+                    {
+                        name: "Stats",
+                        component: () => <GeneralStats
                             stats={explained.stats}
-                        />)
-                    }
-                    {Boolean(explained) && (
-                        <GenericStatsTable stats={explained.indexes_stats} headCells={indexesHeadCells}/>
-                    )}
-                    {Boolean(explained) && (
-                        <GenericStatsTable stats={explained.tables_stats} headCells={tablesHeadCells}/>
-                    )}
-                    {Boolean(explained) && (
-                        <GenericStatsTable stats={explained.nodes_stats} headCells={nodesHeadCells}/>
-                    )}
-
-                    {Boolean(explained) && (
-                        <RawPlan plan={explained.original_plan}/>
-                    )}
-                    {Boolean(explained) && (
-                        <RawQuery query={explained.query}/>
-                    )}
-                </TableTabs>
+                            jitStats={explained.jit_stats}
+                            triggers={explained.triggers_stats}
+                        />,
+                        show: Boolean(explained)
+                    },
+                    {
+                        name: "Indexes",
+                        component: () => <GenericStatsTable stats={explained.indexes_stats} headCells={indexesHeadCells}/>,
+                        show: Boolean(explained)
+                    },
+                    {
+                        name: "Tables",
+                        component: () => <GenericStatsTable stats={explained.tables_stats} headCells={tablesHeadCells}/>,
+                        show: Boolean(explained)
+                    },
+                    {
+                        name: "Nodes",
+                        component: () => <GenericStatsTable stats={explained.nodes_stats} headCells={nodesHeadCells}/>,
+                        show: Boolean(explained)
+                    },
+                    {
+                        name: "Query",
+                        component: () => <RawQuery query={explained.query}/>,
+                        show: Boolean(explained)
+                    },
+                    {
+                        name: "Raw plan",
+                        component: () => <RawPlan plan={explained.original_plan}/>,
+                        show: Boolean(explained)
+                    },
+                ]}
+                />
             </Grid>
         </Grid>
     );

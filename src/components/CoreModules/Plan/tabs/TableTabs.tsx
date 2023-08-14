@@ -32,7 +32,29 @@ export function UnmountableTabPanel(props) {
     );
 }
 
-export const TableTabs = (props) => {
+interface TabProp {
+    name: string
+    component: () => React.JSX.Element
+    show: boolean
+}
+
+interface TableTabsProps {
+    tabs: TabProp[]
+}
+
+function RenderTab(index: number, tab: TabProp, tabIndex: number) {
+    return index === 0 ? (
+        <UnmountableTabPanel key={tab.name} index={index} value={tabIndex}>
+            {tab.component()}
+        </UnmountableTabPanel>
+    ) : (
+        <CustomTabPanel key={tab.name} index={index} value={tabIndex}>
+            {tab.component()}
+        </CustomTabPanel>
+    );
+}
+
+export const TableTabs = (props: TableTabsProps) => {
     const {tabIndex, setTabIndex} = useContext(TableTabsContext);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -46,29 +68,23 @@ export const TableTabs = (props) => {
                 onChange={handleChange}
                 aria-label="table tabs"
             >
-                {props.tabs.map(t => (
+                {props.tabs.filter(t => t.show).map(t => (
                     <Tab
-                        key={t}
+                        key={t.name}
                         label={
                             <Grid container alignItems="center" justifyContent="space-between">
                                 <Grid item>
-                                    <Typography variant="h5">{t}</Typography>
+                                    <Typography variant="h5">{t.name}</Typography>
                                 </Grid>
                             </Grid>
                         }
                     />
                 ))}
             </Tabs>
-            {props.children.map((tab, index) => index == 0 ? (
-                    <UnmountableTabPanel key={index} index={index} value={tabIndex}>
-                        {tab}
-                    </UnmountableTabPanel>
-                ) : (
-                    <CustomTabPanel key={index} index={index} value={tabIndex}>
-                        {tab}
-                    </CustomTabPanel>
-                )
-            )}
+            {props.tabs
+                .filter(tab => tab.show)
+                .map((tab, index) => RenderTab(index, tab, tabIndex))
+            }
         </Box>
     )
 }

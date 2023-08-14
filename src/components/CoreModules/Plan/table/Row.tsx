@@ -2,7 +2,17 @@ import {PlanRow, Stats} from "../types";
 import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
 import {betterNumbers, betterTiming, getPercentageColor} from "../../utils";
 import React, {memo, useContext, useEffect, useState} from "react";
-import {BufferHitsCell, BufferReadsCell, BufferWrittenCell, InfoCell, RowsCell, RowsEstimationCell, TimingCell} from "./Cells";
+import {
+    BufferHitsCell,
+    BufferReadsCell,
+    BufferWrittenCell,
+    InfoCell,
+    isColumnShowing,
+    LoopsCell,
+    RowsCell,
+    RowsEstimationCell,
+    TimingCell
+} from "./Cells";
 import {useTheme} from "@mui/material/styles";
 import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons";
 import {ExpandMore} from "../ExpandMore";
@@ -12,10 +22,11 @@ import {TableTabsContext} from "../Contexts";
 export interface RowProps {
     row: PlanRow
     stats: Stats
+    hidedColumns: { [key: string]: boolean }
 }
 
 
-export const Row = memo(({row, stats}: RowProps) => {
+export const Row = memo(({row, stats, hidedColumns}: RowProps) => {
     const theme = useTheme();
     const {isFocused, switchToNode, isUnfocused, closeFocusNavigation, focus} = useFocus(row.node_id);
     const [expanded, setExpanded] = useState(isFocused);
@@ -63,59 +74,96 @@ export const Row = memo(({row, stats}: RowProps) => {
             onMouseEnter={handleRowHover}
             onMouseLeave={handleRowLeave}
         >
-            <TimingCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'} hovered={rowHovered}/>
 
-            <TimingCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'} hovered={rowHovered}/>
+            {
+                [
+                    {
+                        id: 'exclusive',
+                        label: 'Time',
+                        component: <TimingCell prop={row.exclusive} totalProp={row.execution_time} name={'Exclusive time'}
+                                               hovered={rowHovered}/>
+                    },
+                    {
+                        id: 'inclusive',
+                        label: 'Cumulative Time',
+                        component: <TimingCell prop={row.inclusive} totalProp={row.execution_time} name={'Inclusive time'}
+                                               hovered={rowHovered}/>
+                    },
+                    {
+                        id: 'rows',
+                        label: 'Rows',
+                        component: <RowsCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
 
-            <RowsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+                    },
+                    {
+                        id: 'rows_x',
+                        label: 'Rows E',
+                        component: <RowsEstimationCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
 
-            <RowsEstimationCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
+                    },
+                    {
+                        id: 'loops',
+                        label: 'Loops',
+                        component: <LoopsCell row={row} expanded={expanded} stats={stats}/>
 
-            <TableCell align="right">
-                {betterNumbers(row.loops)} / {row.workers.launched + 1}
-                <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    {Boolean(row.workers.planned) && (
-                        <Typography
-                            variant='subtitle2'>Workers Planned: {row.workers.planned}
-                        </Typography>
-                    )}
-                    {Boolean(row.workers.launched) && (
-                        <Typography
-                            variant='subtitle2'>Workers Launched: {row.workers.launched}
-                        </Typography>
-                    )}
-                </Collapse>
-            </TableCell>
+                    },
+                    {
+                        id: 'reads',
+                        label: 'Reads',
+                        component: <BufferReadsCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
 
-            <BufferReadsCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
+                    },
+                    {
+                        id: 'written',
+                        label: 'Written',
+                        component: <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
 
-            <BufferWrittenCell row={row} expanded={expanded} stats={stats} theme={theme} hovered={rowHovered}/>
+                    },
+                    {
+                        id: 'hits',
+                        label: 'Cache',
+                        component: <BufferHitsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
-            <BufferHitsCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+                    },
+                    {
+                        id: 'node',
+                        label: 'Node',
+                        component: <InfoCell row={row} expanded={expanded} stats={stats} theme={theme}/>
 
-            <InfoCell row={row} expanded={expanded} stats={stats} theme={theme}/>
+                    },
+                    {
+                        id: 'actions',
+                        label: '',
+                        component: (
+                            <TableCell>
+                                <ExpandMore expand={expanded} onClick={handleExpandClick}>
+                                    <DownOutlined style={{fontSize: '10px'}}/>
+                                </ExpandMore>
+                                <IconButton onClick={() => {
+                                    setTabIndex(0)
+                                    // Probably a quirk or a bug with React flow, somehow setTimeout will help to focus on the now
+                                    setTimeout(() => {
+                                        switchToNode(row.node_id)
+                                    })
+                                }}>
+                                    <ApartmentOutlined style={{fontSize: '10px'}}/>
+                                </IconButton>
+                                {isFocused && (
+                                    <>
+                                        <IconButton onClick={closeFocusNavigation}>
+                                            <CloseOutlined style={{fontSize: '10px', color: 'inherit'}}/>
+                                        </IconButton>
+                                    </>
+                                )}
+                            </TableCell>
+                        )
 
-            <TableCell>
-                <ExpandMore expand={expanded} onClick={handleExpandClick}>
-                    <DownOutlined style={{fontSize: '10px'}}/>
-                </ExpandMore>
-                <IconButton onClick={() => {
-                    setTabIndex(0)
-                    // Probably a quirk or a bug with React flow, somehow setTimeout will help to focus on the now
-                    setTimeout(() => {
-                        switchToNode(row.node_id)
-                    })
-                }}>
-                    <ApartmentOutlined style={{fontSize: '10px'}}/>
-                </IconButton>
-                {isFocused && (
-                    <>
-                        <IconButton onClick={closeFocusNavigation}>
-                            <CloseOutlined style={{fontSize: '10px', color: 'inherit'}}/>
-                        </IconButton>
-                    </>
-                )}
-            </TableCell>
+                    },
+                ]
+                    .filter(row => isColumnShowing(row.id, hidedColumns))
+                    .map(value => value.component)
+
+            }
         </TableRow>
     );
 })

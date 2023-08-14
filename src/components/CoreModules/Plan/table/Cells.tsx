@@ -14,32 +14,13 @@ import {PlanRow, Property, Stats} from "../types";
 import {DollarOutlined, FilterOutlined} from "@ant-design/icons";
 import {GenericDetailsPopover} from "../../GenericDetailsPopover";
 
-export const getRowEstimateDirectionSymbol = (direction: string): string => {
-    switch (direction) {
-        case 'over':
-            return '↑'
-        case 'under':
-            return '↓'
-        default:
-            return ''
-    }
-}
-
-export const TimingCell = ({prop, totalProp, name, hovered}: { prop: number, totalProp: number, name?: string, hovered: boolean }) => {
-    const theme = useTheme();
-
-    return (
-        <TableCell
-            style={{
-                backgroundColor: getPercentageColor(prop, totalProp, theme, hovered)
-            }}
-        >
-            {betterTiming(prop)}
-        </TableCell>
-    )
-}
-
-export const headCells = (areBuffersPresent?: boolean) => [
+export const headCells = (): {
+    id: string,
+    label: string,
+    align?: string,
+    disablePadding?: boolean,
+    description?: string | React.JSX.Element
+}[] => [
     {
         id: 'exclusive',
         label: 'Time',
@@ -120,10 +101,32 @@ export interface CellProps {
     hovered?: boolean
 }
 
-export const RowsCell = ({row, expanded, theme}: CellProps) => {
+export const TimingCell = ({prop, totalProp, name, hovered}: { prop: number, totalProp: number, name?: string, hovered: boolean }) => {
+    const theme = useTheme();
+
     return (
-        <TableCell align="left" style={{wordWrap: 'break-word', whiteSpace: 'normal', width: '200px'}}>
-            {row.scopes.filters && (<FilterOutlined style={{color: theme.palette.primary.light, fontSize: '12px'}}/>)}
+        <TableCell
+            style={{
+                backgroundColor: getPercentageColor(prop, totalProp, theme, hovered)
+            }}
+        >
+            {betterTiming(prop)}
+        </TableCell>
+    )
+}
+
+export const RowsCell = ({row, expanded, theme, hovered}: CellProps) => {
+    return (
+        <TableCell
+            align="left"
+            style={{
+                wordWrap: 'break-word',
+                whiteSpace: 'normal',
+                width: '200px',
+                backgroundColor: getPercentageColor(row.rows.removed, row.rows.total, theme, hovered)
+            }}
+        >
+            {row.scopes.filters && (<FilterOutlined style={{marginRight: 4, color: theme.palette.secondary.dark, fontSize: '12px'}}/>)}
             {betterNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <RowsCellCollapsedContent row={row} expanded={expanded} stats={null}/>
@@ -161,6 +164,26 @@ export const RowsCellCollapsedContent = ({row}: CellProps) => {
                 )}
 
         </Box>
+    )
+}
+
+export const LoopsCell = ({row, expanded}: CellProps) => {
+    return (
+        <TableCell align="right">
+            {betterNumbers(row.loops)} / {row.workers.launched + 1}
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+                {Boolean(row.workers.planned) && (
+                    <Typography
+                        variant='subtitle2'>Workers Planned: {row.workers.planned}
+                    </Typography>
+                )}
+                {Boolean(row.workers.launched) && (
+                    <Typography
+                        variant='subtitle2'>Workers Launched: {row.workers.launched}
+                    </Typography>
+                )}
+            </Collapse>
+        </TableCell>
     )
 }
 
@@ -205,7 +228,8 @@ export const BufferWrittenCell = ({
                                       expanded, theme, row, stats, hovered
                                   }: CellProps) => {
     return (
-        <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme, hovered)}}>
+        <TableCell
+            style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme, hovered)}}>
             {betterDiskSizeFromBlocks(row.buffers.effective_blocks_written)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferWrittenCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
@@ -316,6 +340,7 @@ export function NodeStats({expanded, row, stats, theme}: { expanded: boolean, ro
             {scopesNames.map(scopeName => (
                 row.scopes[scopeName] && (
                     <GenericDetailsPopover
+                        key={scopeName}
                         style={{width: '1500px'}}
                         keepCloseCondition={row.scopes[scopeName].length <= theme.diagram.text.maxChars}
                         name={scopeName}
@@ -388,4 +413,19 @@ export const RenderProperty = ({property}: {
             <>{property.name}: {getFunctionFromKind(property.kind)((property[property.type]))}</>
         )
     )
+}
+
+export const getRowEstimateDirectionSymbol = (direction: string): string => {
+    switch (direction) {
+        case 'over':
+            return '↑'
+        case 'under':
+            return '↓'
+        default:
+            return ''
+    }
+}
+
+export function isColumnShowing(columnName: string, hidedColumns: { [key: string]: boolean }): boolean {
+    return !hidedColumns[columnName]
 }

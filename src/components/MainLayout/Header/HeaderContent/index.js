@@ -45,7 +45,7 @@ const HeaderContent = () => {
 
             <Box sx={{flexShrink: 0, ml: 0.75, pr: 1.5}}>
                 <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>
-                    <Typography variant="subtitle1">Postgres Explain</Typography>
+                    <Typography variant="h5">Postgres Explain</Typography>
                 </Stack>
             </Box>
 

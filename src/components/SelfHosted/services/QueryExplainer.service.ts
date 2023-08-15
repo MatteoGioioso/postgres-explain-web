@@ -1,25 +1,8 @@
 import {QueryExplainerRepository} from "../datalayer/QueryExplainer.repository";
 import {GetQueryPlanRequest, GetQueryPlansListRequest, SaveQueryPlanRequest} from "../proto/query_explainer.pb";
-import {Explained, IndexesStats, PlanRow, Stats} from "../../CoreModules/Plan/types";
+import {Explained} from "../../CoreModules/Plan/types";
 import {PlanService} from "../../CoreModules/Plan/parser";
-
-export interface QueryPlanResponse {
-    summary: PlanRow[]
-    stats: Stats
-    indexes_stats: IndexesStats
-}
-
-export interface QueryPlan {
-    summary?: PlanRow[];
-    stats?: Stats;
-    indexes_stats?: IndexesStats;
-    original_plan?: string;
-    query?: string;
-    queryId?: string;
-    id?: string;
-    period_start?: Date
-    alias?: string
-}
+import {QueryPlan, QueryPlanListItem} from "../../CoreModules/types";
 
 export class QueryExplainerService {
     private queryExplainerRepository: QueryExplainerRepository;
@@ -37,8 +20,16 @@ export class QueryExplainerService {
 
     async getQueryPlan(body: GetQueryPlanRequest): Promise<QueryPlan> {
         const response = await this.queryExplainerRepository.getQueryPlan(body)
-        const parsedResponse: QueryPlanResponse = JSON.parse(response.query_plan);
+        const parsedResponse: Explained = JSON.parse(response.query_plan);
         return {
+            alias: "",
+            id: response.plan_id,
+            jit_stats: undefined,
+            nodes_stats: undefined,
+            period_start: undefined,
+            query_id: response.query_id,
+            tables_stats: undefined,
+            triggers_stats: [],
             indexes_stats: parsedResponse.indexes_stats,
             stats: parsedResponse.stats,
             summary: parsedResponse.summary,
@@ -47,7 +38,7 @@ export class QueryExplainerService {
         }
     }
 
-    async getQueryPlansList(body: GetQueryPlansListRequest): Promise<QueryPlan[]> {
+    async getQueryPlansList(body: GetQueryPlansListRequest): Promise<QueryPlanListItem[]> {
         const response = await this.queryExplainerRepository.getQueryPlans({
             cluster_name: body.cluster_name,
         });

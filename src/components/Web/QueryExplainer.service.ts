@@ -1,19 +1,27 @@
 import {nanoid} from "nanoid";
 import store, {StoreType} from "store2";
 import {PlanService} from "../CoreModules/Plan/parser";
-import {QueryPlan} from "../SelfHosted/services/QueryExplainer.service";
-import {PlanRow} from "../CoreModules/Plan/types";
+import {Explained, PlanRow} from "../CoreModules/Plan/types";
 import {NodeData} from "../CoreModules/Plan/Contexts";
+import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
+import {ErrorReport} from "../ErrorReporting";
+
+interface SaveQueryPlanBody {
+    plan: string
+    query: string
+    alias: string
+}
 
 export class QueryExplainerService {
     private planService: PlanService;
     private plansStore: StoreType;
+
     constructor(planService: PlanService) {
         this.planService = planService
         this.plansStore = store.namespace('pgExplain-plans');
     }
 
-    async saveQueryPlan(body): Promise<string> {
+    async saveQueryPlan(body: SaveQueryPlanBody): Promise<string> {
         const plan = this.planService.fromSource(body.plan);
         // @ts-ignore
         const out = global.explain(plan)
@@ -24,17 +32,19 @@ export class QueryExplainerService {
                 message: out.error,
                 error_details: out.error_details,
                 stackTrace: out.error_stack,
-            }))
+            } as ErrorReport))
         } else {
             const id = nanoid(11)
-            this.plansStore.set(id, {
-                plan_id: id,
-                query_plan: JSON.parse(out.explained),
-                query_original_plan: plan,
+            const parsedPlan: Explained = JSON.parse(out.explained)
+            const planToSave: QueryPlan = {
+                id,
+                original_plan: plan,
                 query: body.query || "",
                 period_start: new Date(),
-                alias: body.alias
-            })
+                alias: body.alias,
+                ...parsedPlan
+            }
+            this.plansStore.set(id, planToSave)
             return id;
         }
     }
@@ -44,17 +54,17 @@ export class QueryExplainerService {
     }
 
     getQueryPlanNode(planId: string, nodeId: string): NodeData {
-        const response = this.plansStore.get(planId);
-        const foundNode = response.query_plan.summary.find(node => node.node_id === nodeId);
+        const response: QueryPlan = this.plansStore.get(planId);
+        const foundNode: PlanRow = response.summary.find(node => node.node_id === nodeId);
         return {
             row: foundNode,
-            stats: response.query_plan.stats
+            stats: response.stats
         }
     }
 
-    getQueryPlansList(): QueryPlan[] {
-        const itemsObj = this.plansStore.getAll();
-        const items = Object.values(itemsObj)
+    getQueryPlansList(): QueryPlanListItem[] {
+        const itemsObj: {[key: string]: QueryPlan} = this.plansStore.getAll();
+        const items: QueryPlan[] = Object.values(itemsObj)
         items.sort((a, b) => {
             if (new Date(a.period_start) > new Date(b.period_start)) {
                 return -1
@@ -62,8 +72,9 @@ export class QueryExplainerService {
 
             return 1;
         })
+
         return items.map(plan => ({
-            id: plan.plan_id,
+            id: plan.id,
             query: plan.query,
             period_start: new Date(plan.period_start),
             alias: plan.alias,

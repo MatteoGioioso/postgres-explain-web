@@ -19,7 +19,7 @@ const HeaderContent = () => {
 
     return (
         <>
-            {pathname !== '/' && (
+            {(pathname !== '/' && !pathname.includes('/share')) && (
                 <>
                     <Button component={RouterLink} to={'/'} variant='outlined' sx={{ml: 1, pt: 0.3, pb: 0.3, pl: 3, pr: 3}}>
                         <Box sx={{flexShrink: 0}}>

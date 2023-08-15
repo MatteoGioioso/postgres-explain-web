@@ -5,19 +5,19 @@ import {CopyToClipboardButton} from "./CopyToClipboard";
 import Highlight from "react-highlight";
 import {ConsoleSqlOutlined, DeleteOutlined} from "@ant-design/icons";
 import React from "react";
-import {QueryPlan} from "../SelfHosted/services/QueryExplainer.service";
 import {betterDate} from "./utils";
+import {QueryPlanListItem} from "./types";
 
 interface PlansListProps {
-    items: QueryPlan[]
+    items: QueryPlanListItem[]
     clusterId?: string
-    onClick?: (item: QueryPlan) => void
-    onDelete?: (item: QueryPlan) => void
+    onClick?: (item: QueryPlanListItem) => void
+    onDelete?: (item: QueryPlanListItem) => void
 }
 
 export function PlansList(props: PlansListProps) {
     const navigate = useNavigate();
-    const getPrimaryText = (item: QueryPlan) => {
+    const getPrimaryText = (item: QueryPlanListItem) => {
         if (item.alias) {
             return <>{item.alias} ({item.id})</>
         }

@@ -59,7 +59,7 @@ function TableToolBar({setHidedColumns, hidedColumns}: { hidedColumns: { [key: s
 
     return (
         <>
-            <Toolbar variant='dense'>
+            <Toolbar sx={{backgroundColor: '#fafafb'}} variant='dense'>
                 <Box sx={{flex: '1 1 100%'}}></Box>
                 <ExpandMore
                     expand={expanded}

@@ -1,4 +1,4 @@
-import {useContext, useEffect, useState} from 'react';
+import {ReactNode, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {
     Box,
@@ -12,7 +12,7 @@ import {Formik} from 'formik';
 import {QUERY_EXAMPLE_PLACEHOLDER, QUERY_PLAN_EXAMPLE_PLACEHOLDER} from "../utils";
 import MainCard from '../CoreModules/MainCard';
 import {queryExplainerService} from "./ioc";
-import {ErrorAlert} from "../ErrorReporting";
+import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 
 import {PlansList} from "../CoreModules/PlansList";
 import InputLabel from "@mui/material/InputLabel";
@@ -38,7 +38,7 @@ const FormCard = ({children, ...other}) => (
 
 const FormPlan = () => {
     const navigate = useNavigate();
-    const [error, setError] = useState();
+    const [error, setError] = useState<ErrorReport>();
     const [plansList, setPlansList] = useState([])
 
     useEffect(() => {
@@ -94,6 +94,7 @@ const FormPlan = () => {
                         validate={values => {
                             const errors = {};
                             if (!values.plan) {
+                                // @ts-ignore
                                 errors.plan = 'Required';
                             }
                     
@@ -158,17 +159,12 @@ const FormPlan = () => {
 
                                             {touched.plan && errors.plan && (
                                                 <FormHelperText error id="helper-text-plan-signup">
-                                                    {errors.plan}
+                                                    {errors.plan as ReactNode}
                                                 </FormHelperText>
                                             )}
                                         </Stack>
                                     </Grid>
 
-                                    {errors.submit && (
-                                        <Grid item xs={12}>
-                                            <FormHelperText error>{errors.submit}</FormHelperText>
-                                        </Grid>
-                                    )}
                                     <Grid item xs={12}>
                                         <Typography variant="body1">
                                             Postgres explain uses wasm and does not have a backend. <b>I do not save any of the information

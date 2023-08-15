@@ -1,7 +1,13 @@
 import React from 'react'
 import {Alert, AlertTitle, Box, Button, Divider, Link, Typography} from "@mui/material";
 
-export const ErrorAlert = ({error}) => {
+export interface ErrorReport {
+    message: string
+    error_details?: string
+    stackTrace?: string
+}
+
+export const ErrorAlert = ({error}: {error: ErrorReport}) => {
     const {message, error_details, stackTrace} = error
     return (
         <div>

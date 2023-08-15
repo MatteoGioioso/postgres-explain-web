@@ -2,7 +2,7 @@ import {useContext, useEffect, useState} from 'react';
 import {Grid} from '@mui/material';
 import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
 import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
-import {ErrorAlert} from "../ErrorReporting";
+import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {useParams} from "react-router-dom";
 import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
@@ -12,21 +12,20 @@ import {queryExplainerService} from "./ioc";
 import {useFocus} from "../CoreModules/Plan/hooks";
 import {GeneralStats} from "../CoreModules/Plan/stats/GeneralStats";
 import {RawQuery} from "../CoreModules/Plan/stats/RawQuery";
+import {PlanToolbar} from "./PlanToolbar";
+import {QueryPlan} from "../CoreModules/types";
 
 const PlanVisualizationWeb = () => {
-    const [error, setError] = useState();
+    const [error, setError] = useState<ErrorReport>();
     const {plan_id} = useParams();
-    const {setExplained, explained} = useContext(NodeContext);
-    const [originalPlan, setOriginalPlan] = useState("{}")
-    const [query, setQuery] = useState("")
+    // const {setExplained, explained} = useContext(NodeContext);
+    const [enrichedQueryPlan, setEnrichedQueryPlan] = useState<QueryPlan>(null)
     const {closeFocusNavigation} = useFocus();
 
     function fetchQueryPlan(planID) {
         try {
             const response = queryExplainerService.getQueryPlan(planID);
-            setExplained(response.query_plan)
-            setOriginalPlan(response.query_original_plan)
-            setQuery(response.query)
+            setEnrichedQueryPlan(response)
         } catch (e) {
             setError({
                 message: e.message,
@@ -41,57 +40,58 @@ const PlanVisualizationWeb = () => {
 
     return (
         <Grid container>
+            <PlanToolbar />
             {error && <ErrorAlert error={error}/>}
             <Grid container>
                 <TableTabs tabs={[
                     {
                         name: "Diagram", component: () => <SummaryDiagram
-                            summary={explained.summary}
-                            stats={explained.stats}
+                            summary={enrichedQueryPlan.summary}
+                            stats={enrichedQueryPlan.stats}
                         />,
-                        show: Boolean(explained)
+                        show: Boolean(enrichedQueryPlan)
                     },
                     {
                         name: "Table",
                         component: () => <SummaryTable
-                            summary={explained.summary}
-                            stats={explained.stats}
+                            summary={enrichedQueryPlan.summary}
+                            stats={enrichedQueryPlan.stats}
                         />,
-                        show: Boolean(explained)
+                        show: Boolean(enrichedQueryPlan)
                     },
                     {
                         name: "Stats",
                         component: () => <GeneralStats
-                            stats={explained.stats}
-                            jitStats={explained.jit_stats}
-                            triggers={explained.triggers_stats}
+                            stats={enrichedQueryPlan.stats}
+                            jitStats={enrichedQueryPlan.jit_stats}
+                            triggers={enrichedQueryPlan.triggers_stats}
                         />,
-                        show: Boolean(explained)
+                        show: Boolean(enrichedQueryPlan)
                     },
                     {
                         name: "Indexes",
-                        component: () => <GenericStatsTable stats={explained.indexes_stats} headCells={indexesHeadCells}/>,
-                        show: Boolean(explained)
+                        component: () => <GenericStatsTable stats={enrichedQueryPlan.indexes_stats} headCells={indexesHeadCells}/>,
+                        show: Boolean(enrichedQueryPlan)
                     },
                     {
                         name: "Tables",
-                        component: () => <GenericStatsTable stats={explained.tables_stats} headCells={tablesHeadCells}/>,
-                        show: Boolean(explained)
+                        component: () => <GenericStatsTable stats={enrichedQueryPlan.tables_stats} headCells={tablesHeadCells}/>,
+                        show: Boolean(enrichedQueryPlan)
                     },
                     {
                         name: "Nodes",
-                        component: () => <GenericStatsTable stats={explained.nodes_stats} headCells={nodesHeadCells}/>,
-                        show: Boolean(explained)
+                        component: () => <GenericStatsTable stats={enrichedQueryPlan.nodes_stats} headCells={nodesHeadCells}/>,
+                        show: Boolean(enrichedQueryPlan)
                     },
                     {
                         name: "Query",
-                        component: () => <RawQuery query={query}/>,
-                        show: Boolean(query)
+                        component: () => <RawQuery query={enrichedQueryPlan.query}/>,
+                        show: Boolean(enrichedQueryPlan?.query)
                     },
                     {
                         name: "Raw plan",
-                        component: () => <RawPlan plan={originalPlan}/>,
-                        show: Boolean(originalPlan)
+                        component: () => <RawPlan plan={enrichedQueryPlan.original_plan}/>,
+                        show: Boolean(enrichedQueryPlan?.original_plan)
                     },
                 ]}
                 />

@@ -7,7 +7,8 @@ import {analyticsService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
 import {QueriesListTable} from "../CoreModules/Tables/QueriesListTable";
 import {PlansList} from "../CoreModules/PlansList";
-import {QueryPlan} from "./services/QueryExplainer.service";
+
+import {QueryPlan} from "../CoreModules/types";
 
 const Wrapper = ({children, title, sx = {}, other}) => (
     <>

@@ -1,7 +1,7 @@
 import {nanoid} from "nanoid";
 import store, {StoreType} from "store2";
 import {PlanService} from "../CoreModules/Plan/parser";
-import {Explained, PlanRow} from "../CoreModules/Plan/types";
+import {Explained, ExplainedError, ExplainedResponse, PlanRow} from "../CoreModules/Plan/types";
 import {NodeData} from "../CoreModules/Plan/Contexts";
 import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
 import {ErrorReport} from "../ErrorReporting";
@@ -24,15 +24,10 @@ export class QueryExplainerService {
     async saveQueryPlan(body: SaveQueryPlanBody): Promise<string> {
         const plan = this.planService.fromSource(body.plan);
         // @ts-ignore
-        const out = global.explain(plan)
+        const out: ExplainedResponse = global.explain(plan)
 
         if (out.error) {
-            console.error(`${out.error}: ${out.error_details}`)
-            throw new Error(JSON.stringify({
-                message: out.error,
-                error_details: out.error_details,
-                stackTrace: out.error_stack,
-            } as ErrorReport))
+            throw new Error(out.error)
         } else {
             const id = nanoid(11)
             const parsedPlan: Explained = JSON.parse(out.explained)

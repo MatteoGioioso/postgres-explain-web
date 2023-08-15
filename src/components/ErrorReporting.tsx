@@ -1,36 +1,47 @@
 import React from 'react'
-import {Alert, AlertTitle, Box, Button, Divider, Link, Typography} from "@mui/material";
+import {Alert, AlertColor, AlertTitle, Box, Button, Grid, IconButton, Link, Stack, Typography} from "@mui/material";
+import {CloseOutlined} from "@ant-design/icons";
+import {ExplainedError} from "./CoreModules/Plan/types";
 
-export interface ErrorReport {
-    message: string
-    error_details?: string
-    stackTrace?: string
+export interface ErrorReport extends ExplainedError {
+    severity?: AlertColor
+    description?: string | React.JSX.Element
 }
 
-export const ErrorAlert = ({error}: {error: ErrorReport}) => {
-    const {message, error_details, stackTrace} = error
+export const ErrorAlert = ({error, setError}: { error: ErrorReport, setError: (err: ErrorReport) => void }) => {
+    const {severity = "error"} = error
+    console.log(error)
     return (
-        <div>
-            <Alert severity="error" action={
-                <Button
-                    color="inherit"
-                    size="small"
-                    component={Link}
-                    href={`https://github.com/MatteoGioioso/postgres-explain-web/issues/new?title=[Explain web]: add your title (Please attach also the full query plan)&body=${JSON.stringify(error, null, 2)}`}
-                >
-                    REPORT ISSUE
-                </Button>
-            }>
-                <AlertTitle><Typography variant='h5'>{message}</Typography></AlertTitle>
-                <Typography variant='h6'>{error_details}</Typography>
+        <Grid container justifyContent='center'>
+            <Alert
+                sx={{p: 2}}
+                severity={severity as AlertColor}
+                action={
+                    <Stack direction='row'>
+                        <IconButton
+                            size='medium'
+                            onClick={() => setError(null)}
+                        >
+                            <CloseOutlined/>
+                        </IconButton>
+                    </Stack>
+                }
+            >
+                <AlertTitle><Typography variant='h4'>{error.error}</Typography></AlertTitle>
+                <Typography variant='h6'>{error.error_details}</Typography>
+                {error.description}
 
-                <Box pt={3}>
-                    <Typography variant='h6'>Stack: </Typography>
-                    <div>{stackTrace ? stackTrace
-                        .split("\n")
-                        .map((line, i) => <p key={i} style={{margin: "1px", fontSize: "12px", paddingLeft: 3*i}}>{line}</p>) : '-'}</div>
-                </Box>
+                {Boolean(error.error_stack) && (
+                    <Box pt={3}>
+                        <Typography variant='h6'>Stack: </Typography>
+                        <div>{error.error_stack ? error.error_stack
+                            .split("\n")
+                            .map((line, i) => <p key={i}
+                                                 style={{margin: "1px", fontSize: "12px", paddingLeft: 3 * i}}>{line}</p>) : '-'}</div>
+                    </Box>
+                )}
             </Alert>
-        </div>
+        </Grid>
     )
 }
+

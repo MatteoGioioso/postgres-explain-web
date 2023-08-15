@@ -1,19 +1,22 @@
 import {Button, IconButton, Paper, Snackbar, Stack} from "@mui/material";
 import {ShareAltOutlined} from "@ant-design/icons";
 import {useParams} from "react-router-dom";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 export const PlanToolbar = (props) => {
-    const [open, setOpen] = useState<boolean>(false)
     const {plan_id} = useParams();
+    const [open, setOpen] = useState<boolean>(false)
 
     const createPlanSharableLink = () => {
         const host = window.location.host;
-        // @ts-ignore
         const link = `${host}/plans/${plan_id}`
         navigator.clipboard.writeText(link)
         setOpen(true)
     }
+
+    useEffect(() => {
+
+    }, []);
 
     return (
         <Paper

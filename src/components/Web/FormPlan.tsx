@@ -16,6 +16,8 @@ import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 
 import {PlansList} from "../CoreModules/PlansList";
 import InputLabel from "@mui/material/InputLabel";
+import {ExplainedError} from "../CoreModules/Plan/types";
+import {WasmErrorDescription} from "./Errors";
 
 
 const FormWrapper = ({children}) => (
@@ -51,158 +53,159 @@ const FormPlan = () => {
     }
 
     return (
-        <Grid container>
-            <Grid item xs={8}>
-                <FormWrapper>
-                    {error && (
-                        <Box sx={{pb: 2}}>
-                            <ErrorAlert error={error}/>
-                        </Box>
-                    )}
-                    <Formik
-                        initialValues={{
-                            plan: '',
-                            alias: '',
-                            query: ''
-                        }}
-                        onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
-                            try {
-                                const planId = await queryExplainerService.saveQueryPlan({
-                                    plan: values.plan,
-                                    alias: values.alias,
-                                    query: values.query,
-                                });
-                                navigate(`/plans/${planId}`)
-                            } catch (e) {
-                                try {
-                                    const out = JSON.parse(e.message);
-
-                                    setError({
-                                        message: out.error,
-                                        error_details: out.error_details,
-                                        stackTrace: out.stackTrace,
-                                    })
-                                } catch (_) {
-                                    setError({
-                                        message: e.message,
-                                        error_details: "",
-                                        stackTrace: e.stack,
-                                    })
-                                }
-                            }
-                        }}
-                        validate={values => {
-                            const errors = {};
-                            if (!values.plan) {
-                                // @ts-ignore
-                                errors.plan = 'Required';
-                            }
-                    
-                            return errors;
-                        }}
-                    >
-                        {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
-                            <form noValidate onSubmit={handleSubmit}>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12}>
-                                        <Stack spacing={2}>
-                                            <Stack spacing={0}>
-                                                <InputLabel htmlFor="alias">Alias</InputLabel>
-                                                <TextField
-                                                    fullWidth
-                                                    id="alias"
-                                                    type="text"
-                                                    value={values.alias}
-                                                    name="alias"
-                                                    onBlur={handleBlur}
-                                                    onChange={handleChange}
-                                                    placeholder={'Plan alias'}
-                                                    inputProps={{}}
-                                                    rows={1}
-                                                />
-                                            </Stack>
-
-                                            <Stack spacing={0}>
-                                                <InputLabel htmlFor="plan">Plan*</InputLabel>
-                                                <TextField
-                                                    fullWidth
-                                                    error={Boolean(touched.plan && errors.plan)}
-                                                    id="plan"
-                                                    type="text"
-                                                    value={values.plan}
-                                                    name="plan"
-                                                    onBlur={handleBlur}
-                                                    onChange={handleChange}
-                                                    placeholder={QUERY_PLAN_EXAMPLE_PLACEHOLDER}
-                                                    inputProps={{}}
-                                                    multiline
-                                                    rows={15}
-                                                />
-                                            </Stack>
-
-                                            <Stack spacing={0}>
-                                                <InputLabel htmlFor="query">Query</InputLabel>
-                                                <TextField
-                                                    fullWidth
-                                                    id="query"
-                                                    type="text"
-                                                    value={values.query}
-                                                    name="query"
-                                                    onBlur={handleBlur}
-                                                    onChange={handleChange}
-                                                    placeholder={QUERY_EXAMPLE_PLACEHOLDER}
-                                                    inputProps={{}}
-                                                    multiline
-                                                    rows={4}
-                                                />
-                                            </Stack>
-
-                                            {touched.plan && errors.plan && (
-                                                <FormHelperText error id="helper-text-plan-signup">
-                                                    {errors.plan as ReactNode}
-                                                </FormHelperText>
-                                            )}
-                                        </Stack>
-                                    </Grid>
-
-                                    <Grid item xs={12}>
-                                        <Typography variant="body1">
-                                            Postgres explain uses wasm and does not have a backend. <b>I do not save any of the information
-                                            provided
-                                            in this form</b>.
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            For the time being all your query plans, query and schemas are stored in the client. If any
-                                            changes to
-                                            this behaviour will occur, you will be notified.
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit"
-                                                variant="contained"
-                                                color="primary">
-                                            Explain
-                                        </Button>
-                                    </Grid>
-
-                                </Grid>
-                            </form>
-                        )}
-                    </Formik>
-                </FormWrapper>
-            </Grid>
-            <Grid item xs={4}>
-                <Box sx={{pl: 2}}>
-                    <PlansList
-                        items={plansList}
-                        onClick={(item) => {
-                            navigate(`/plans/${item.id}`)
-                        }}
-                        onDelete={onDeleteQueryPlan}
-                    />
+        <>
+            {error && (
+                <Box sx={{pb: 2}}>
+                    <ErrorAlert error={error} setError={setError}/>
                 </Box>
+            )}
+            <Grid container>
+                <Grid item xs={8}>
+                    <FormWrapper>
+                        <Formik
+                            initialValues={{
+                                plan: '',
+                                alias: '',
+                                query: ''
+                            }}
+                            onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
+                                try {
+                                    const planId = await queryExplainerService.saveQueryPlan({
+                                        plan: values.plan,
+                                        alias: values.alias,
+                                        query: values.query,
+                                    });
+                                    navigate(`/plans/${planId}`)
+                                } catch (e) {
+                                    try {
+                                        const out: ExplainedError = JSON.parse(e.message);
+                                        setError({
+                                            ...out,
+                                            description: <WasmErrorDescription error={out} />
+                                        })
+                                    } catch (_) {
+                                        setError({
+                                            error: e.message,
+                                            error_details: "",
+                                            error_stack: e.stack,
+                                        })
+                                    }
+                                }
+                            }}
+                            validate={values => {
+                                const errors = {};
+                                if (!values.plan) {
+                                    // @ts-ignore
+                                    errors.plan = 'Required';
+                                }
+
+                                return errors;
+                            }}
+                        >
+                            {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
+                                <form noValidate onSubmit={handleSubmit}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Stack spacing={2}>
+                                                <Stack spacing={0}>
+                                                    <InputLabel htmlFor="alias">Alias</InputLabel>
+                                                    <TextField
+                                                        fullWidth
+                                                        id="alias"
+                                                        type="text"
+                                                        value={values.alias}
+                                                        name="alias"
+                                                        onBlur={handleBlur}
+                                                        onChange={handleChange}
+                                                        placeholder={'Plan alias'}
+                                                        inputProps={{}}
+                                                        rows={1}
+                                                    />
+                                                </Stack>
+
+                                                <Stack spacing={0}>
+                                                    <InputLabel htmlFor="plan">Plan*</InputLabel>
+                                                    <TextField
+                                                        fullWidth
+                                                        error={Boolean(touched.plan && errors.plan)}
+                                                        id="plan"
+                                                        type="text"
+                                                        value={values.plan}
+                                                        name="plan"
+                                                        onBlur={handleBlur}
+                                                        onChange={handleChange}
+                                                        placeholder={QUERY_PLAN_EXAMPLE_PLACEHOLDER}
+                                                        inputProps={{}}
+                                                        multiline
+                                                        rows={15}
+                                                    />
+                                                </Stack>
+
+                                                <Stack spacing={0}>
+                                                    <InputLabel htmlFor="query">Query</InputLabel>
+                                                    <TextField
+                                                        fullWidth
+                                                        id="query"
+                                                        type="text"
+                                                        value={values.query}
+                                                        name="query"
+                                                        onBlur={handleBlur}
+                                                        onChange={handleChange}
+                                                        placeholder={QUERY_EXAMPLE_PLACEHOLDER}
+                                                        inputProps={{}}
+                                                        multiline
+                                                        rows={4}
+                                                    />
+                                                </Stack>
+
+                                                {touched.plan && errors.plan && (
+                                                    <FormHelperText error id="helper-text-plan-signup">
+                                                        {errors.plan as ReactNode}
+                                                    </FormHelperText>
+                                                )}
+                                            </Stack>
+                                        </Grid>
+
+                                        <Grid item xs={12}>
+                                            <Typography variant="body1">
+                                                Postgres explain uses wasm and does not have a backend. <b>I do not save any of the
+                                                information
+                                                provided
+                                                in this form</b>.
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                For the time being all your query plans, query and schemas are stored in the client. If any
+                                                changes to
+                                                this behaviour will occur, you will be notified.
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit"
+                                                    variant="contained"
+                                                    color="primary">
+                                                Explain
+                                            </Button>
+                                        </Grid>
+
+                                    </Grid>
+                                </form>
+                            )}
+                        </Formik>
+                    </FormWrapper>
+                </Grid>
+                <Grid item xs={4}>
+                    <Box sx={{pl: 2}}>
+                        <PlansList
+                            items={plansList}
+                            onClick={(item) => {
+                                navigate(`/plans/${item.id}`)
+                            }}
+                            onDelete={onDeleteQueryPlan}
+                        />
+                    </Box>
+                </Grid>
             </Grid>
-        </Grid>
+        </>
     );
 };
 

@@ -388,3 +388,12 @@ export interface Trigger {
   calls: number /* float64 */;
   avg_time: number /* float64 */;
 }
+export interface ExplainedError {
+  error: string;
+  error_details: string;
+  error_stack: string;
+}
+export interface ExplainedResponse {
+  error: string;
+  explained: string;
+}

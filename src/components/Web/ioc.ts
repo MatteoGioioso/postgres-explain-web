@@ -1,6 +1,6 @@
 import {PlanService} from "../CoreModules/Plan/parser";
 import {QueryExplainerService} from "./QueryExplainer.service";
-import ReactGA from 'react-ga';
+import ReactGA from 'react-ga4';
 
 // @ts-ignore
 const go = new Go()

@@ -1,5 +1,6 @@
 import {PlanService} from "../CoreModules/Plan/parser";
 import {QueryExplainerService} from "./QueryExplainer.service";
+import ReactGA from 'react-ga';
 
 // @ts-ignore
 const go = new Go()
@@ -16,3 +17,4 @@ export const waitWebAssembly = async () => {
 }
 
 waitWebAssembly().then().catch(console.error)
+ReactGA.initialize('G-51XGTHRV4Q')

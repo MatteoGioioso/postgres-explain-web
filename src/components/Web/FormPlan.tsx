@@ -4,7 +4,7 @@ import {
     Box,
     Button,
     FormHelperText,
-    Grid,
+    Grid, IconButton, Input, Paper,
     Stack,
     TextField, Typography
 } from '@mui/material';
@@ -17,7 +17,9 @@ import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {PlansList} from "../CoreModules/PlansList";
 import InputLabel from "@mui/material/InputLabel";
 import {ExplainedError} from "../CoreModules/Plan/types";
-import {WasmErrorDescription} from "./Errors";
+import {PlanUploadErrorDescription, WasmErrorDescription} from "./Errors";
+import {UploadButton} from "./UploadButton";
+import {uploadSharablePlan} from "./utils";
 
 
 const FormWrapper = ({children}) => (
@@ -81,7 +83,7 @@ const FormPlan = () => {
                                         const out: ExplainedError = JSON.parse(e.message);
                                         setError({
                                             ...out,
-                                            description: <WasmErrorDescription error={out} />
+                                            description: <WasmErrorDescription error={out}/>
                                         })
                                     } catch (_) {
                                         setError({
@@ -194,6 +196,30 @@ const FormPlan = () => {
                     </FormWrapper>
                 </Grid>
                 <Grid item xs={4}>
+                    <Box sx={{pl: 2, pb: 2}}>
+                        <Paper
+                            elevation={0}
+                            sx={{borderColor: theme => theme.palette.grey['A800'],}}
+                        >
+                            <Stack spacing={0}>
+                                <UploadButton
+                                    onUpload={async (e) => {
+                                        try {
+                                            const id = await uploadSharablePlan(e);
+                                            navigate(`/plans/${id}`)
+                                        } catch (e) {
+                                            setError({
+                                                error: e.message,
+                                                error_details: "",
+                                                error_stack: "",
+                                                description: <PlanUploadErrorDescription />
+                                            })
+                                        }
+                                    }}
+                                />
+                            </Stack>
+                        </Paper>
+                    </Box>
                     <Box sx={{pl: 2}}>
                         <PlansList
                             items={plansList}

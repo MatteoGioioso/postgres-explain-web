@@ -52,7 +52,7 @@ const PlanVisualizationWeb = () => {
 
     return (
         <Grid container>
-            <PlanToolbar/>
+            <PlanToolbar setError={setError} />
             {error && <ErrorAlert error={error} setError={setError}/>}
             <Grid container>
                 <TableTabs tabs={[

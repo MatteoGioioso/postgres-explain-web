@@ -38,3 +38,9 @@ export const WasmErrorDescription = ({error}: { error: ExplainedError }) => {
         </Box>
     )
 }
+
+export const PlanUploadErrorDescription = () => {
+  return (
+      <div>Make sure that the plan was exported correctly</div>
+  )
+}

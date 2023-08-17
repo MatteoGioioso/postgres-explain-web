@@ -1,4 +1,4 @@
-import {Box, IconButton, Stack, Link, Typography, useMediaQuery, Button} from '@mui/material';
+import {Box, IconButton, Stack, Link, Typography, useMediaQuery, Button, Chip} from '@mui/material';
 import {GithubOutlined} from '@ant-design/icons';
 import {Link as RouterLink, useLocation, useNavigate, useParams} from 'react-router-dom';
 import Search from './Search';
@@ -44,8 +44,21 @@ const HeaderContent = () => {
             <Box sx={{width: '100%', ml: 1}}/>
 
             <Box sx={{flexShrink: 0, ml: 0.75, pr: 1.5}}>
-                <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>
-                    <Typography variant="h5">Postgres Explain</Typography>
+                <Stack direction="row" spacing={0.5} alignItems="center" sx={{p: 0.5}}>
+                    <Typography variant="h4">Postgres Explain</Typography>
+                    <Chip
+                        label={'v1.0.0-beta'}
+                        size="small"
+                        sx={{
+                            height: 16,
+                            backgroundColor: theme => theme.palette.primary[100],
+                            '& .MuiChip-label': {fontSize: '0.625rem', py: 0.25}
+                        }}
+                        // component="a"
+                        // href="https://github.com/codedthemes/mantis-free-react-admin-template"
+                        // target="_blank"
+                        // clickable
+                    />
                 </Stack>
             </Box>
 
@@ -55,7 +68,7 @@ const HeaderContent = () => {
                 target="_blank"
                 disableRipple
                 color="secondary"
-                title="Download Free Version"
+                title="Github"
                 sx={{color: 'text.primary', bgcolor: 'grey.100'}}
             >
                 <GithubOutlined/>

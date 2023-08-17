@@ -10,7 +10,6 @@ export interface ErrorReport extends ExplainedError {
 
 export const ErrorAlert = ({error, setError}: { error: ErrorReport, setError: (err: ErrorReport) => void }) => {
     const {severity = "error"} = error
-    console.log(error)
     return (
         <Grid container justifyContent='center'>
             <Alert

@@ -71,16 +71,6 @@ const MainCard = forwardRef(
                 {/* card content */}
                 {content && <CardContent sx={contentSX}>{children}</CardContent>}
                 {!content && children}
-
-                {/* card footer - clipboard & highlighter  */}
-                {/*{codeHighlight && (*/}
-                {/*    <>*/}
-                {/*        <Divider sx={{ borderStyle: 'dashed' }} />*/}
-                {/*        <Highlighter codeHighlight={codeHighlight} main>*/}
-                {/*            {children}*/}
-                {/*        </Highlighter>*/}
-                {/*    </>*/}
-                {/*)}*/}
             </Card>
         );
     }

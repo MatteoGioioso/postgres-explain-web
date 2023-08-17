@@ -1,22 +1,47 @@
 import {Button, IconButton, Paper, Snackbar, Stack} from "@mui/material";
 import {ShareAltOutlined} from "@ant-design/icons";
-import {useParams} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {useState} from "react";
+import {queryExplainerService} from "./ioc";
+import {UploadButton} from "./UploadButton";
+import {uploadSharablePlan} from "./utils";
+import {PlanUploadErrorDescription} from "./Errors";
+import {ErrorReport} from "../ErrorReporting";
 
-export const PlanToolbar = (props) => {
+interface PlanToolbarProps {
+    setError: (e: ErrorReport) => void
+}
+
+export const PlanToolbar = (props: PlanToolbarProps) => {
     const {plan_id} = useParams();
     const [open, setOpen] = useState<boolean>(false)
+    const navigate = useNavigate();
 
-    const createPlanSharableLink = () => {
-        const host = window.location.host;
-        const link = `${host}/plans/${plan_id}`
-        navigator.clipboard.writeText(link)
+    const downloadSharablePlan = () => {
         setOpen(true)
+
+        const queryPlan = queryExplainerService.getQueryPlan(plan_id);
+
+        const url = window.URL.createObjectURL(
+            new Blob([JSON.stringify(queryPlan, null, 2)]),
+        );
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute(
+            'download',
+            `${plan_id}.json`,
+        );
+
+        // Append to html link element page
+        document.body.appendChild(link);
+
+        // Start download
+        link.click();
+
+        // Clean up and remove the link
+        link.parentNode.removeChild(link)
     }
 
-    useEffect(() => {
-
-    }, []);
 
     return (
         <Paper
@@ -35,10 +60,26 @@ export const PlanToolbar = (props) => {
             <Stack direction='row'>
                 <IconButton
                     component={Button}
-                    onClick={createPlanSharableLink}
+                    onClick={downloadSharablePlan}
                 >
-                    <ShareAltOutlined/>
+                    <ShareAltOutlined />
                 </IconButton>
+
+                <UploadButton
+                    onUpload={async (e) => {
+                        try {
+                            const id = await uploadSharablePlan(e);
+                            navigate(`/plans/${id}`)
+                        } catch (e) {
+                            props.setError({
+                                error: e.message,
+                                error_details: "",
+                                error_stack: "",
+                                description: <PlanUploadErrorDescription />
+                            })
+                        }
+                    }}
+                />
             </Stack>
 
             <Snackbar
@@ -46,7 +87,7 @@ export const PlanToolbar = (props) => {
                 open={open}
                 onClose={() => setOpen(false)}
                 autoHideDuration={2000}
-                message="Sharable link copied to clipboard"
+                message="Downloading plan"
             />
         </Paper>
     )

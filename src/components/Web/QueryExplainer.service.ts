@@ -76,6 +76,10 @@ export class QueryExplainerService {
         }))
     }
 
+    uploadQueryPlan(plan: QueryPlan): void {
+        this.plansStore.set(plan.id, plan)
+    }
+
     deleteQueryPlanById(planId: string): void {
         this.plansStore.remove(planId)
     }

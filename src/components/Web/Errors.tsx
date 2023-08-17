@@ -30,7 +30,7 @@ export const WasmErrorDescription = ({error}: { error: ExplainedError }) => {
                 color="inherit"
                 size="small"
                 component={Link}
-                href={`https://github.com/MatteoGioioso/postgres-explain-web/issues/new?title=[Explain web]: add your title (Please attach also the full query plan)&body=${JSON.stringify(error, null, 2)}`}
+                href={`https://github.com/MatteoGioioso/postgres-explain/issues/new?title=[Explain web]: add your title (Please attach also the full query plan)&body=${JSON.stringify(error, null, 2)}`}
                 target='_blank'
             >
                 REPORT ISSUE

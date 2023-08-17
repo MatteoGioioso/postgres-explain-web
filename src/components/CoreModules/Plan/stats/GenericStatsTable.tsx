@@ -1,21 +1,17 @@
 import MainCard from "../../MainCard";
-import {Box, Collapse, Divider, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {Box, Collapse, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React, {useContext, useState} from "react";
 import {IndexesStats, IndexNode, IndexStats, NodeNode, NodesStats, NodeStats, Stats, TableNode, TablesStats, TableStats} from "../types";
 import {
-    betterDiskSizeFromBlocks,
     betterNumbers,
     betterTiming,
-    capitalizeFirstLetter,
     getColorFromPercentage,
-    getPercentageColor
 } from "../../utils";
 import {ExpandMore} from "../ExpandMore";
 import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
 import {useTheme} from "@mui/material/styles";
-import {GenericDetailsPopover} from "../../GenericDetailsPopover";
 
 export interface GenericStatsTableProps {
     stats: IndexesStats | TablesStats | NodesStats
@@ -59,8 +55,8 @@ export const GenericStatsTable = ({stats, headCells}: GenericStatsTableProps) =>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {stats?.stats.map((index) => {
-                            return <Row data={index} theme={theme}/>
+                        {stats?.stats.map((stat) => {
+                            return <Row data={stat} theme={theme}/>
                         })}
                     </TableBody>
                 </Table>
@@ -77,7 +73,6 @@ const Row = ({data, theme}: { data: IndexStats | TableStats | NodeStats, theme: 
 
     return (
         <TableRow
-            hover
             role="checkbox"
             sx={{'&:last-child td, &:last-child th': {border: 0}}}
             tabIndex={-1}
@@ -104,17 +99,17 @@ const Row = ({data, theme}: { data: IndexStats | TableStats | NodeStats, theme: 
                 <b>{betterTiming(data.total_time)}</b>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     {data.nodes.map(i => (
-                        <Box sx={{pb: 1, pt: 1.5}}>{i.exclusive_time}</Box>
+                        <Box sx={{pb: 1.2, pt: 1.4}}>{i.exclusive_time}</Box>
                     ))}
                 </Collapse>
             </TableCell>
             <TableCell style={{backgroundColor: getColorFromPercentage(data.percentage, theme)}}>
                 {betterNumbers(data.percentage)} %
-                {data.nodes.map(i => (
-                    <Collapse in={expanded} timeout="auto" unmountOnExit>
-                        <Box sx={{pb: 1, pt: 1.5}}>0</Box>
-                    </Collapse>
-                ))}
+                <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    {data.nodes.map(i => (
+                        <Box sx={{pb: 1.2, pt: 1.4}}>0</Box>
+                    ))}
+                </Collapse>
             </TableCell>
         </TableRow>
     )
@@ -125,7 +120,7 @@ const NodeSubRow = ({node}: { node: IndexNode | TableNode | NodeNode }) => {
     const {setTabIndex} = useContext(TableTabsContext);
 
     return (
-        <Box sx={{pb: 1, pt: 1.5}}>
+        <Box sx={{pb: 0.45, pt: 0.45}}>
             <IconButton onClick={() => {
                 setTabIndex(0)
                 setTimeout(() => {

@@ -45,7 +45,7 @@ const HeaderContent = () => {
 
             <Box sx={{flexShrink: 0, ml: 0.75, pr: 1.5}}>
                 <Stack direction="row" spacing={0.5} alignItems="center" sx={{p: 0.5}}>
-                    <Typography variant="h4">Postgres Explain</Typography>
+                    <Typography fontFamily='Comfortaa' sx={{fontWeight: 'bold'}} variant="h4">Pgex</Typography>
                     <Chip
                         label={'v1.0.0-beta'}
                         size="small"
@@ -64,7 +64,7 @@ const HeaderContent = () => {
 
             <IconButton
                 component={Link}
-                href="https://github.com/MatteoGioioso/postgres-explain-web"
+                href="https://github.com/MatteoGioioso/postgres-explain"
                 target="_blank"
                 disableRipple
                 color="secondary"

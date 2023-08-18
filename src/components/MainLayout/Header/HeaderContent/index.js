@@ -1,10 +1,11 @@
-import {Box, IconButton, Stack, Link, Typography, useMediaQuery, Button, Chip} from '@mui/material';
+import {Box, IconButton, Stack, Link, Typography, Chip} from '@mui/material';
 import {GithubOutlined} from '@ant-design/icons';
-import {Link as RouterLink, useLocation, useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import Search from './Search';
 import PlansListDropdown from "../../../CoreModules/PlansListDropdown";
 import {queryExplainerService} from "../../../Web/ioc";
 import {useEffect, useState} from "react";
+import {ButtonLink} from "../../../CoreModules/Buttons";
 
 const HeaderContent = () => {
     const {pathname} = useLocation();
@@ -19,15 +20,11 @@ const HeaderContent = () => {
 
     return (
         <>
+            <ButtonLink to={'/docs'} title="Help" variant='contained'/>
+
             {(pathname !== '/' && !pathname.includes('/share')) && (
                 <>
-                    <Button component={RouterLink} to={'/'} variant='outlined' sx={{ml: 1, pt: 0.3, pb: 0.3, pl: 3, pr: 3}}>
-                        <Box sx={{flexShrink: 0}}>
-                            <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>
-                                <Typography variant="subtitle1">+ New Plan</Typography>
-                            </Stack>
-                        </Box>
-                    </Button>
+                    <ButtonLink to={'/'} title="+ New Plan" variant='outlined'/>
 
                     <Box sx={{pl: 2}}>
                         <PlansListDropdown

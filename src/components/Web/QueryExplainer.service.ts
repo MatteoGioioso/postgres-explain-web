@@ -10,6 +10,7 @@ interface SaveQueryPlanBody {
     plan: string
     query: string
     alias: string
+    optimization_id?: string
 }
 
 export class QueryExplainerService {
@@ -37,6 +38,7 @@ export class QueryExplainerService {
                 query: body.query || "",
                 period_start: new Date(),
                 alias: body.alias,
+                optimization_id: body.optimization_id || id,
                 ...parsedPlan
             }
             this.plansStore.set(id, planToSave)
@@ -58,22 +60,44 @@ export class QueryExplainerService {
     }
 
     getQueryPlansList(): QueryPlanListItem[] {
-        const itemsObj: {[key: string]: QueryPlan} = this.plansStore.getAll();
-        const items: QueryPlan[] = Object.values(itemsObj)
-        items.sort((a, b) => {
-            if (new Date(a.period_start) > new Date(b.period_start)) {
-                return -1
-            }
+        const itemsObj: { [key: string]: QueryPlan } = this.plansStore.getAll();
+        return Object
+            .values(itemsObj)
+            .sort((a, b) => {
+                if (new Date(a.period_start) > new Date(b.period_start)) {
+                    return -1
+                }
 
-            return 1;
-        })
+                return 1;
+            })
+            .map(plan => ({
+                id: plan.id,
+                query: plan.query,
+                period_start: new Date(plan.period_start),
+                alias: plan.alias,
+            }))
+    }
 
-        return items.map(plan => ({
-            id: plan.id,
-            query: plan.query,
-            period_start: new Date(plan.period_start),
-            alias: plan.alias,
-        }))
+    getOptimizationsList(planId: string): QueryPlanListItem[] {
+        const plan: QueryPlan = this.plansStore.get(planId);
+        const all: { [key: string]: QueryPlan } = this.plansStore.getAll();
+        return Object
+            .values(all)
+            .filter(item => item.optimization_id === plan.optimization_id)
+            .sort((a, b) => {
+                if (new Date(a.period_start) < new Date(b.period_start)) {
+                    return -1
+                }
+
+                return 1;
+            })
+            .map(plan => ({
+                id: plan.id,
+                query: plan.query,
+                period_start: new Date(plan.period_start),
+                alias: plan.alias,
+                executionTime: plan.stats.execution_time
+            }))
     }
 
     uploadQueryPlan(plan: QueryPlan): void {

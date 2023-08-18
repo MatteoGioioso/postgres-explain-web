@@ -6,12 +6,14 @@ import {getMode, SELF_HOSTED, WEB} from "./config";
 import HeaderContent from "./components/MainLayout/Header/HeaderContent";
 import HeaderContentSelfHosted from "./components/MainLayout/Header/HeaderContent/HeaderContentSelfHosted";
 
-const DashboardDefault = Loadable(lazy(() => import('./components/Dashboard')));
+const HomePageLoadableWeb = Loadable(lazy(() => import('./components/Web/HomePage')));
 const PlanVisualizationLoadableWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationWeb')))
-const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
-const ClustersTableLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersTableAndQueryForm')));
-const ClustersListLoadable = Loadable(lazy(() => import('./components/SelfHosted/ClustersList')))
+const HelpLoadableWeb = Loadable(lazy(() => import('./components/Web/HelpWeb')))
 // const PlanVisualizationComparisonWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationComparisonWeb')))
+
+const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
+const ClustersTableLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/ClustersTableAndQueryForm')));
+const ClustersListLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/ClustersList')))
 
 const WebRoutes = () => ({
     path: '/',
@@ -21,12 +23,16 @@ const WebRoutes = () => ({
     children: [
         {
             path: '/',
-            element: <DashboardDefault/>
+            element: <HomePageLoadableWeb/>
         },
         {
             path: '/plans/:plan_id',
             element: <PlanVisualizationLoadableWeb/>
         },
+        {
+            path: '/docs',
+            element: <HelpLoadableWeb/>
+        }
         // {
         //     path: '/comparison',
         //     element: <PlanVisualizationComparisonWeb/>
@@ -40,15 +46,15 @@ const SelfHostedRoutes = () => ({
     children: [
         {
             path: '/',
-            element: <ClustersListLoadable/>
+            element: <ClustersListLoadableSelfHosted/>
         },
         {
             path: '/clusters',
-            element: <ClustersListLoadable/>
+            element: <ClustersListLoadableSelfHosted/>
         },
         {
             path: '/clusters/:cluster_id',
-            element: <ClustersTableLoadable/>
+            element: <ClustersTableLoadableSelfHosted/>
         },
         {
             path: '/clusters/:cluster_id/plans/:plan_id',

@@ -83,6 +83,7 @@ export class QueryExplainerService {
         const all: { [key: string]: QueryPlan } = this.plansStore.getAll();
         return Object
             .values(all)
+            .filter(item => item.optimization_id)
             .filter(item => item.optimization_id === plan.optimization_id)
             .sort((a, b) => {
                 if (new Date(a.period_start) < new Date(b.period_start)) {
@@ -98,6 +99,13 @@ export class QueryExplainerService {
                 alias: plan.alias,
                 executionTime: plan.stats.execution_time
             }))
+    }
+
+    comparePlans(planId: string, planIdToCompare: string) {
+        const plan: QueryPlan = this.plansStore.get(planId);
+        const planToCompare: QueryPlan = this.plansStore.get(planIdToCompare);
+        // @ts-ignore
+        const out: ExplainedResponse = global.compare(plan, planToCompare)
     }
 
     uploadQueryPlan(plan: QueryPlan): void {

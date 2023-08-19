@@ -35,6 +35,7 @@ export const PLANNER_ESTIMATE_FACTOR = "*Planner Row Estimate Factor";
 export const PLANNER_ESTIMATE_DIRECTION = "*Planner Row Estimate Direction";
 export const PARENT_RELATIONSHIP = "Parent Relationship";
 export const SUBPLAN_NAME = "Subplan Name";
+export const BATCHES = "Batches";
 export const ARRAY_INDEX_KEY = "arrayIndex";
 export const RELATION_NAME = "Relation Name";
 export const SCHEMA = "Schema";
@@ -71,9 +72,7 @@ export const WAL_FPI = "WAL FPI";
 export const FULL_SORT_GROUPS = "Full-sort Groups";
 export const PRE_SORTED_GROUPS = "Pre-sorted Groups";
 export const PRESORTED_KEY = "Presorted Key";
-/**
- * computed by pev
- */
+export const HEAP_BLOCKS = "Heap Blocks";
 export const NODE_ID = "nodeId";
 export const EXCLUSIVE_DURATION = "*Duration (exclusive)";
 export const EXCLUSIVE_COST = "*Cost (exclusive)";
@@ -82,6 +81,7 @@ export const PLAN_ROWS_REVISED = "*Plan Rows Revised";
 export const ROWS_REMOVED_BY_FILTER = "Rows Removed by Filter";
 export const ROWS_REMOVED_BY_JOIN_FILTER = "Rows Removed by Join Filter";
 export const FILTER = "Filter";
+export const JOIN_FILTER = "Join Filter";
 export const WORKERS_PLANNED_BY_GATHER = "*Workers Planned By Gather";
 export const CTE_SCAN = "CTE Scan";
 export const CTE_NAME = "CTE Name";
@@ -107,7 +107,9 @@ export const HASH_AGGREGATE = "HashAggregate";
 export const SORT = "Sort";
 export const FUNCTION_SCAN = "Function Scan";
 export const INCREMENTAL_SORT = "Incremental Sort";
-export const NESTED_LOOP_JOIN = "Nested Loop";
+export const NESTED_LOOP_JOIN = "Nested Loop Join";
+export const NESTED_LOOP = "Nested Loop";
+export const NESTED_LOOP_SEMI_JOIN = "Nested Loop Semi Join";
 export const MERGE_JOIN = "Merge Join";
 export const GROUP_AGGREGATE = "GroupAggregate";
 export const X_POSITION_FACTOR = "*X Position Factor";

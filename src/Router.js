@@ -9,7 +9,7 @@ import HeaderContentSelfHosted from "./components/MainLayout/Header/HeaderConten
 const HomePageLoadableWeb = Loadable(lazy(() => import('./components/Web/HomePage')));
 const PlanVisualizationLoadableWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationWeb')))
 const HelpLoadableWeb = Loadable(lazy(() => import('./components/Web/HelpWeb')))
-// const PlanVisualizationComparisonWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationComparisonWeb')))
+const PlanVisualizationComparisonWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationComparisonWeb')))
 
 const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
 const ClustersTableLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/ClustersTableAndQueryForm')));
@@ -30,13 +30,13 @@ const WebRoutes = () => ({
             element: <PlanVisualizationLoadableWeb/>
         },
         {
+            path: '/plans/:plan_id/comparisons/:plan_id_to_compare',
+            element: <PlanVisualizationComparisonWeb/>
+        },
+        {
             path: '/docs',
             element: <HelpLoadableWeb/>
         }
-        // {
-        //     path: '/comparison',
-        //     element: <PlanVisualizationComparisonWeb/>
-        // }
     ]
 });
 

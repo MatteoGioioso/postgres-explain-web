@@ -3,7 +3,7 @@ import {Grid} from '@mui/material';
 import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
 import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
-import {useNavigate, useParams} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
@@ -14,14 +14,13 @@ import {RawQuery} from "../CoreModules/Plan/stats/RawQuery";
 import {PlanToolbar} from "./PlanToolbar";
 import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
 import {PlanNotFoundErrorDescription} from "./Errors";
-import {OptimizationsList} from "../CoreModules/Optimization/OptimizationsList";
+import {Optimizations} from "./Optimizations";
 
 const PlanVisualizationWeb = () => {
     const [error, setError] = useState<ErrorReport>();
     const {plan_id} = useParams();
     const [enrichedQueryPlan, setEnrichedQueryPlan] = useState<QueryPlan>(null)
     const [optimizations, setOptimizations] = useState<QueryPlanListItem[]>(null)
-    const navigate = useNavigate();
     const {closeFocusNavigation} = useFocus();
 
     function fetchQueryPlan(planID: string) {
@@ -46,10 +45,6 @@ const PlanVisualizationWeb = () => {
                 error_details: ""
             })
         }
-    }
-
-    function onClickOptimization(opt: QueryPlanListItem) {
-        navigate(`/plans/${opt.id}`)
     }
 
     function fetchOptimizations(planId: string) {
@@ -109,8 +104,8 @@ const PlanVisualizationWeb = () => {
                     },
                     {
                         name: "Optimizations",
-                        component: () => <OptimizationsList optimizations={optimizations} onClickOptimization={onClickOptimization}/>,
-                        show: Boolean(optimizations)
+                        component: () => <Optimizations optimizations={optimizations} />,
+                        show: Boolean(optimizations?.length)
                     },
                     {
                         name: "Query",

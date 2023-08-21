@@ -1,5 +1,5 @@
 import {Grid, Tab, Typography, Tabs, Box} from "@mui/material";
-import React, {useContext} from "react";
+import React, {useContext, useEffect} from "react";
 import {TableTabsContext} from "../Contexts";
 
 export function CustomTabPanel(props) {
@@ -56,6 +56,10 @@ function RenderTab(index: number, tab: TabProp, tabIndex: number) {
 
 export const TableTabs = (props: TableTabsProps) => {
     const {tabIndex, setTabIndex} = useContext(TableTabsContext);
+
+    useEffect(() => {
+        setTabIndex(0)
+    }, []);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);

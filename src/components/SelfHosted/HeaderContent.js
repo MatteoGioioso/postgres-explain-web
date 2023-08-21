@@ -3,7 +3,7 @@ import {GithubOutlined} from '@ant-design/icons';
 import {Link as RouterLink, useLocation, useNavigation, useParams} from 'react-router-dom';
 
 // project import
-import Search from './Search';
+import Search from '../MainLayout/Header/HeaderContent/Search';
 
 const HeaderContent = () => {
     const {cluster_id} = useParams();

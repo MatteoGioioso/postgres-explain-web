@@ -3,8 +3,8 @@ import Loadable from './components/Loadable';
 import MainLayout from './components/MainLayout';
 import {useRoutes} from "react-router-dom";
 import {getMode, SELF_HOSTED, WEB} from "./config";
-import HeaderContent from "./components/MainLayout/Header/HeaderContent";
-import HeaderContentSelfHosted from "./components/MainLayout/Header/HeaderContent/HeaderContentSelfHosted";
+import HeaderContent from "./components/Web/HeaderContent";
+import HeaderContentSelfHosted from "./components/SelfHosted/HeaderContent";
 
 const HomePageLoadableWeb = Loadable(lazy(() => import('./components/Web/HomePage')));
 const PlanVisualizationLoadableWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationWeb')))

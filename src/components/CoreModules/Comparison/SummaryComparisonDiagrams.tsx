@@ -10,18 +10,19 @@ import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
 import {calculateNodes, getLayoutedElements} from "../utils";
-import {Grid, Typography} from "@mui/material";
+import {Grid, Stack, Typography} from "@mui/material";
 import {PlanRow, Stats} from "../Plan/types";
+import {QueryPlan} from "../types";
 
 interface ComparisonDiagramsProps {
-    planOptimized: PlanRow[]
-    planPrev: PlanRow[]
+    plan: QueryPlan
+    planToCompare: QueryPlan
 }
 
 // @ts-ignore
 const elk = new ELK();
 
-export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagramsProps) => {
+export const ComparisonDiagrams = ({planToCompare, plan}: ComparisonDiagramsProps) => {
     const theme = useTheme();
     const {fitView, getNode} = useReactFlow()
     const [nodes, setNodes, onNodesChange] = useNodesState([])
@@ -37,9 +38,17 @@ export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagrams
         // @ts-ignore
         theme.diagram.node.width = 100
         // @ts-ignore
-        theme.diagram.node.height = 2
-        const {initialNodes: initialNodesPrev, initialEdges: initialEdgesPrev} = calculateNodes(planPrev, null, theme, {draggable: false})
-        const {initialNodes: initialNodesOptimized, initialEdges: initialEdgesOptimized} = calculateNodes(planOptimized, null, theme, {draggable: false})
+        theme.diagram.node.height = 50
+        const {initialNodes: initialNodesPrev, initialEdges: initialEdgesPrev} = calculateNodes(planToCompare.summary,
+            plan.stats,
+            theme,
+            {draggable: false}
+        )
+        const {initialNodes: initialNodesOptimized, initialEdges: initialEdgesOptimized} = calculateNodes(plan.summary,
+            planToCompare.stats,
+            theme,
+            {draggable: false}
+        )
 
         const elkOptions = {
             'elk.algorithm': 'layered',
@@ -48,17 +57,19 @@ export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagrams
             'elk.direction': 'DOWN',
         };
 
-        getLayoutedElements(elk, initialNodesPrev, initialEdgesPrev, elkOptions, theme).then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
-            setNodes(layoutedNodes);
-            setEdges(layoutedEdges);
-            window.requestAnimationFrame(() => fitView());
-        });
+        getLayoutedElements(elk, initialNodesPrev, initialEdgesPrev, elkOptions, theme)
+            .then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
+                setNodes(layoutedNodes);
+                setEdges(layoutedEdges);
+                window.requestAnimationFrame(() => fitView());
+            });
 
-        getLayoutedElements(elk, initialNodesOptimized, initialEdgesOptimized, elkOptions, theme).then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
-            setNodesOptimized(layoutedNodes);
-            setEdgesOptimized(layoutedEdges);
-            window.requestAnimationFrame(() => fitView());
-        });
+        getLayoutedElements(elk, initialNodesOptimized, initialEdgesOptimized, elkOptions, theme)
+            .then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
+                setNodesOptimized(layoutedNodes);
+                setEdgesOptimized(layoutedEdges);
+                window.requestAnimationFrame(() => fitView());
+            });
 
     }, [])
 
@@ -66,9 +77,7 @@ export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagrams
     return (
         <Grid container>
             <Grid item xs={6} sx={{pt: 2, pr: 1}}>
-                <Typography variant='h5'>
-                    Previous Plan: 10902903903
-                </Typography>
+                <Title plan={plan} label="Plan ID"/>
                 <div style={{height: '75vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
                     <ReactFlow
                         fitView
@@ -84,9 +93,8 @@ export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagrams
                 </div>
             </Grid>
             <Grid item xs={6} sx={{pt: 2, pl: 1}}>
-                <Typography variant='h5'>
-                    Optimized Plan: 10902903903
-                </Typography>
+                <Title plan={planToCompare} label="Plan to compare ID"/>
+
                 <div style={{height: '75vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
                     <ReactFlow
                         fitView
@@ -106,8 +114,33 @@ export const ComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagrams
     )
 }
 
-export const SummaryComparisonDiagrams = ({planPrev, planOptimized}: ComparisonDiagramsProps) => {
+const Title = ({plan, label}: { plan: QueryPlan, label: string }) => {
     return (
-        <ComparisonDiagrams planPrev={planPrev} planOptimized={planOptimized}/>
+        <Stack direction='row'>
+            <Typography variant='h5'>
+                {label}:
+            </Typography>
+            &nbsp;
+            <Typography
+                // onClick={() => onClickOptimization(opt)}
+                variant='h5'
+                sx={{
+                    cursor: 'pointer',
+                    color: (theme) => theme.palette.primary.main,
+                    '&:hover': {
+                        color: (theme) => theme.palette.primary.dark,
+                        textDecoration: 'underline'
+                    }
+                }}
+            >
+                {plan.id}
+            </Typography>
+        </Stack>
+    )
+}
+
+export const SummaryComparisonDiagrams = ({planToCompare, plan}: ComparisonDiagramsProps) => {
+    return (
+        <ComparisonDiagrams planToCompare={planToCompare} plan={plan}/>
     )
 }

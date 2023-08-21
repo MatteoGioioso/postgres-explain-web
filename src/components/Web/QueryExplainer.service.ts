@@ -1,16 +1,23 @@
 import {nanoid} from "nanoid";
 import store, {StoreType} from "store2";
 import {PlanService} from "../CoreModules/Plan/parser";
-import {Explained, ExplainedError, ExplainedResponse, PlanRow} from "../CoreModules/Plan/types";
+import {Comparison, ComparisonResponse, Explained, ExplainedError, ExplainedResponse, PlanRow} from "../CoreModules/Plan/types";
 import {NodeData} from "../CoreModules/Plan/Contexts";
 import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
 import {ErrorReport} from "../ErrorReporting";
+import {waitWebAssembly} from "./ioc";
 
 interface SaveQueryPlanBody {
     plan: string
     query: string
     alias: string
     optimization_id?: string
+}
+
+export interface ComparePlanResponse {
+    comparison: Comparison;
+    plan: QueryPlan;
+    planToCompare: QueryPlan;
 }
 
 export class QueryExplainerService {
@@ -101,11 +108,19 @@ export class QueryExplainerService {
             }))
     }
 
-    comparePlans(planId: string, planIdToCompare: string) {
+    async comparePlans(planId: string, planIdToCompare: string): Promise<ComparePlanResponse> {
         const plan: QueryPlan = this.plansStore.get(planId);
         const planToCompare: QueryPlan = this.plansStore.get(planIdToCompare);
+        await waitWebAssembly()
         // @ts-ignore
-        const out: ExplainedResponse = global.compare(plan, planToCompare)
+        const out: ComparisonResponse = global.compare(JSON.stringify(plan), JSON.stringify(planToCompare))
+        if (out.error) {
+            throw new Error(out.error)
+        } else {
+            return {
+                planToCompare, plan, comparison: JSON.parse(out.comparison)
+            }
+        }
     }
 
     uploadQueryPlan(plan: QueryPlan): void {

@@ -1,8 +1,9 @@
 import {Grid} from "@mui/material";
 import {OptimizationsList} from "../CoreModules/Optimization/OptimizationsList";
 import {QueryPlanListItem} from "../CoreModules/types";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {OptimizationsComparisons} from "../CoreModules/Optimization/OptimizationsComparisons";
+import {OptimizationsAnalytics} from "../CoreModules/Optimization/OptimizationsAnalytics";
 
 interface OptimizationsProps {
     optimizations: QueryPlanListItem[]
@@ -16,7 +17,7 @@ export const Optimizations = ({optimizations}: OptimizationsProps) => {
     }
 
     function onClickCompare(planId: string, planIdToCompare: string) {
-        console.log(planId, planIdToCompare)
+        navigate(`/plans/${planId}/comparisons/${planIdToCompare}`)
     }
 
     return (
@@ -26,6 +27,9 @@ export const Optimizations = ({optimizations}: OptimizationsProps) => {
             </Grid>
             <Grid item xs={6} sx={{pl: 2}}>
                 <OptimizationsComparisons optimizations={optimizations} onClickCompare={onClickCompare} />
+            </Grid>
+            <Grid item xs={12} sx={{pt: 2}}>
+                <OptimizationsAnalytics optimizations={optimizations} />
             </Grid>
         </Grid>
     )

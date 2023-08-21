@@ -323,6 +323,9 @@ export interface Property {
   kind: Kind;
 }
 export type Kind = string;
+export interface ExplainedComparison {
+  query: string;
+}
 export interface ComparisonGeneralStats {
   execution_time: PropComparison;
   planning_time: PropComparison;
@@ -334,8 +337,6 @@ export interface ComparisonGeneralStats {
   max_blocks_hit: PropComparison;
 }
 export interface NodeComparison {
-  node_id: string;
-  node_parent_id: string;
   operation: string;
   level: number /* int */;
   scopes: NodeScopesComparison;
@@ -372,17 +373,16 @@ export interface CostsComparison {
 }
 export interface Comparison {
   general_stats: ComparisonGeneralStats;
-  nodes: NodeComparison;
 }
 export interface PropComparison {
-  previous: number /* float64 */;
-  optimized: number /* float64 */;
+  current: number /* float64 */;
+  to_compare: number /* float64 */;
   has_improved: boolean;
   percentage_improved: number /* float64 */;
 }
 export interface PropStringComparison {
-  previous: string;
-  optimized: string;
+  original: string;
+  to_compare: string;
 }
 export interface Trigger {
   name: string;
@@ -398,4 +398,8 @@ export interface ExplainedError {
 export interface ExplainedResponse {
   error: string;
   explained: string;
+}
+export interface ComparisonResponse {
+  error: string;
+  comparison: string;
 }

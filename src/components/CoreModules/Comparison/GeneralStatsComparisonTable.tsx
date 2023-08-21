@@ -3,7 +3,7 @@ import React from "react";
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
 import MainCard from "../MainCard";
 import {ComparisonGeneralStats, PropComparison} from "../Plan/types";
-import {ArrowDownOutlined, ArrowUpOutlined} from "@ant-design/icons";
+import {ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined} from "@ant-design/icons";
 import {useTheme} from "@mui/material/styles";
 
 export interface GeneralStatsComparisonTableProps {
@@ -47,7 +47,7 @@ export const GeneralStatsComparisonTable = ({stats}: GeneralStatsComparisonTable
                     </TableHead>
                     <TableBody>
                         {Object.keys(stats).map((s) => {
-                            return <Row name={s} data={stats[s]}/>
+                            return <Row key={s} name={s} data={stats[s]}/>
                         })}
                     </TableBody>
                 </Table>
@@ -62,7 +62,6 @@ const Row = ({name, data}: { name: string, data: PropComparison }) => {
     const formattedName = capitalizeFirstLetter(name.replaceAll("_", " "))
     return (
         <TableRow
-            hover
             role="checkbox"
             sx={{'&:last-child td, &:last-child th': {border: 0}}}
             tabIndex={-1}
@@ -73,20 +72,30 @@ const Row = ({name, data}: { name: string, data: PropComparison }) => {
                 {formattedName}
             </TableCell>
             <TableCell>
-                <b>{getMeasure(formattedName, data.previous)}</b>
+                <b>{getMeasure(formattedName, data.current)}</b>
             </TableCell>
             <TableCell>
-                <b>{getMeasure(formattedName, data.optimized)}</b>
+                <b>{getMeasure(formattedName, data.to_compare)}</b>
             </TableCell>
-            <TableCell>
-                {data.previous !== data.optimized ? (data.has_improved
-                    ? <ArrowUpOutlined style={{color: theme.palette.success.main}}/>
-                    : <ArrowDownOutlined style={{color: theme.palette.error.main}}/>
-                ): <div>-</div>}
-            </TableCell>
-            <TableCell>
-                {betterNumbers(data.previous - data.optimized)}
-            </TableCell>
+            {data.current === data.to_compare && <TableCell>-</TableCell>}
+            {data.current !== data.to_compare && (
+                <TableCell>
+                    {data.has_improved
+                        ? <CheckOutlined style={{color: theme.palette.success.main}}/>
+                        : <CloseOutlined style={{color: theme.palette.error.main}}/>}
+                </TableCell>
+            )}
+            {data.current === data.to_compare && <TableCell>-</TableCell>}
+            {data.current !== data.to_compare && (
+                <TableCell
+                    style={{
+                        backgroundColor: data.has_improved ? theme.palette.success.main : theme.palette.error.main,
+                        color: data.has_improved ? 'inherit' : 'white'
+                    }}
+                >
+                    {data.percentage_improved > 0 && "+"}{betterNumbers(data.percentage_improved)} %
+                </TableCell>
+            )}
         </TableRow>
     )
 }

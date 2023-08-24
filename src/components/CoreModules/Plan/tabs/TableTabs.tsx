@@ -1,6 +1,7 @@
 import {Grid, Tab, Typography, Tabs, Box} from "@mui/material";
 import React, {useContext, useEffect} from "react";
 import {TableTabsContext} from "../Contexts";
+import {useLocation} from "react-router-dom";
 
 export function CustomTabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -56,9 +57,14 @@ function RenderTab(index: number, tab: TabProp, tabIndex: number) {
 
 export const TableTabs = (props: TableTabsProps) => {
     const {tabIndex, setTabIndex} = useContext(TableTabsContext);
+    const {state} = useLocation();
 
     useEffect(() => {
-        setTabIndex(0)
+        if (state && state.from === "comparison") {
+            setTabIndex(6)
+        } else {
+            setTabIndex(0)
+        }
     }, []);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {

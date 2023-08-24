@@ -1,6 +1,7 @@
-import React, {useMemo, useEffect} from 'react'
+import React, {useMemo, useEffect, useState, useCallback} from 'react'
 import ReactFlow, {
-    Controls,
+    applyNodeChanges,
+    Controls, Node, OnSelectionChangeParams, ReactFlowProvider,
     useEdgesState,
     useNodesState,
     useReactFlow,
@@ -11,43 +12,71 @@ import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
 import {calculateNodes, getLayoutedElements} from "../utils";
 import {Grid, Stack, Typography} from "@mui/material";
-import {PlanRow, Stats} from "../Plan/types";
 import {QueryPlan} from "../types";
+import clone from 'just-clone';
+import {NodeData} from "../Plan/Contexts";
+import {NodeComparison, PlanRow} from "../Plan/types";
+import {NodeComparisonTable} from "./NodeComparisonTable";
 
 interface ComparisonDiagramsProps {
     plan: QueryPlan
     planToCompare: QueryPlan
+    compareNode: (node: PlanRow, nodeToCompare: PlanRow) => Promise<NodeComparison>
 }
 
 // @ts-ignore
 const elk = new ELK();
 
-export const ComparisonDiagrams = ({planToCompare, plan}: ComparisonDiagramsProps) => {
+export const ComparisonDiagrams = ({planToCompare, plan, compareNode}: ComparisonDiagramsProps) => {
     const theme = useTheme();
+    const [nodePairSelection, setNodePairSelection] = useState<{ [key: string]: PlanRow }>({nodeToCompare: null, node: null})
+    const [nodeComparison, setNodeComparison] = useState<NodeComparison>(null)
     const {fitView, getNode} = useReactFlow()
+
     const [nodes, setNodes, onNodesChange] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
 
-    const [nodesOptimized, setNodesOptimized, onNodesChangeOptimized] = useNodesState([])
-    const [edgesOptimized, setEdgesOptimized, onEdgesChangeOptimized] = useEdgesState([])
+    const [nodesToCompare, setNodesToCompare, onNodesToCompareChange] = useNodesState([])
+    const [edgesToCompare, setEdgesToCompare, onEdgesToCompareChange] = useEdgesState([])
+
     const nodeTypes = useMemo(() => ({special: NodeWidget}), [])
     const edgeTypes = useMemo(() => ({special: EdgeWidget}), [])
 
+    const nodeTypesToCompare = useMemo(() => ({special: NodeWidget}), [])
+    const edgeTypesToCompare = useMemo(() => ({special: EdgeWidget}), [])
+
+    const onNodeSelected = useCallback((params: OnSelectionChangeParams) => {
+        const node = params.nodes[0];
+        if (!node) return
+
+        setNodePairSelection(prevState => ({...prevState, node: node.data.row}))
+    }, [])
+
+    const onNodeSelectedToCompare = useCallback((params: OnSelectionChangeParams) => {
+        const node = params.nodes[0];
+        if (!node) return
+
+        setNodePairSelection(prevState => ({...prevState, nodeToCompare: node.data.row}))
+    }, [])
 
     useEffect(() => {
+        const themeCopy = clone(theme)
         // @ts-ignore
-        theme.diagram.node.width = 100
+        themeCopy.diagram.node.width = 100
         // @ts-ignore
-        theme.diagram.node.height = 50
-        const {initialNodes: initialNodesPrev, initialEdges: initialEdgesPrev} = calculateNodes(planToCompare.summary,
+        themeCopy.diagram.node.height = 50
+
+        const {initialNodes, initialEdges} = calculateNodes(
+            plan.summary,
             plan.stats,
-            theme,
-            {draggable: false}
+            themeCopy,
+            {draggable: false},
         )
-        const {initialNodes: initialNodesOptimized, initialEdges: initialEdgesOptimized} = calculateNodes(plan.summary,
+        const {initialNodes: initialNodesToCompare, initialEdges: initialEdgesToCompare} = calculateNodes(
+            planToCompare.summary,
             planToCompare.stats,
-            theme,
-            {draggable: false}
+            themeCopy,
+            {draggable: false},
         )
 
         const elkOptions = {
@@ -57,57 +86,78 @@ export const ComparisonDiagrams = ({planToCompare, plan}: ComparisonDiagramsProp
             'elk.direction': 'DOWN',
         };
 
-        getLayoutedElements(elk, initialNodesPrev, initialEdgesPrev, elkOptions, theme)
+        getLayoutedElements(elk, initialNodes, initialEdges, elkOptions, themeCopy)
             .then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
                 setNodes(layoutedNodes);
                 setEdges(layoutedEdges);
                 window.requestAnimationFrame(() => fitView());
             });
 
-        getLayoutedElements(elk, initialNodesOptimized, initialEdgesOptimized, elkOptions, theme)
+        getLayoutedElements(elk, initialNodesToCompare, initialEdgesToCompare, elkOptions, themeCopy)
             .then(({nodes: layoutedNodes, edges: layoutedEdges}) => {
-                setNodesOptimized(layoutedNodes);
-                setEdgesOptimized(layoutedEdges);
+                setNodesToCompare(layoutedNodes);
+                setEdgesToCompare(layoutedEdges);
                 window.requestAnimationFrame(() => fitView());
             });
 
     }, [])
 
+    useEffect(() => {
+        if (nodePairSelection.nodeToCompare && nodePairSelection.node) {
+            compareNode(nodePairSelection.node, nodePairSelection.nodeToCompare)
+                .then(resp => setNodeComparison(resp))
+        }
+    }, [nodePairSelection]);
 
     return (
         <Grid container>
-            <Grid item xs={6} sx={{pt: 2, pr: 1}}>
+            <Grid item xs sx={{pt: 2, pr: 1}}>
                 <Title plan={plan} label="Plan ID"/>
                 <div style={{height: '75vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
-                    <ReactFlow
-                        fitView
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        minZoom={0.1}
-                    >
-                    </ReactFlow>
+                    <ReactFlowProvider>
+                        <ReactFlow
+                            fitView
+                            nodes={nodes}
+                            edges={edges}
+                            onNodesChange={onNodesChange}
+                            onEdgesChange={onEdgesChange}
+                            nodeTypes={nodeTypes}
+                            edgeTypes={edgeTypes}
+                            onSelectionChange={onNodeSelected}
+                            minZoom={0.1}
+                        >
+                            <Controls/>
+
+                        </ReactFlow>
+                    </ReactFlowProvider>
                 </div>
             </Grid>
-            <Grid item xs={6} sx={{pt: 2, pl: 1}}>
+            {Boolean(nodeComparison) && (
+                <Grid item xs sx={{pt: 2, pr: 0}}>
+                    <Typography variant='h5'>
+                        Comparison
+                    </Typography>
+                    <NodeComparisonTable nodeComparison={nodeComparison} planId={plan.id} planIdToCompare={planToCompare.id}/>
+                </Grid>
+            )}
+            <Grid item xs sx={{pt: 2, pl: 1}}>
                 <Title plan={planToCompare} label="Plan to compare ID"/>
-
                 <div style={{height: '75vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
-                    <ReactFlow
-                        fitView
-                        nodes={nodesOptimized}
-                        edges={edgesOptimized}
-                        onNodesChange={onNodesChangeOptimized}
-                        onEdgesChange={onEdgesChangeOptimized}
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        minZoom={0.1}
-                    >
-                        <Controls/>
-                    </ReactFlow>
+                    <ReactFlowProvider>
+                        <ReactFlow
+                            fitView
+                            nodes={nodesToCompare}
+                            edges={edgesToCompare}
+                            onNodesChange={onNodesToCompareChange}
+                            onEdgesChange={onEdgesToCompareChange}
+                            nodeTypes={nodeTypesToCompare}
+                            edgeTypes={edgeTypesToCompare}
+                            onSelectionChange={onNodeSelectedToCompare}
+                            minZoom={0.1}
+                        >
+                            <Controls/>
+                        </ReactFlow>
+                    </ReactFlowProvider>
                 </div>
             </Grid>
         </Grid>
@@ -139,8 +189,8 @@ const Title = ({plan, label}: { plan: QueryPlan, label: string }) => {
     )
 }
 
-export const SummaryComparisonDiagrams = ({planToCompare, plan}: ComparisonDiagramsProps) => {
+export const SummaryComparisonDiagrams = ({planToCompare, plan, compareNode}: ComparisonDiagramsProps) => {
     return (
-        <ComparisonDiagrams planToCompare={planToCompare} plan={plan}/>
+        <ComparisonDiagrams planToCompare={planToCompare} plan={plan} compareNode={compareNode}/>
     )
 }

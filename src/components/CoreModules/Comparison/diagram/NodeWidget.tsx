@@ -2,16 +2,15 @@ import React, {memo} from 'react'
 import {Handle, Position} from 'reactflow'
 import Node from "./Node";
 import {useTheme} from "@mui/material/styles";
-import {PlanRow, Stats} from "../../Plan/types";
 import {NodeData} from "../../Plan/Contexts";
+import {Node as ReactflowNodeProps} from 'reactflow'
 
 export interface NodeWidgetProps {
     data: NodeData
 }
 
-export const NodeWidget = memo(({data}: NodeWidgetProps) => {
+export const NodeWidget = memo(({data, ...otherProps}: NodeWidgetProps) => {
     const theme = useTheme()
-
     return (
         <>
             <Handle
@@ -21,9 +20,9 @@ export const NodeWidget = memo(({data}: NodeWidgetProps) => {
                 style={{backgroundColor: 'transparent', color: 'transparent'}}
             />
             <Node
-                data={data.row}
                 theme={theme}
-                stats={data.stats}
+                {...data}
+                {...otherProps as ReactflowNodeProps}
             />
             <Handle
                 type="target"

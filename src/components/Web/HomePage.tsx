@@ -2,14 +2,15 @@ import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {queryExplainerService} from "./ioc";
-import {Box, Grid, Paper, Stack} from "@mui/material";
+import {Box, Grid, IconButton, Paper, Stack} from "@mui/material";
 import {PlanForm} from "./PlanForm";
-import {UploadButton} from "../CoreModules/Buttons";
+import {ButtonAction, UploadButton} from "../CoreModules/Buttons";
 import {uploadSharablePlan} from "./utils";
 import {PlanUploadErrorDescription, WasmErrorDescription} from "./Errors";
 import {PlansList} from "../CoreModules/PlansList";
 import MainCard from "../CoreModules/MainCard";
 import {ExplainedError} from "../CoreModules/Plan/types";
+import {ShareAltOutlined} from "@ant-design/icons";
 
 
 const FormWrapper = ({children}) => (
@@ -87,10 +88,11 @@ const HomePage = () => {
                     <Box sx={{pl: 2, pb: 2}}>
                         <Paper
                             elevation={0}
-                            sx={{borderColor: theme => theme.palette.grey['A800'],}}
+                            sx={{borderColor: theme => theme.palette.grey['A800'], p: 1}}
                         >
-                            <Stack spacing={0}>
+                            <Stack spacing={0} direction='row'>
                                 <UploadButton
+                                    color='primary'
                                     onUpload={async (e) => {
                                         try {
                                             const id = await uploadSharablePlan(e);
@@ -105,6 +107,7 @@ const HomePage = () => {
                                         }
                                     }}
                                 />
+                                <ButtonAction icon={<ShareAltOutlined />} />
                             </Stack>
                         </Paper>
                     </Box>

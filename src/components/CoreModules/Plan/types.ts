@@ -337,29 +337,32 @@ export interface ComparisonGeneralStats {
   max_blocks_hit: PropComparison;
 }
 export interface NodeComparison {
+  node_id: string;
+  node_id_to_compare: string;
   operation: string;
   level: number /* int */;
+  warnings: string[];
+  infos: string[];
   scopes: NodeScopesComparison;
-  inclusive: PropComparison;
+  inclusive_time: PropComparison;
   loops: PropComparison;
   rows: RowsComparison;
   costs: CostsComparison;
-  exclusive: PropComparison;
+  exclusive_time: PropComparison;
   execution_time: PropComparison;
   buffers: BuffersComparison;
 }
 export interface NodeScopesComparison {
-  table: PropStringComparison;
   filters: PropStringComparison;
   index: PropStringComparison;
   key: PropStringComparison;
   condition: PropStringComparison;
 }
 export interface RowsComparison {
-  total: PropComparison;
+  total_rows: PropComparison;
   planned_rows: PropComparison;
-  removed: PropComparison;
-  estimation_factor: PropComparison;
+  removed_rows: PropComparison;
+  rows_estimation_factor: PropComparison;
 }
 export interface BuffersComparison {
   effective_blocks_read: PropComparison;
@@ -383,6 +386,7 @@ export interface PropComparison {
 export interface PropStringComparison {
   original: string;
   to_compare: string;
+  are_same: boolean;
 }
 export interface Trigger {
   name: string;

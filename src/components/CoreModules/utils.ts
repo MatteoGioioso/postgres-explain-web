@@ -173,7 +173,13 @@ export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export const calculateNodes = (summary: PlanRow[], stats: Stats, theme: Theme, nodeOptions: any = {}) => {
+export const calculateNodes = (
+    summary: PlanRow[],
+    stats: Stats,
+    theme: Theme,
+    nodeOptions: any = {},
+    additionalData: any = {}
+) => {
     const initialNodes = []
     const initialEdges = []
 
@@ -192,6 +198,7 @@ export const calculateNodes = (summary: PlanRow[], stats: Stats, theme: Theme, n
             data: {
                 row,
                 stats,
+                ...additionalData
             },
             targetPosition: Position.Bottom,
             sourcePosition: Position.Top,
@@ -215,6 +222,7 @@ export const calculateNodes = (summary: PlanRow[], stats: Stats, theme: Theme, n
             },
             data: {
                 rows: row.rows.total,
+                ...additionalData
             },
             type: 'special',
         }

@@ -1,7 +1,15 @@
 import {nanoid} from "nanoid";
 import store, {StoreType} from "store2";
 import {PlanService} from "../CoreModules/Plan/parser";
-import {Comparison, ComparisonResponse, Explained, ExplainedError, ExplainedResponse, PlanRow} from "../CoreModules/Plan/types";
+import {
+    Comparison,
+    ComparisonResponse,
+    Explained,
+    ExplainedError,
+    ExplainedResponse,
+    NodeComparison,
+    PlanRow
+} from "../CoreModules/Plan/types";
 import {NodeData} from "../CoreModules/Plan/Contexts";
 import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
 import {ErrorReport} from "../ErrorReporting";
@@ -120,6 +128,17 @@ export class QueryExplainerService {
             return {
                 planToCompare, plan, comparison: JSON.parse(out.comparison)
             }
+        }
+    }
+
+    async compareNodes(node: PlanRow, nodeToCompare: PlanRow): Promise<NodeComparison> {
+        await waitWebAssembly()
+        // @ts-ignore
+        const out: ComparisonResponse = global.compareNodes(JSON.stringify(node), JSON.stringify(nodeToCompare))
+        if (out.error) {
+            throw new Error(out.error)
+        } else {
+            return JSON.parse(out.comparison)
         }
     }
 

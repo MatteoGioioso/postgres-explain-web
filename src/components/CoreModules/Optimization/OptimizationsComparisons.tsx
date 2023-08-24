@@ -12,6 +12,7 @@ import {QueryPlanListItem} from "../types";
 import Typography from "@mui/material/Typography";
 import {ButtonAction} from "../Buttons";
 import {Box} from "@mui/material";
+import clone from "just-clone";
 
 
 interface OptimizationsComparisonsProps {
@@ -34,6 +35,11 @@ export function OptimizationsComparisons({optimizations, onClickCompare}: Optimi
 
     const leftChecked = intersection(checked, left);
     const rightChecked = intersection(checked, right);
+
+    const onClick = () => {
+        const queryPlansToCompare = clone(right);
+        onClickCompare(queryPlansToCompare[0].id, queryPlansToCompare[1].id)
+    }
 
     const handleToggle = (value: QueryPlanListItem) => () => {
         const currentIndex = checked.indexOf(value);
@@ -160,14 +166,12 @@ export function OptimizationsComparisons({optimizations, onClickCompare}: Optimi
                 <Grid item>{customList(right)}</Grid>
             </Grid>
             {right.length === 2 && (
-                <Box sx={{pt: 4}}>
+                <Box>
                     <Grid container justifyContent="center" alignItems="center">
                         <ButtonAction
-                            title={"Compare"}
+                            title="Compare"
                             variant='contained'
-                            onClick={() => {
-                                onClickCompare(right[0].id, right[1].id)
-                            }}
+                            onClick={onClick}
                         />
                     </Grid>
                 </Box>

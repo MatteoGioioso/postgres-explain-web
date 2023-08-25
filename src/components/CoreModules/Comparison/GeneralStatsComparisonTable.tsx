@@ -1,9 +1,9 @@
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React from "react";
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
 import MainCard from "../MainCard";
 import {ComparisonGeneralStats, PropComparison} from "../Plan/types";
-import {ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined} from "@ant-design/icons";
+import {ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined, SwapRightOutlined} from "@ant-design/icons";
 import {useTheme} from "@mui/material/styles";
 
 export interface GeneralStatsComparisonTableProps {
@@ -72,7 +72,11 @@ const Row = ({name, data}: { name: string, data: PropComparison }) => {
                 {formattedName}
             </TableCell>
             <TableCell>
-                <b>{getMeasure(formattedName, data.current)}</b>
+                <Stack direction='row'>
+                    <b>{getMeasure(formattedName, data.current)}</b>
+                    <Box sx={{flex: '1 1 100%'}}></Box>
+                    <SwapRightOutlined/>
+                </Stack>
             </TableCell>
             <TableCell>
                 <b>{getMeasure(formattedName, data.to_compare)}</b>

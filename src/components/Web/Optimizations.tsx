@@ -4,6 +4,7 @@ import {QueryPlanListItem} from "../CoreModules/types";
 import {useNavigate, useParams} from "react-router-dom";
 import {OptimizationsComparisons} from "../CoreModules/Optimization/OptimizationsComparisons";
 import {OptimizationsAnalytics} from "../CoreModules/Optimization/OptimizationsAnalytics";
+import {OptimizationsComparisonsSelects} from "../CoreModules/Optimization/OptimizationsComparisonsSelects";
 
 interface OptimizationsProps {
     optimizations: QueryPlanListItem[]
@@ -26,7 +27,7 @@ export const Optimizations = ({optimizations}: OptimizationsProps) => {
                 <OptimizationsList optimizations={optimizations} onClickOptimization={onClickOptimization}/>
             </Grid>
             <Grid item xs={6} sx={{pl: 2}}>
-                <OptimizationsComparisons optimizations={optimizations} onClickCompare={onClickCompare} />
+                <OptimizationsComparisonsSelects optimizations={optimizations} onClickCompare={onClickCompare} />
             </Grid>
             <Grid item xs={12} sx={{pt: 2}}>
                 <OptimizationsAnalytics optimizations={optimizations} />

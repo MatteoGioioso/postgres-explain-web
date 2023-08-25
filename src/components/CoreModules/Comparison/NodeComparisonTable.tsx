@@ -1,9 +1,9 @@
-import {Alert, AlertTitle, Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {Alert, AlertTitle, Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar} from "@mui/material";
 import React from "react";
 import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, truncateText} from "../utils";
 import MainCard from "../MainCard";
-import {ComparisonGeneralStats, NodeComparison, PropComparison, PropStringComparison} from "../Plan/types";
-import {ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined, ReadOutlined, SwapRightOutlined} from "@ant-design/icons";
+import {NodeComparison, PropComparison, PropStringComparison} from "../Plan/types";
+import {CheckOutlined, CloseOutlined, ReadOutlined, SwapRightOutlined} from "@ant-design/icons";
 import {useTheme} from "@mui/material/styles";
 import {GenericDetailsPopover} from "../GenericDetailsPopover";
 
@@ -11,9 +11,10 @@ export interface NodeComparisonTableProps {
     nodeComparison: NodeComparison
     planId: string
     planIdToCompare: string
+    closeComparisonTable: (e: any) => void
 }
 
-export const NodeComparisonTable = ({nodeComparison, planId, planIdToCompare}: NodeComparisonTableProps) => {
+export const NodeComparisonTable = ({nodeComparison, planId, planIdToCompare, closeComparisonTable}: NodeComparisonTableProps) => {
     return (
         <MainCard content={false}>
             <TableContainer
@@ -26,6 +27,12 @@ export const NodeComparisonTable = ({nodeComparison, planId, planIdToCompare}: N
                     '& td, & th': {whiteSpace: 'nowrap'}
                 }}
             >
+
+                <Toolbar variant='dense'>
+                    <Box sx={{flex: '1 1 100%'}}></Box>
+                    <CloseOutlined onClick={closeComparisonTable}/>
+                </Toolbar>
+
                 {nodeComparison?.warnings?.length > 0 && (
                     <Alert sx={{width: '100%'}} severity="error">
                         <AlertTitle>Meaningless comparison</AlertTitle>

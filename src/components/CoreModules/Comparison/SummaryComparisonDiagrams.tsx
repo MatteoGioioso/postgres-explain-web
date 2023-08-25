@@ -11,7 +11,7 @@ import {NodeWidget} from './diagram/NodeWidget'
 import {EdgeWidget} from './diagram/EdgeWidget'
 import {useTheme} from "@mui/material/styles";
 import {calculateNodes, getLayoutedElements} from "../utils";
-import {Grid, Stack, Typography} from "@mui/material";
+import {Grid, Stack, Toolbar, Typography} from "@mui/material";
 import {QueryPlan} from "../types";
 import clone from 'just-clone';
 import {NodeData} from "../Plan/Contexts";
@@ -21,13 +21,21 @@ import {NodeComparisonTable} from "./NodeComparisonTable";
 interface ComparisonDiagramsProps {
     plan: QueryPlan
     planToCompare: QueryPlan
+    onClickPlanIdTitle: (id: string) => void
+    onClickPlanToCompareIdTitle: (id: string) => void
     compareNode: (node: PlanRow, nodeToCompare: PlanRow) => Promise<NodeComparison>
 }
 
 // @ts-ignore
 const elk = new ELK();
 
-export const ComparisonDiagrams = ({planToCompare, plan, compareNode}: ComparisonDiagramsProps) => {
+export const ComparisonDiagrams = ({
+                                       planToCompare,
+                                       plan,
+                                       compareNode,
+                                       onClickPlanToCompareIdTitle,
+                                       onClickPlanIdTitle
+                                   }: ComparisonDiagramsProps) => {
     const theme = useTheme();
     const [nodePairSelection, setNodePairSelection] = useState<{ [key: string]: PlanRow }>({nodeToCompare: null, node: null})
     const [nodeComparison, setNodeComparison] = useState<NodeComparison>(null)
@@ -109,10 +117,15 @@ export const ComparisonDiagrams = ({planToCompare, plan, compareNode}: Compariso
         }
     }, [nodePairSelection]);
 
+
+    const closeComparisonTable = () => {
+        setNodeComparison(null)
+    }
+
     return (
         <Grid container>
             <Grid item xs sx={{pt: 2, pr: 1}}>
-                <Title plan={plan} label="Plan ID"/>
+                <Title plan={plan} label="Plan ID" onClick={onClickPlanIdTitle}/>
                 <div style={{height: '75vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
                     <ReactFlowProvider>
                         <ReactFlow
@@ -135,13 +148,18 @@ export const ComparisonDiagrams = ({planToCompare, plan, compareNode}: Compariso
             {Boolean(nodeComparison) && (
                 <Grid item xs sx={{pt: 2, pr: 0}}>
                     <Typography variant='h5'>
-                        Comparison
+                        Differences
                     </Typography>
-                    <NodeComparisonTable nodeComparison={nodeComparison} planId={plan.id} planIdToCompare={planToCompare.id}/>
+                    <NodeComparisonTable
+                        nodeComparison={nodeComparison}
+                        planId={plan.id}
+                        planIdToCompare={planToCompare.id}
+                        closeComparisonTable={closeComparisonTable}
+                    />
                 </Grid>
             )}
             <Grid item xs sx={{pt: 2, pl: 1}}>
-                <Title plan={planToCompare} label="Plan to compare ID"/>
+                <Title plan={planToCompare} label="Plan to compare ID" onClick={onClickPlanToCompareIdTitle}/>
                 <div style={{height: '75vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
                     <ReactFlowProvider>
                         <ReactFlow
@@ -164,7 +182,7 @@ export const ComparisonDiagrams = ({planToCompare, plan, compareNode}: Compariso
     )
 }
 
-const Title = ({plan, label}: { plan: QueryPlan, label: string }) => {
+const Title = ({plan, label, onClick}: { plan: QueryPlan, label: string, onClick: any }) => {
     return (
         <Stack direction='row'>
             <Typography variant='h5'>
@@ -172,7 +190,7 @@ const Title = ({plan, label}: { plan: QueryPlan, label: string }) => {
             </Typography>
             &nbsp;
             <Typography
-                // onClick={() => onClickOptimization(opt)}
+                onClick={() => onClick(plan.id)}
                 variant='h5'
                 sx={{
                     cursor: 'pointer',
@@ -189,8 +207,8 @@ const Title = ({plan, label}: { plan: QueryPlan, label: string }) => {
     )
 }
 
-export const SummaryComparisonDiagrams = ({planToCompare, plan, compareNode}: ComparisonDiagramsProps) => {
+export const SummaryComparisonDiagrams = (props: ComparisonDiagramsProps) => {
     return (
-        <ComparisonDiagrams planToCompare={planToCompare} plan={plan} compareNode={compareNode}/>
+        <ComparisonDiagrams {...props}/>
     )
 }

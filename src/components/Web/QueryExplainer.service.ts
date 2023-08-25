@@ -95,6 +95,9 @@ export class QueryExplainerService {
 
     getOptimizationsList(planId: string): QueryPlanListItem[] {
         const plan: QueryPlan = this.plansStore.get(planId);
+        if (!plan) {
+            return null
+        }
         const all: { [key: string]: QueryPlan } = this.plansStore.getAll();
         return Object
             .values(all)
@@ -119,6 +122,10 @@ export class QueryExplainerService {
     async comparePlans(planId: string, planIdToCompare: string): Promise<ComparePlanResponse> {
         const plan: QueryPlan = this.plansStore.get(planId);
         const planToCompare: QueryPlan = this.plansStore.get(planIdToCompare);
+        if (!plan || !planToCompare) {
+            return null
+        }
+
         await waitWebAssembly()
         // @ts-ignore
         const out: ComparisonResponse = global.compare(JSON.stringify(plan), JSON.stringify(planToCompare))

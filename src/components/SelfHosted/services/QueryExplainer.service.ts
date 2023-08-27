@@ -1,6 +1,6 @@
 import {QueryExplainerRepository} from "../datalayer/QueryExplainer.repository";
 import {GetQueryPlanRequest, GetQueryPlansListRequest, SaveQueryPlanRequest} from "../proto/query_explainer.pb";
-import {Explained} from "../../CoreModules/Plan/types";
+import {Explained, Triggers} from "../../CoreModules/Plan/types";
 import {PlanService} from "../../CoreModules/Plan/parser";
 import {QueryPlan, QueryPlanListItem} from "../../CoreModules/types";
 
@@ -29,7 +29,7 @@ export class QueryExplainerService {
             period_start: undefined,
             query_id: response.query_id,
             tables_stats: undefined,
-            triggers_stats: [],
+            triggers_stats: {} as Triggers,
             indexes_stats: parsedResponse.indexes_stats,
             stats: parsedResponse.stats,
             summary: parsedResponse.summary,

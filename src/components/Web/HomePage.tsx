@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {queryExplainerService} from "./ioc";
 import {Box, Grid, IconButton, Paper, Stack} from "@mui/material";
-import {PlanForm} from "./PlanForm";
+import {PlanForm} from "../CoreModules/PlanForm";
 import {ButtonAction, UploadButton} from "../CoreModules/Buttons";
 import {uploadSharablePlan} from "./utils";
 import {PlanUploadErrorDescription, WasmErrorDescription} from "./Errors";

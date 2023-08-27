@@ -184,7 +184,7 @@ export interface Explained {
   tables_stats: TablesStats;
   nodes_stats: NodesStats;
   jit_stats?: JIT;
-  triggers_stats: Trigger[];
+  triggers_stats?: Triggers;
 }
 export interface NodeScopes {
   table: string;
@@ -393,6 +393,10 @@ export interface Trigger {
   time: number /* float64 */;
   calls: number /* float64 */;
   avg_time: number /* float64 */;
+}
+export interface Triggers {
+  max_time: number /* float64 */;
+  items: Trigger[];
 }
 export interface ExplainedError {
   error: string;

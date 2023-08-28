@@ -172,7 +172,7 @@ const PlanVisualizationWeb = () => {
                         {
                             name: "Optimizations",
                             component: () => <Optimizations optimizations={optimizations}/>,
-                            show: Boolean(optimizations?.length)
+                            show: Boolean(optimizations?.length > 1)
                         },
                         {
                             name: "Query",

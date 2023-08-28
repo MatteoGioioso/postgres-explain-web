@@ -107,7 +107,7 @@ export const getFunctionFromKind = (kind: string) => {
 }
 
 export function getPercentageColor(reference: number, total: number, theme?: any, hovered?: boolean): string {
-    if (total === 0 || total === undefined) return !hovered ? theme.palette.secondary.A100 : theme.palette.secondary[200]
+    if (total === undefined) return !hovered ? theme.palette.secondary.A100 : theme.palette.secondary[200]
 
     const percentage = getPercentage(reference, total)
     return getColorFromPercentage(percentage, theme, hovered);
@@ -122,11 +122,11 @@ export function getColorFromPercentage(percentage: number, theme, hovered?: any)
         return !hovered ? theme.palette.warning.light : theme.palette.warning.main
     }
 
-    if (percentage > 50 && percentage < 90) {
+    if (percentage >= 50 && percentage < 90) {
         return !hovered ? theme.palette.warning.main : theme.palette.warning.dark
     }
 
-    if (percentage > 90) {
+    if (percentage >= 90) {
         return !hovered ? theme.palette.error.main : theme.palette.error.dark
     }
 
@@ -150,6 +150,9 @@ export function getEstimationColor(estimationFactor: number, theme?: any, hovere
 }
 
 export function getPercentage(reference: number, total: number): number {
+    if (reference > total) {
+        return 100
+    }
     return (reference / total) * 100
 }
 

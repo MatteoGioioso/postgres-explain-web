@@ -210,6 +210,10 @@ export interface JIT {
   [key: string]: number | Timing
 }
 
+export interface Planning {
+  [key: string]: number | Timing
+}
+
 interface NodeElement {
   node: Node
   subelementType?: string
@@ -297,7 +301,7 @@ export class PlanService {
         out[out.length - 1] += line
       } else if (
         line.match(
-          /^(?:Total\s+runtime|Planning\s+time|Execution\s+time|Time|Filter|Output|JIT)/i
+          /^(?:Total\s+runtime|Planning\s+time|Execution\s+time|Time|Filter|Output|JIT|Planning:)/i
         )
       ) {
         out.push(line)
@@ -458,6 +462,9 @@ export class PlanService {
 
       const extraRegex = /^(\s*)(\S.*\S)\s*$/g
       const extraMatches = extraRegex.exec(line)
+
+      const planningRegex = /^(\s*)Planning:\s*$/g
+      const planningMatches = planningRegex.exec(line)
 
       if (emptyLineMatches || headerMatches) {
         return
@@ -647,6 +654,14 @@ export class PlanService {
             elementsAtDepth.push([depth, element])
           }
         }
+      } else if (planningMatches) {
+        let element
+        // @ts-ignore
+        root.Planning = {} as Planning
+        element = {
+            node: root.Planning,
+        }
+        elementsAtDepth.push([1, element])
       } else if (extraMatches) {
         //const prefix = extraMatches[1]
 

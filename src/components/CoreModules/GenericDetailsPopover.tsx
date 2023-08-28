@@ -35,7 +35,6 @@ export const GenericDetailsPopover = (props: { name: string, content: any, child
                 transitionDuration={200}
                 id="mouse-over-popover"
                 sx={{
-                    width: '1200px',
                     ...props.style
                 }}
                 open={open}

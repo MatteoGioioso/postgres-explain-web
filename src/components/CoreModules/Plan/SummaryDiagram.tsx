@@ -52,7 +52,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
             </Grid>
 
             <Grid item xs={12}>
-                <div style={{height: '82vh', width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
+                <div style={{height: '78vh' ,width: 'auto', border: `solid 1px ${theme.palette.secondary.light}`, borderRadius: '10px'}}>
                     <ReactFlow
                         fitView
                         nodes={nodes}

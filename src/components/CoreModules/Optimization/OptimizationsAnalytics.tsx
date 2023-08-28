@@ -24,7 +24,7 @@ interface OptimizationsAnalyticsProps {
 
 export const OptimizationsAnalytics = ({optimizations}: OptimizationsAnalyticsProps) => {
     return (
-        <IncomeAreaChart optimizations={optimizations}/>
+        <OptimizationChart optimizations={optimizations}/>
     )
 }
 
@@ -51,7 +51,7 @@ const areaChartOptions = {
 
 // ==============================|| INCOME AREA CHART ||============================== //
 
-const IncomeAreaChart = ({optimizations}: OptimizationsAnalyticsProps) => {
+const OptimizationChart = ({optimizations}: OptimizationsAnalyticsProps) => {
     const theme = useTheme();
     const {plan_id} = useParams();
 

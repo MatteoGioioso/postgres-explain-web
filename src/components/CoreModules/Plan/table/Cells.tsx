@@ -1,12 +1,12 @@
 import React from "react";
-import {Box, Chip, Collapse, Divider, Grid, TableCell, Typography} from "@mui/material";
+import {Box, Chip, Collapse, Divider, Grid, TableCell, Tooltip, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {
     betterDiskSizeFromBlocks,
     betterNumbers,
     betterTiming,
     getEstimationColor,
-    getFunctionFromKind,
+    getFunctionFromKind, getPercentage,
     getPercentageColor,
     truncateText
 } from "../../utils";
@@ -110,7 +110,9 @@ export const TimingCell = ({prop, totalProp, name, hovered}: { prop: number, tot
                 backgroundColor: getPercentageColor(prop, totalProp, theme, hovered)
             }}
         >
-            {betterTiming(prop)}
+            <GenericDetailsPopover name={name} content={prop} keepCloseCondition={prop === 0}>
+                {betterTiming(prop)}
+            </GenericDetailsPopover>
         </TableCell>
     )
 }
@@ -126,7 +128,11 @@ export const RowsCell = ({row, expanded, theme, hovered}: CellProps) => {
                 backgroundColor: getPercentageColor(row.rows.removed, row.rows.total, theme, hovered)
             }}
         >
-            {row.scopes.filters && (<FilterOutlined style={{marginRight: 4, color: theme.palette.secondary.dark, fontSize: '12px'}}/>)}
+            {row.scopes.filters && (
+                <Tooltip title="Rows have been filtered">
+                    <FilterOutlined style={{marginRight: 4, color: theme.palette.secondary.dark, fontSize: '12px'}}/>
+                </Tooltip>
+            )}
             {betterNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <RowsCellCollapsedContent row={row} expanded={expanded} stats={null}/>
@@ -308,7 +314,7 @@ export const RowsEstimationCell = ({row, theme, expanded, hovered}: CellProps) =
 
 export const InfoCell = ({row, expanded, stats, theme}: CellProps) => {
     return (
-        <TableCell align="left" style={{width: '500px'}}>
+        <TableCell align="left">
             <Grid container>
                 {expanded || (
                     <Box sx={{pl: row.level * 2}}>
@@ -350,7 +356,7 @@ export function NodeStats({expanded, row, stats, theme}: { expanded: boolean, ro
                             </Typography>
                         }
                     >
-                        <Typography><b>{scopeName} </b><code>{truncateText(row.scopes[scopeName], theme.diagram.text.maxChars)}</code></Typography>
+                        <Typography><b>{scopeName} </b><code>{truncateText(row.scopes[scopeName], 25)}</code></Typography>
                     </GenericDetailsPopover>
                 )
             ))}
@@ -376,7 +382,7 @@ export function NodeStats({expanded, row, stats, theme}: { expanded: boolean, ro
                 Plan width: {row.costs.plan_width}
             </div>
 
-            {row.node_type_specific_properties && (
+            {Object.keys(row.node_type_specific_properties).length > 0 && (
                 <Box sx={{pt: 1, pb: 1}}>
                     <Divider/>
                 </Box>
@@ -391,11 +397,13 @@ export function NodeStats({expanded, row, stats, theme}: { expanded: boolean, ro
                     <Box sx={{pt: 1, pb: 1}}>
                         <Divider/>
                     </Box>
-                    {row.workers.list.map(worker => (
-                        <div>
-                            Worker {worker.number}: time {betterTiming(worker.time)}, rows {betterNumbers(worker.rows)},
-                            loops {worker.loops}
-                        </div>
+                    {row.workers.list.map((worker, index) => (
+                        <GenericDetailsPopover
+                            name={`worker-${index}`}
+                            content={worker.slice(1).map(property => renderStringProperty(property)).join(", ")}
+                        >
+                            <div>{renderStringProperty(worker[0])}</div>
+                        </GenericDetailsPopover>
                     ))}
                 </>
             )}
@@ -413,6 +421,10 @@ export const RenderProperty = ({property}: {
             <>{property.name}: {getFunctionFromKind(property.kind)((property[property.type]))}</>
         )
     )
+}
+
+export const renderStringProperty = (property: Property): string => {
+    return property.skip ? '' : `${property.name}: ${getFunctionFromKind(property.kind)((property[property.type]))}`
 }
 
 export const getRowEstimateDirectionSymbol = (direction: string): string => {

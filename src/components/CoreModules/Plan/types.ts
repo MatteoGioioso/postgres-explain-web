@@ -240,7 +240,7 @@ export interface Worker {
 export interface Workers {
   launched: number /* float64 */;
   planned: number /* float64 */;
-  list: Worker[];
+  list: Property[][];
 }
 export interface Timings {
   inclusive: number /* float64 */;
@@ -263,6 +263,7 @@ export interface PlanRow {
   execution_time: number /* float64 */;
   buffers: Buffers;
   sub_plan_of: string;
+  cte_sub_plan_of: string;
   parent_plan_id: string;
   does_contain_buffers: boolean;
   workers: Workers;

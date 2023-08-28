@@ -4,17 +4,17 @@ import {
     Grid,
     LinearProgress,
     LinearProgressProps,
-    Stack,
+    Stack, Tooltip,
     Typography,
 } from '@mui/material';
 import MainCard from '../../MainCard';
 import {
     DollarOutlined,
     FallOutlined,
-    FieldTimeOutlined, ForkOutlined, Loading3QuartersOutlined,
-    RiseOutlined, TableOutlined,
+    FieldTimeOutlined, ForkOutlined, HddOutlined, Loading3QuartersOutlined,
+    RiseOutlined,
 } from '@ant-design/icons';
-import React, {useContext} from "react";
+import React from "react";
 import {
     areRowsOverEstimated,
     betterNumbers, betterTiming,
@@ -24,7 +24,6 @@ import {
 } from "../../utils";
 import {PlanRow, Stats} from "../types";
 import {useFocus} from "../hooks";
-import {TableTabsContext} from "../Contexts";
 import {GenericDetailsPopover} from "../../GenericDetailsPopover";
 
 interface NodeProps {
@@ -70,7 +69,6 @@ function showRowEstimationChip(factor: number): boolean {
 
 const Node = ({data, stats, theme}: NodeProps) => {
         const {isFocused, focus, switchToRow} = useFocus(data.node_id);
-        const {setTabIndex} = useContext(TableTabsContext);
         const exclusiveTimeColor = getPercentageColor(data.exclusive, data.execution_time, theme);
         const exclusiveTimePercentage = getPercentage(data.exclusive, data.execution_time);
 
@@ -92,6 +90,8 @@ const Node = ({data, stats, theme}: NodeProps) => {
             }
         }
 
+        const iconStyle = {fontSize: '0.75rem', color: 'inherit'};
+
         return (
             <div
                 id={`node_${data.node_id}`}
@@ -111,94 +111,103 @@ const Node = ({data, stats, theme}: NodeProps) => {
                             </Typography>
                             <Grid item>
                                 {Boolean(data.workers.launched) && (
-                                    <GenericDetailsPopover
-                                        name={"workers"}
-                                        content={`Number of workers`}
-                                        keepCloseCondition={!isFocused}
-                                    >
+                                    <Tooltip title={`Number of workers`}>
                                         <Chip
                                             style={{backgroundColor: theme.palette.primary['100'], cursor: 'inherit'}}
-                                            icon={<ForkOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                            icon={<ForkOutlined style={iconStyle}/>}
                                             sx={{ml: 1.25, pl: 1}}
                                             label={data.workers.launched + 1}
                                             size="small"
                                         />
-                                    </GenericDetailsPopover>
+                                    </Tooltip>
                                 )}
                                 {Boolean(data.loops > 1) && (
-                                    <GenericDetailsPopover
-                                        name={"loops"}
-                                        content={`Number of loops per workers`}
-                                        keepCloseCondition={!isFocused}
-                                    >
+                                    <Tooltip title={`Number of loops ${data.workers.launched > 0 ? 'per worker' : ''}`}>
                                         <Chip
                                             style={{backgroundColor: theme.palette.primary['100'], cursor: 'inherit'}}
-                                            icon={<Loading3QuartersOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                            icon={<Loading3QuartersOutlined style={iconStyle}/>}
                                             sx={{ml: 1.25, pl: 1}}
                                             label={betterNumbers(data.loops / (data.workers.launched + 1))}
                                             size="small"
                                         />
-                                    </GenericDetailsPopover>
+                                    </Tooltip>
 
                                 )}
                                 {showChipsBasedOnPercentage(getPercentage(data.exclusive, data.execution_time)) && (
-                                    <GenericDetailsPopover
-                                        name={"timing"}
-                                        content={'Time'}
-                                        keepCloseCondition={!isFocused}
-                                    >
+                                    <Tooltip title="High exclusive time">
                                         <Chip
                                             style={{backgroundColor: exclusiveTimeColor, cursor: 'inherit'}}
-                                            icon={<FieldTimeOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
+                                            icon={<FieldTimeOutlined style={iconStyle}/>}
                                             sx={{ml: 1.25, pl: 1}}
                                             size="small"
                                         />
-                                    </GenericDetailsPopover>
+                                    </Tooltip>
                                 )}
                                 {showChipsBasedOnPercentage(getPercentage(data.costs.total_cost, stats.max_cost)) && (
-                                    <Chip
-                                        style={{backgroundColor: getPercentageColor(data.costs.total_cost, stats.max_cost, theme)}}
-                                        icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                                        sx={{ml: 1.25, pl: 1}}
-                                        size="small"
-                                    />
+                                    <Tooltip title="High cost">
+                                        <Chip
+                                            style={{backgroundColor: getPercentageColor(data.costs.total_cost, stats.max_cost, theme)}}
+                                            icon={<DollarOutlined style={iconStyle}/>}
+                                            sx={{ml: 1.25, pl: 1}}
+                                            size="small"
+                                        />
+                                    </Tooltip>
                                 )}
                                 {showRowEstimationChip(data.rows.estimation_factor) && (
-                                    <Chip
-                                        style={{backgroundColor: getEstimationColor(data.rows.estimation_factor, theme)}}
-                                        icon={
-                                            <>
-                                                {areRowsOverEstimated(data.rows.estimation_direction) ?
-                                                    <RiseOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/> :
-                                                    <FallOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>
-                                                }
-                                            </>
-                                        }
-                                        sx={{ml: 1.25, pl: 1}}
-                                        size="small"
-                                    />
+                                    <Tooltip
+                                        title={`${areRowsOverEstimated(data.rows.estimation_direction) ? 'Rows over-estimated' : 'Rows under-estimated'}`}>
+                                        <Chip
+                                            style={{backgroundColor: getEstimationColor(data.rows.estimation_factor, theme)}}
+                                            icon={
+                                                <>
+                                                    {areRowsOverEstimated(data.rows.estimation_direction) ?
+                                                        <RiseOutlined style={iconStyle}/> :
+                                                        <FallOutlined style={iconStyle}/>
+                                                    }
+                                                </>
+                                            }
+                                            sx={{ml: 1.25, pl: 1}}
+                                            size="small"
+                                        />
+                                    </Tooltip>
+                                )}
+                                {(getPercentage(data.buffers.effective_blocks_read, stats.max_blocks_read) >= 10
+                                    || getPercentage(data.buffers.effective_blocks_written, stats.max_blocks_written) >= 10) && (
+                                    <Tooltip title={`High disk usage`}>
+                                        <Chip
+                                            style={{
+                                                backgroundColor: getPercentageColor(
+                                                    Math.max(data.buffers.effective_blocks_read, data.buffers.effective_blocks_written),
+                                                    stats.max_blocks_read,
+                                                    theme
+                                                )
+                                            }}
+                                            icon={<HddOutlined style={iconStyle}/>}
+                                            sx={{ml: 1.25, pl: 1}}
+                                            size="small"
+                                        />
+                                    </Tooltip>
+                                )}
+                                {data.cte_sub_plan_of && (
+                                    <Tooltip title={`CTE:  ${data.cte_sub_plan_of}`}>
+                                        <Chip
+                                            style={{backgroundColor: theme.palette.secondary.light}}
+                                            sx={{ml: 1.25}}
+                                            size="small"
+                                            label="CTE"
+                                        />
+                                    </Tooltip>
                                 )}
                                 {data.sub_plan_of && (
-                                    <Chip
-                                        style={{backgroundColor: theme.palette.secondary.light}}
-                                        sx={{ml: 1.25}}
-                                        size="small"
-                                        label="CTE"
-                                    />
+                                    <Tooltip title={`SubPlan:  ${data.sub_plan_of}`}>
+                                        <Chip
+                                            style={{backgroundColor: theme.palette.secondary.light}}
+                                            sx={{ml: 1.25}}
+                                            size="small"
+                                            label="SubPlan"
+                                        />
+                                    </Tooltip>
                                 )}
-                                <Chip
-                                    style={{backgroundColor: theme.palette.secondary["A100"]}}
-                                    icon={<TableOutlined style={{fontSize: '0.90rem', color: 'inherit'}}/>}
-                                    sx={{ml: 1.25, pl: 1}}
-                                    size="medium"
-                                    onClick={async () => {
-                                        // If the tab is set to, for example, Indexes, the app will crash because it won't find the row id
-                                        // of the main table. Moreover, the switchToRow cannot happen asynchronously, thus we must wait
-                                        // that setTabIndex has finished
-                                        await setTabIndex(1)
-                                        switchToRow()
-                                    }}
-                                />
                             </Grid>
                         </Grid>
                     </Stack>

@@ -1,5 +1,4 @@
-import {useNavigate} from "react-router-dom";
-import {Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography} from "@mui/material";
+import {Box, List, ListItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
 import {GenericDetailsPopover} from "./GenericDetailsPopover";
 import {CopyToClipboardButton} from "./CopyToClipboard";
 import Highlight from "react-highlight";
@@ -16,7 +15,6 @@ interface PlansListProps {
 }
 
 export function PlansList(props: PlansListProps) {
-    const navigate = useNavigate();
     const getPrimaryText = (item: QueryPlanListItem) => {
         if (item.alias) {
             return <>{item.alias} ({item.id})</>
@@ -27,7 +25,7 @@ export function PlansList(props: PlansListProps) {
 
     return (
         <List
-            sx={{width: '100%', bgcolor: 'background.paper'}}
+            sx={{width: '100%', bgcolor: 'background.paper', height: '75vh', overflow: 'auto'}}
         >
             {props.items.map(item => (
                 <ListItem key={item.id} alignItems='flex-start'>

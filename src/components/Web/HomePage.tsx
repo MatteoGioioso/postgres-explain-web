@@ -12,9 +12,8 @@ import MainCard from "../CoreModules/MainCard";
 import {ExplainedError} from "../CoreModules/Plan/types";
 import {ShareAltOutlined} from "@ant-design/icons";
 
-
 const FormWrapper = ({children}) => (
-    <Box sx={{minHeight: '100vh'}}>
+    <Box >
         <Grid item>
             <FormCard>{children}</FormCard>
         </Grid>

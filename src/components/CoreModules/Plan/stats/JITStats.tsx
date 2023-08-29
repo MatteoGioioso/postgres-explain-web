@@ -2,7 +2,7 @@ import MainCard from "../../MainCard";
 import {Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import React from "react";
 import {JIT} from "../types";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, getPercentageColor} from "../../utils";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter, getPercentageColor} from "../../utils";
 
 export interface JITStatsTableProps {
     stats: JIT
@@ -74,7 +74,7 @@ const Row = ({name, data, executionTime}: { name: string, data: any, executionTi
                             </TableCell>
                             <TableCell
                                 sx={{backgroundColor: (theme) => isTiming(data[k]) ? getPercentageColor(data[k], executionTime, theme) : 'inherit'}}>
-                                {isTiming(data[k]) ? data[k].toString() : betterTiming(data[k])}
+                                {isTiming(data[k]) ? data[k].toString() : formatTiming(data[k])}
                             </TableCell>
                         </TableRow>
                     ))}

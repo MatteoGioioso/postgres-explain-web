@@ -4,7 +4,7 @@ import {CopyToClipboardButton} from "./CopyToClipboard";
 import Highlight from "react-highlight";
 import {ConsoleSqlOutlined, DeleteOutlined} from "@ant-design/icons";
 import React from "react";
-import {betterDate} from "./utils";
+import {formatDate} from "./utils";
 import {QueryPlanListItem} from "./types";
 
 interface PlansListProps {
@@ -45,7 +45,7 @@ export function PlansList(props: PlansListProps) {
                                 {getPrimaryText(item)}
                             </Typography>
                         }
-                        secondary={betterDate(item.period_start)}
+                        secondary={formatDate(item.period_start)}
                     />
                     <ListItemIcon sx={{pr: 4}}>
                         <DeleteOutlined onClick={() => props.onDelete(item)} />

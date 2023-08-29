@@ -7,7 +7,7 @@ import StepContent from '@mui/material/StepContent';
 import Typography from '@mui/material/Typography';
 import {QueryPlanListItem} from "../types";
 import MainCard from "../MainCard";
-import {betterDate, betterTiming} from "../utils";
+import {formatDate, formatTiming} from "../utils";
 import {useParams} from "react-router-dom";
 
 interface OptimizationsListProps {
@@ -58,11 +58,11 @@ export function OptimizationsList({optimizations, onClickOptimization}: Optimiza
                                         {getPrimaryText(opt, index)}
                                     </Typography>
                                     <Typography variant='body2'>
-                                        {betterDate(opt.period_start)}
+                                        {formatDate(opt.period_start)}
                                     </Typography>
                                 </StepLabel>
                                 <StepContent>
-                                    <Typography fontWeight='bold'>Execution time: {betterTiming(opt.executionTime)}</Typography>
+                                    <Typography fontWeight='bold'>Execution time: {formatTiming(opt.executionTime)}</Typography>
                                 </StepContent>
                             </Step>
                         )

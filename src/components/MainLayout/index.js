@@ -34,7 +34,7 @@ const MainLayout = ({children, headerContent}) => {
             <Header open={open} handleDrawerToggle={handleDrawerToggle} children={headerContent}/>
             <Box component="main" sx={{width: '100%', flexGrow: 1, p: {xs: 2, sm: 3}}}>
                 {/*<Breadcrumbs navigation={navigation} title />*/}
-                <Toolbar/>
+                <Toolbar sx={{mt: 2}} variant='dense'/>
                 <Outlet/>
                 {children}
             </Box>

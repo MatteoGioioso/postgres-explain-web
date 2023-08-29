@@ -1,7 +1,8 @@
-import {Grid, Tab, Typography, Tabs, Box} from "@mui/material";
+import {Box, Grid, Tab, Tabs, Typography} from "@mui/material";
 import React, {useContext, useEffect} from "react";
-import {TableTabsContext} from "../Contexts";
+import {TableTabsContext} from "./Plan/Contexts";
 import {useLocation} from "react-router-dom";
+import {tabMaps} from "./types";
 
 export function CustomTabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -33,7 +34,7 @@ export function UnmountableTabPanel(props) {
     );
 }
 
-interface TabProp {
+export interface TabProp {
     name: string
     component: () => React.JSX.Element
     show: boolean
@@ -41,6 +42,7 @@ interface TabProp {
 
 interface TableTabsProps {
     tabs: TabProp[]
+    tabMaps: tabMaps
 }
 
 function RenderTab(index: number, tab: TabProp, tabIndex: number) {
@@ -55,13 +57,15 @@ function RenderTab(index: number, tab: TabProp, tabIndex: number) {
     );
 }
 
+
 export const TableTabs = (props: TableTabsProps) => {
     const {tabIndex, setTabIndex} = useContext(TableTabsContext);
     const {state} = useLocation();
 
     useEffect(() => {
-        if (state && state.from === "comparison") {
-            setTabIndex(6)
+        const tabsMap = props.tabMaps;
+        if (state?.tab) {
+            tabsMap[state.tab] && setTabIndex(tabsMap[state.tab].index)
         } else {
             setTabIndex(0)
         }

@@ -3,8 +3,8 @@ import {Box, Collapse, IconButton, Table, TableBody, TableCell, TableContainer, 
 import React, {useContext, useState} from "react";
 import {IndexesStats, IndexNode, IndexStats, NodeNode, NodesStats, NodeStats, Stats, TableNode, TablesStats, TableStats} from "../types";
 import {
-    betterNumbers,
-    betterTiming,
+    formatNumbers,
+    formatTiming,
     getColorFromPercentage,
 } from "../../utils";
 import {ExpandMore} from "../ExpandMore";
@@ -12,6 +12,7 @@ import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
 import {useTheme} from "@mui/material/styles";
+import {TABS_MAP} from "../../../Web/PlanVisualizationWeb";
 
 export interface GenericStatsTableProps {
     stats: IndexesStats | TablesStats | NodesStats
@@ -96,7 +97,7 @@ const Row = ({data, theme}: { data: IndexStats | TableStats | NodeStats, theme: 
                 </Collapse>
             </TableCell>
             <TableCell>
-                <b>{betterTiming(data.total_time)}</b>
+                <b>{formatTiming(data.total_time)}</b>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     {data.nodes.map(i => (
                         <Box sx={{pb: 1.2, pt: 1.4}}>{i.exclusive_time}</Box>
@@ -104,7 +105,7 @@ const Row = ({data, theme}: { data: IndexStats | TableStats | NodeStats, theme: 
                 </Collapse>
             </TableCell>
             <TableCell style={{backgroundColor: getColorFromPercentage(data.percentage, theme)}}>
-                {betterNumbers(data.percentage)} %
+                {formatNumbers(data.percentage)} %
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     {data.nodes.map(i => (
                         <Box sx={{pb: 1.2, pt: 1.4}}>0</Box>
@@ -122,7 +123,7 @@ const NodeSubRow = ({node}: { node: IndexNode | TableNode | NodeNode }) => {
     return (
         <Box sx={{pb: 0.45, pt: 0.45}}>
             <IconButton onClick={() => {
-                setTabIndex(0)
+                setTabIndex(TABS_MAP().diagram.index)
                 setTimeout(() => {
                     switchToNode(node.id)
                 })

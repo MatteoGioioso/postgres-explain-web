@@ -1,6 +1,6 @@
 import {Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import React from "react";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../utils";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter} from "../utils";
 import MainCard from "../MainCard";
 import {ComparisonGeneralStats, PropComparison} from "../Plan/types";
 import {ArrowDownOutlined, ArrowUpOutlined, CheckOutlined, CloseOutlined, SwapRightOutlined} from "@ant-design/icons";
@@ -97,7 +97,7 @@ const Row = ({name, data}: { name: string, data: PropComparison }) => {
                         color: data.has_improved ? 'inherit' : 'white'
                     }}
                 >
-                    {data.percentage_improved > 0 && "+"}{betterNumbers(data.percentage_improved)} %
+                    {data.percentage_improved > 0 && "+"}{formatNumbers(data.percentage_improved)} %
                 </TableCell>
             )}
         </TableRow>
@@ -139,10 +139,10 @@ const headCells = [
 
 const getMeasure = (name: string, data: number): string => {
     if (name.includes("time") || name.includes("duration")) {
-        return betterTiming(data)
+        return formatTiming(data)
     } else if (name.includes("blocks")) {
-        return betterDiskSizeFromBlocks(data)
+        return formatBlocksToDiskSize(data)
     }
 
-    return betterNumbers(data)
+    return formatNumbers(data)
 }

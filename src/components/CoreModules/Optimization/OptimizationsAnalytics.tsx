@@ -6,9 +6,9 @@ import {ApexOptions} from "apexcharts";
 import MainCard from "../MainCard";
 import {
     areRowsOverEstimated,
-    betterDate,
-    betterNumbers,
-    betterTiming,
+    formatDate,
+    formatNumbers,
+    formatTiming,
     getEstimationColor,
     getPercentage,
     getPercentageColor
@@ -66,7 +66,7 @@ const OptimizationChart = ({optimizations}: OptimizationsAnalyticsProps) => {
             ...prevState,
             colors: [theme.palette.primary.main],
             xaxis: {
-                categories: optimizations.map(opt => betterDate(opt.period_start)),
+                categories: optimizations.map((opt, index) => `#${index+1}`),
                 axisBorder: {
                     show: true,
                     color: line
@@ -98,7 +98,7 @@ const OptimizationChart = ({optimizations}: OptimizationsAnalyticsProps) => {
             },
             annotations: {
                 xaxis: [{
-                    x: betterDate(optimizations.find(opt => opt.id === plan_id).period_start),
+                    x: `#${optimizations.findIndex(opt => opt.id === plan_id)+1}`,
                     borderColor: '#999',
                     yAxisIndex: 0,
                     label: {
@@ -132,7 +132,7 @@ const OptimizationChart = ({optimizations}: OptimizationsAnalyticsProps) => {
 
     return (
         <MainCard>
-            <ReactApexChart options={options as ApexOptions} series={series} type="line" height={450}/>
+            <ReactApexChart options={options as ApexOptions} series={series} type="line" height={300}/>
         </MainCard>
     );
 };
@@ -141,11 +141,14 @@ const OptimizationChart = ({optimizations}: OptimizationsAnalyticsProps) => {
 const OptimizationToolTip = ({series, seriesIndex, dataPointIndex, w, optimizations}) => {
     return (
         <Box style={{padding: '10px'}}>
-            <Typography variant='h4'>
+            <Typography variant='h4' sx={{p: 0}}>
                 {(optimizations as QueryPlanListItem[])[dataPointIndex].id}
             </Typography>
             <Typography variant='body2'>
-                Execution time: {betterTiming((optimizations as QueryPlanListItem[])[dataPointIndex].executionTime)}
+                Execution time: {formatTiming((optimizations as QueryPlanListItem[])[dataPointIndex].executionTime)}
+            </Typography>
+            <Typography variant='subtitle1'>
+                {formatDate((optimizations as QueryPlanListItem[])[dataPointIndex].period_start)}
             </Typography>
         </Box>
     )

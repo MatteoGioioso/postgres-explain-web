@@ -4,7 +4,7 @@ import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
 import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {useNavigate, useParams} from "react-router-dom";
-import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
+import {TableTabs, TabProp} from "../CoreModules/TableTabs";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
 import {queryExplainerService} from "./ioc";
@@ -12,11 +12,61 @@ import {useFocus} from "../CoreModules/Plan/hooks";
 import {GeneralStats} from "../CoreModules/Plan/stats/GeneralStats";
 import {RawQuery} from "../CoreModules/Plan/stats/RawQuery";
 import {PlanToolbar} from "../CoreModules/Plan/PlanToolbar";
-import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
+import {QueryPlan, QueryPlanListItem, tabMaps} from "../CoreModules/types";
 import {PlanNotFoundErrorDescription, WasmErrorDescription} from "./Errors";
 import {Optimizations} from "./Optimizations";
 import {ExplainedError} from "../CoreModules/Plan/types";
 import {uploadSharablePlan} from "./utils";
+
+export const TABS_MAP = () => {
+    return {
+        diagram: {
+            index: 0,
+            id: "diagram",
+            name: "Diagram"
+        },
+        table: {
+            index: 1,
+            id: "table",
+            name: "Table"
+        },
+        stats: {
+            index: 2,
+            id: "stats",
+            name: "Stats"
+        },
+        indexes: {
+            index: 3,
+            id: "indexes",
+            name: "Indexes"
+        },
+        tables: {
+            index: 4,
+            id: "tables",
+            name: "Tables"
+        },
+        nodes: {
+            index: 5,
+            id: "nodes",
+            name: "Nodes"
+        },
+        optimizations: {
+            index: 6,
+            id: "optimizations",
+            name: "Optimizations"
+        },
+        query: {
+            index: 7,
+            id: "query",
+            name: "Query"
+        },
+        rawPlan: {
+            index: 8,
+            id: "raw_plan",
+            name: "Raw_plan"
+        },
+    }
+}
 
 const PlanVisualizationWeb = () => {
     const navigate = useNavigate();
@@ -24,6 +74,8 @@ const PlanVisualizationWeb = () => {
     const {plan_id} = useParams();
     const [enrichedQueryPlan, setEnrichedQueryPlan] = useState<QueryPlan>(null)
     const [optimizations, setOptimizations] = useState<QueryPlanListItem[]>(null)
+    const [plansList, setPlansList] = useState<QueryPlanListItem[]>([])
+
     const {closeFocusNavigation} = useFocus();
 
     function fetchQueryPlan(planID: string) {
@@ -101,27 +153,99 @@ const PlanVisualizationWeb = () => {
         }
     }
 
+    const selectPlan = (planId: string) => {
+        navigate(`/plans/${planId}`)
+    }
+
+    function fetchQueryPlansList() {
+        const queryPlansList = queryExplainerService.getQueryPlansList();
+        setPlansList(queryPlansList)
+    }
 
     function fetchOptimizations(planId: string) {
         setOptimizations(queryExplainerService.getOptimizationsList(planId))
     }
 
     useEffect(() => {
+        window.history.replaceState({}, document.title)
+
         fetchQueryPlan(plan_id)
         fetchOptimizations(plan_id)
+        fetchQueryPlansList()
         closeFocusNavigation()
     }, [plan_id])
+
+    function buildTableTabs(): TabProp[] {
+        const obj = TABS_MAP()
+        return [
+            {
+                name: obj.diagram.name, component: () => <SummaryDiagram
+                    summary={enrichedQueryPlan.summary}
+                    stats={enrichedQueryPlan.stats}
+                />,
+                show: Boolean(enrichedQueryPlan)
+            },
+            {
+                name: obj.table.name,
+                component: () => <SummaryTable
+                    summary={enrichedQueryPlan.summary}
+                    stats={enrichedQueryPlan.stats}
+                />,
+                show: Boolean(enrichedQueryPlan)
+            },
+            {
+                name: obj.stats.name,
+                component: () => <GeneralStats
+                    stats={enrichedQueryPlan.stats}
+                    jitStats={enrichedQueryPlan.jit_stats}
+                    triggers={enrichedQueryPlan.triggers_stats}
+                />,
+                show: Boolean(enrichedQueryPlan)
+            },
+            {
+                name: obj.indexes.name,
+                component: () => <GenericStatsTable stats={enrichedQueryPlan.indexes_stats} headCells={indexesHeadCells}/>,
+                show: Boolean(enrichedQueryPlan)
+            },
+            {
+                name: obj.tables.name,
+                component: () => <GenericStatsTable stats={enrichedQueryPlan.tables_stats} headCells={tablesHeadCells}/>,
+                show: Boolean(enrichedQueryPlan)
+            },
+            {
+                name: obj.nodes.name,
+                component: () => <GenericStatsTable stats={enrichedQueryPlan.nodes_stats} headCells={nodesHeadCells}/>,
+                show: Boolean(enrichedQueryPlan)
+            },
+            {
+                name: obj.optimizations.name,
+                component: () => <Optimizations optimizations={optimizations}/>,
+                show: Boolean(optimizations?.length > 1)
+            },
+            {
+                name: obj.query.name,
+                component: () => <RawQuery query={enrichedQueryPlan.query}/>,
+                show: Boolean(enrichedQueryPlan?.query)
+            },
+            {
+                name: obj.rawPlan.name,
+                component: () => <RawPlan plan={enrichedQueryPlan.original_plan}/>,
+                show: Boolean(enrichedQueryPlan?.original_plan)
+            },
+        ]
+    }
 
     return (
         <>
             {Boolean(enrichedQueryPlan) && (
-                <Stack direction='row'>
-                    <Box sx={{flex: '1 1 100%'}}></Box>
+                <Stack direction='row' justifyContent='end'>
                     <PlanToolbar
                         plan={enrichedQueryPlan}
                         onSubmitOptimizationPlanForm={onSubmitPlanForm}
                         sharePlan={downloadSharablePlan}
                         uploadSharedPlan={uploadSharablePlan}
+                        plansList={plansList}
+                        selectPlan={selectPlan}
                     />
                 </Stack>
             )}
@@ -129,63 +253,7 @@ const PlanVisualizationWeb = () => {
 
                 {error && <ErrorAlert error={error} setError={setError}/>}
                 <Grid container>
-                    <TableTabs tabs={[
-                        {
-                            name: "Diagram", component: () => <SummaryDiagram
-                                summary={enrichedQueryPlan.summary}
-                                stats={enrichedQueryPlan.stats}
-                            />,
-                            show: Boolean(enrichedQueryPlan)
-                        },
-                        {
-                            name: "Table",
-                            component: () => <SummaryTable
-                                summary={enrichedQueryPlan.summary}
-                                stats={enrichedQueryPlan.stats}
-                            />,
-                            show: Boolean(enrichedQueryPlan)
-                        },
-                        {
-                            name: "Stats",
-                            component: () => <GeneralStats
-                                stats={enrichedQueryPlan.stats}
-                                jitStats={enrichedQueryPlan.jit_stats}
-                                triggers={enrichedQueryPlan.triggers_stats}
-                            />,
-                            show: Boolean(enrichedQueryPlan)
-                        },
-                        {
-                            name: "Indexes",
-                            component: () => <GenericStatsTable stats={enrichedQueryPlan.indexes_stats} headCells={indexesHeadCells}/>,
-                            show: Boolean(enrichedQueryPlan)
-                        },
-                        {
-                            name: "Tables",
-                            component: () => <GenericStatsTable stats={enrichedQueryPlan.tables_stats} headCells={tablesHeadCells}/>,
-                            show: Boolean(enrichedQueryPlan)
-                        },
-                        {
-                            name: "Nodes",
-                            component: () => <GenericStatsTable stats={enrichedQueryPlan.nodes_stats} headCells={nodesHeadCells}/>,
-                            show: Boolean(enrichedQueryPlan)
-                        },
-                        {
-                            name: "Optimizations",
-                            component: () => <Optimizations optimizations={optimizations}/>,
-                            show: Boolean(optimizations?.length > 1)
-                        },
-                        {
-                            name: "Query",
-                            component: () => <RawQuery query={enrichedQueryPlan.query}/>,
-                            show: Boolean(enrichedQueryPlan?.query)
-                        },
-                        {
-                            name: "Raw plan",
-                            component: () => <RawPlan plan={enrichedQueryPlan.original_plan}/>,
-                            show: Boolean(enrichedQueryPlan?.original_plan)
-                        },
-                    ]}
-                    />
+                    <TableTabs tabs={buildTableTabs()} tabMaps={TABS_MAP()}/>
                 </Grid>
             </Grid>
         </>

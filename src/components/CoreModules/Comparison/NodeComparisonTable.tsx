@@ -1,6 +1,6 @@
 import {Alert, AlertTitle, Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar} from "@mui/material";
 import React from "react";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, truncateText} from "../utils";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter, truncateText} from "../utils";
 import MainCard from "../MainCard";
 import {NodeComparison, PropComparison, PropStringComparison} from "../Plan/types";
 import {CheckOutlined, CloseOutlined, ReadOutlined, SwapRightOutlined} from "@ant-design/icons";
@@ -35,7 +35,7 @@ export const NodeComparisonTable = ({nodeComparison, planId, planIdToCompare, cl
 
                 {nodeComparison?.warnings?.length > 0 && (
                     <Alert sx={{width: '100%'}} severity="error">
-                        <AlertTitle>Meaningless comparison</AlertTitle>
+                        <AlertTitle>Probable meaningless comparison</AlertTitle>
                         {nodeComparison.warnings.map(w => (
                             <p>{w}</p>
                         ))}
@@ -177,7 +177,7 @@ const PropComparisonCells = ({data, name}: { data: PropComparison, name: string 
                         color: data.has_improved ? 'inherit' : 'white'
                     }}
                 >
-                    {data.percentage_improved > 0 && "+"}{betterNumbers(data.percentage_improved)} %
+                    {data.percentage_improved > 0 && "+"}{formatNumbers(data.percentage_improved)} %
                 </TableCell>
             )}
         </>
@@ -253,12 +253,12 @@ const headCells = (planId: string, planIdToCompare: string) => [
 
 const getMeasure = (name: string, data: number): string => {
     if (name.includes("time") || name.includes("duration")) {
-        return betterTiming(data)
+        return formatTiming(data)
     } else if (name.includes("blocks")) {
-        return betterDiskSizeFromBlocks(data)
+        return formatBlocksToDiskSize(data)
     }
 
-    return betterNumbers(data)
+    return formatNumbers(data)
 }
 
 const getUnit = (name: string): string => {

@@ -16,9 +16,9 @@ import {
     Typography
 } from "@mui/material";
 import {
-    betterDiskSizeFromBlocks,
-    betterNumbers,
-    betterTiming, getEstimationColor,
+    formatBlocksToDiskSize,
+    formatNumbers,
+    formatTiming, getEstimationColor,
     getPercentage,
     getPercentageColor
 } from "../../utils";
@@ -37,6 +37,7 @@ import {queryExplainerService} from "../../../Web/ioc";
 import {useParams} from "react-router-dom";
 import {NodeData, TableTabsContext} from "../Contexts";
 import {ButtonAction} from "../../Buttons";
+import {TABS_MAP} from "../../../Web/PlanVisualizationWeb";
 
 export const DetailsTable = () => {
     const theme = useTheme();
@@ -88,7 +89,7 @@ export const DetailsTable = () => {
                                                 // If the tab is set to, for example, Indexes, the app will crash because it won't find the row id
                                                 // of the main table. Moreover, the switchToRow cannot happen asynchronously, thus we must wait
                                                 // that setTabIndex has finished
-                                                await setTabIndex(1)
+                                                await setTabIndex(TABS_MAP().table.index)
                                                 switchToRow()
                                             }}
                                         />
@@ -108,7 +109,7 @@ export const DetailsTable = () => {
                                     <TableCell
                                         style={{backgroundColor: getPercentageColor(data.row.exclusive, data.stats.execution_time, theme)}}>
                                         <b>Time:</b> {` `}
-                                        {betterTiming(data.row.exclusive)}
+                                        {formatTiming(data.row.exclusive)}
                                     </TableCell>
                                 </TableRow>
 
@@ -120,14 +121,14 @@ export const DetailsTable = () => {
                                     <TableCell
                                         style={{backgroundColor: getPercentageColor(data.row.inclusive, data.stats.execution_time, theme)}}>
                                         <b>Cumulative time:</b> {` `}
-                                        {betterTiming(data.row.inclusive)}
+                                        {formatTiming(data.row.inclusive)}
                                     </TableCell>
                                 </TableRow>
 
 
                                 <Row
                                     name="Rows"
-                                    mainValue={betterNumbers(data.row.rows.total)}
+                                    mainValue={formatNumbers(data.row.rows.total)}
                                     color={getEstimationColor(data.row.rows.estimation_factor, theme)}
                                     showWarning={data.row.rows.estimation_factor >= 25}
                                 >
@@ -138,7 +139,7 @@ export const DetailsTable = () => {
                                         content={Math.round(data.row.rows.estimation_factor * 1000) / 1000}
                                         name="Rows estimate factor"
                                     >
-                                        {betterNumbers(data.row.rows.estimation_factor)}
+                                        {formatNumbers(data.row.rows.estimation_factor)}
                                     </GenericDetailsPopover>
                                 </Row>
 
@@ -147,7 +148,7 @@ export const DetailsTable = () => {
                                         <Row
                                             name="Reads"
                                             color={getPercentageColor(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read, theme)}
-                                            mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_read)}
+                                            mainValue={formatBlocksToDiskSize(data.row.buffers.effective_blocks_read)}
                                             showWarning={getPercentage(data.row.buffers.effective_blocks_read, data.stats.max_blocks_read) >= 10}
                                         >
                                             <BufferReadsCellCollapsedContent row={data.row} expanded={true} stats={data.stats}
@@ -157,7 +158,7 @@ export const DetailsTable = () => {
                                         <Row
                                             name="Written"
                                             color={getPercentageColor(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written, theme)}
-                                            mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_written)}
+                                            mainValue={formatBlocksToDiskSize(data.row.buffers.effective_blocks_written)}
                                             showWarning={getPercentage(data.row.buffers.effective_blocks_written, data.stats.max_blocks_written) > 10}
                                         >
                                             <BufferWrittenCellCollapsedContent row={data.row} expanded={true} stats={data.stats}
@@ -166,7 +167,7 @@ export const DetailsTable = () => {
 
                                         <Row
                                             name="Cache"
-                                            mainValue={betterDiskSizeFromBlocks(data.row.buffers.effective_blocks_hits)}
+                                            mainValue={formatBlocksToDiskSize(data.row.buffers.effective_blocks_hits)}
                                         >
                                             <BufferHitsCellCollapsedContent row={data.row} expanded={true} stats={data.stats}
                                                                             theme={theme}/>

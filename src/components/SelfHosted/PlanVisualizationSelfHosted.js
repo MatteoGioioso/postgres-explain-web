@@ -5,7 +5,7 @@ import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
 import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
 import {ErrorAlert} from "../ErrorReporting";
 import {useParams} from "react-router-dom";
-import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
+import {TableTabs} from "../CoreModules/TableTabs";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
 import {NodeContext} from "../CoreModules/Plan/Contexts";
 import {queryExplainerService} from "./ioc";

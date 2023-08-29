@@ -1,4 +1,4 @@
-import {Grid} from "@mui/material";
+import {Grid, Stack} from "@mui/material";
 import {OptimizationsList} from "../CoreModules/Optimization/OptimizationsList";
 import {QueryPlanListItem} from "../CoreModules/types";
 import {useNavigate, useParams} from "react-router-dom";
@@ -27,10 +27,10 @@ export const Optimizations = ({optimizations}: OptimizationsProps) => {
                 <OptimizationsList optimizations={optimizations} onClickOptimization={onClickOptimization}/>
             </Grid>
             <Grid item xs={6} sx={{pl: 2}}>
+                <Stack spacing={2}>
                 <OptimizationsComparisonsSelects optimizations={optimizations} onClickCompare={onClickCompare} />
-            </Grid>
-            <Grid item xs={12} sx={{pt: 2}}>
                 <OptimizationsAnalytics optimizations={optimizations} />
+                </Stack>
             </Grid>
         </Grid>
     )

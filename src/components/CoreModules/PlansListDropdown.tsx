@@ -19,11 +19,12 @@ export default function PlansListDropdown({items, onClick, currentPlanId}: Plans
 
     return (
         <Box sx={{ minWidth: 300 }}>
-            <FormControl fullWidth>
+            <FormControl>
                 <InputLabel id="plans">Plan ID</InputLabel>
                 <Select
                     labelId="plans"
                     id="plans"
+                    sx={{width: '400px'}}
                     label="Plans"
                     value={currentPlanId}
                     onChange={handleChange}

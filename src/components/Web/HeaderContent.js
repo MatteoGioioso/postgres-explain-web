@@ -9,15 +9,6 @@ import {ButtonLink} from "../CoreModules/Buttons";
 
 const HeaderContent = () => {
     const {pathname} = useLocation();
-    const {plan_id} = useParams();
-    const navigate = useNavigate();
-    const [plansList, setPlansList] = useState([])
-
-    useEffect(() => {
-        const queryPlansList = queryExplainerService.getQueryPlansList();
-        setPlansList(queryPlansList)
-    }, [plan_id]);
-
 
     function getContentBasedOnPath(pathname) {
         switch (true) {
@@ -33,13 +24,6 @@ const HeaderContent = () => {
                 return (
                     <>
                         <ButtonLink to={'/'} title="+ New Plan" variant='outlined'/>
-                        <Box sx={{pl: 2}}>
-                            <PlansListDropdown
-                                items={plansList}
-                                currentPlanId={plan_id}
-                                onClick={(id) => navigate(`/plans/${id}`)}
-                            />
-                        </Box>
                     </>
                 )
         }

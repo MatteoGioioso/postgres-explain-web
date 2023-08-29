@@ -2,7 +2,7 @@ import {PlanRow, Stats} from "./Plan/types";
 import {Edge, Node, Position} from "reactflow";
 import {Theme} from "@mui/material";
 
-export const betterNumbers = (num: number): string => {
+export const formatNumbers = (num: number): string => {
     const ONE_MILLION = 1000000
     const THOUSAND = 1000
     const HUNDRED = 100
@@ -36,7 +36,7 @@ export const betterNumbers = (num: number): string => {
     return num.toString()
 }
 
-export function betterTiming(milliseconds: number): string {
+export function formatTiming(milliseconds: number): string {
     const seconds = Math.round(milliseconds / 1000);
 
     if (seconds < 1) {
@@ -56,7 +56,7 @@ export function betterTiming(milliseconds: number): string {
     }
 }
 
-export function betterDate(date: string | Date): string {
+export function formatDate(date: string | Date): string {
     const options = {
         weekday: 'long',
         year: 'numeric',
@@ -69,7 +69,7 @@ export function betterDate(date: string | Date): string {
     return d.toLocaleDateString("en-US", options)
 }
 
-export function betterDiskSizeFromBlocks(blocks: number): string {
+export function formatBlocksToDiskSize(blocks: number): string {
     const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     let size = blocks * 8192;
     let unitIndex = 0;
@@ -82,7 +82,7 @@ export function betterDiskSizeFromBlocks(blocks: number): string {
     return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
-export function betterDiskSize(diskSize: number): string {
+export function formatDiskSize(diskSize: number): string {
     const units = ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     let unitIndex = 0;
 
@@ -94,12 +94,16 @@ export function betterDiskSize(diskSize: number): string {
     return `${diskSize.toFixed(2)} ${units[unitIndex]}`;
 }
 
+export function formatBigNumbers(n: number) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 export const getFunctionFromKind = (kind: string) => {
     const kindMap = {
-        "timing": betterTiming,
-        "quantity": betterNumbers,
-        "blocks": betterDiskSizeFromBlocks,
-        "disk_size": betterDiskSize,
+        "timing": formatTiming,
+        "quantity": formatNumbers,
+        "blocks": formatBlocksToDiskSize,
+        "disk_size": formatDiskSize,
         "": (val: any) => val
     }
 
@@ -112,6 +116,21 @@ export function getPercentageColor(reference: number, total: number, theme?: any
     const percentage = getPercentage(reference, total)
     return getColorFromPercentage(percentage, theme, hovered);
 }
+
+export function getTextPercentageColor(reference: number, total: number, theme?: any, hovered?: boolean): string {
+    const percentage = getPercentage(reference, total)
+
+    if (percentage >= 50 && hovered) {
+        return theme.palette.secondary["A100"]
+    }
+
+    if (percentage >= 90) {
+        return theme.palette.secondary["A100"]
+    }
+
+    return 'inherit'
+}
+
 
 export function getColorFromPercentage(percentage: number, theme, hovered?: any): string {
     if (percentage <= 10) {
@@ -147,6 +166,18 @@ export function getEstimationColor(estimationFactor: number, theme?: any, hovere
     }
 
     return !hovered ? theme.palette.secondary.A100 : theme.palette.secondary[200]
+}
+
+export function getTextEstimationColor(estimationFactor: number, theme?: any, hovered?: boolean): string {
+    if (estimationFactor >= 100 && hovered) {
+        return theme.palette.secondary["A100"]
+    }
+
+    if (estimationFactor >= 1000) {
+        return theme.palette.secondary["A100"]
+    }
+
+    return 'inherit'
 }
 
 export function getPercentage(reference: number, total: number): number {

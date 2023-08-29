@@ -2,12 +2,13 @@ import React from "react";
 import {Box, Chip, Collapse, Divider, Grid, TableCell, Tooltip, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {
-    betterDiskSizeFromBlocks,
-    betterNumbers,
-    betterTiming,
+    formatBigNumbers,
+    formatBlocksToDiskSize,
+    formatNumbers,
+    formatTiming,
     getEstimationColor,
     getFunctionFromKind, getPercentage,
-    getPercentageColor,
+    getPercentageColor, getTextEstimationColor, getTextPercentageColor,
     truncateText
 } from "../../utils";
 import {PlanRow, Property, Stats} from "../types";
@@ -26,7 +27,14 @@ export const headCells = (): {
         label: 'Time',
         align: 'left',
         disablePadding: false,
-        description: "Total node time per worker"
+        description: (
+            <>
+                <Typography>Actual time spent to process this single node, but without the time spent on any sub nodes.</Typography>
+                <Typography fontWeight='bolder'>NOTE: this number takes into account how many times each process had to be run
+                    (Loops)</Typography>
+            </>
+
+        )
     },
     {
         id: 'inclusive',
@@ -67,17 +75,53 @@ export const headCells = (): {
         label: 'Reads',
         align: 'left',
         disablePadding: false,
+        description: (
+            <>
+                <Typography>
+                    It shows how much was read in total from disk. When expanded you can see the detailed break down between Shared, Local
+                    and Temp
+                </Typography>
+                <Typography fontWeight='bold'>
+                    NOTE: Shared, Local and Temp are expressed in number of blocks
+                </Typography>
+            </>
+        )
     },
     {
         id: 'written',
         label: 'Written',
         align: 'left',
         disablePadding: false,
+        description: (
+            <>
+                <Typography>
+                    It shows how much was written in total from disk. When expanded you can see the detailed break down between Shared,
+                    Local
+                    and Temp
+                </Typography>
+                <Typography fontWeight='bold'>
+                    NOTE: Shared, Local and Temp are expressed in number of blocks
+                </Typography>
+            </>
+        )
+
     },
     {
         id: 'hits',
         label: 'Cache',
-        align: 'left'
+        align: 'left',
+        description: (
+            <>
+                <Typography>
+                    It shows how much was get from the shared_buffers cache. When expanded you can see the detailed break down between
+                    Shared, Local
+                </Typography>
+                <Typography fontWeight='bold'>
+                    NOTE: Shared, Local are expressed in number of blocks
+                </Typography>
+            </>
+        )
+
     },
     {
         id: 'node',
@@ -101,18 +145,45 @@ export interface CellProps {
     hovered?: boolean
 }
 
-export const TimingCell = ({prop, totalProp, name, hovered}: { prop: number, totalProp: number, name?: string, hovered: boolean }) => {
+export const ExclusiveTimingCell = ({row, stats, expanded, hovered}: CellProps) => {
     const theme = useTheme();
 
     return (
         <TableCell
             style={{
-                backgroundColor: getPercentageColor(prop, totalProp, theme, hovered)
+                backgroundColor: getPercentageColor(row.exclusive, row.execution_time, theme, hovered),
+                color: getTextPercentageColor(row.exclusive, row.execution_time, theme, hovered)
             }}
         >
-            <GenericDetailsPopover name={name} content={prop} keepCloseCondition={prop === 0}>
-                {betterTiming(prop)}
+            <GenericDetailsPopover name={""} content={`${formatBigNumbers(row.exclusive)} ms`} keepCloseCondition={row.exclusive === 0}>
+                {formatTiming(row.exclusive)}
             </GenericDetailsPopover>
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+                <Box sx={{pt: 1}}/>
+                <Typography fontSize={13}>{formatNumbers(getPercentage(row.exclusive, row.execution_time))}%</Typography>
+            </Collapse>
+        </TableCell>
+    )
+}
+
+export const InclusiveTimingCell = ({row, stats, expanded, hovered}: CellProps) => {
+    const theme = useTheme();
+
+    return (
+        <TableCell
+            style={{
+                backgroundColor: getPercentageColor(row.inclusive, row.execution_time, theme, hovered),
+                color: getTextPercentageColor(row.inclusive, row.execution_time, theme, hovered)
+            }}
+        >
+            <GenericDetailsPopover name={""} content={`${formatBigNumbers(row.inclusive)} ms`} keepCloseCondition={row.inclusive === 0}>
+                {formatTiming(row.inclusive)}
+            </GenericDetailsPopover>
+
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+                <Box sx={{pt: 1}}/>
+                <Typography fontSize={13}>{formatNumbers(getPercentage(row.inclusive, row.execution_time))}%</Typography>
+            </Collapse>
         </TableCell>
     )
 }
@@ -125,7 +196,8 @@ export const RowsCell = ({row, expanded, theme, hovered}: CellProps) => {
                 wordWrap: 'break-word',
                 whiteSpace: 'normal',
                 width: '200px',
-                backgroundColor: getPercentageColor(row.rows.removed, row.rows.total, theme, hovered)
+                backgroundColor: getPercentageColor(row.rows.removed, row.rows.total, theme, hovered),
+                color: getTextPercentageColor(row.rows.removed, row.rows.total, theme, hovered)
             }}
         >
             {row.scopes.filters && (
@@ -133,7 +205,7 @@ export const RowsCell = ({row, expanded, theme, hovered}: CellProps) => {
                     <FilterOutlined style={{marginRight: 4, color: theme.palette.secondary.dark, fontSize: '12px'}}/>
                 </Tooltip>
             )}
-            {betterNumbers(row.rows.total)}
+            {formatNumbers(row.rows.total)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <RowsCellCollapsedContent row={row} expanded={expanded} stats={null}/>
             </Collapse>
@@ -151,12 +223,12 @@ export const RowsCellCollapsedContent = ({row}: CellProps) => {
         <Box sx={{pt: 1}}>
             <Typography><b>Avg per {getAvgText(row)}</b>: {' '}
                 <GenericDetailsPopover name={"Rows"} content={row.rows.total_avg}>
-                    {betterNumbers(row.rows.total_avg)}
+                    {formatNumbers(row.rows.total_avg)}
                 </GenericDetailsPopover>
             </Typography>
             <Typography><b>Planned</b>: {' '}
                 <GenericDetailsPopover name={"Planned rows"} content={row.rows.planned_rows}>
-                    {betterNumbers(row.rows.planned_rows)}
+                    {formatNumbers(row.rows.planned_rows)}
                 </GenericDetailsPopover>
             </Typography>
             {
@@ -164,7 +236,7 @@ export const RowsCellCollapsedContent = ({row}: CellProps) => {
                     <>
                         <b>Removed: </b>
                         <GenericDetailsPopover name={"rows removed"} content={row.rows.removed}>
-                            - {' '}{betterNumbers(row.rows.removed)}
+                            - {' '}{formatNumbers(row.rows.removed)}
                         </GenericDetailsPopover>
                     </>
                 )}
@@ -176,7 +248,7 @@ export const RowsCellCollapsedContent = ({row}: CellProps) => {
 export const LoopsCell = ({row, expanded}: CellProps) => {
     return (
         <TableCell align="right">
-            {betterNumbers(row.loops)} / {row.workers.launched + 1}
+            {formatNumbers(row.loops)} / {row.workers.launched + 1}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 {Boolean(row.workers.planned) && (
                     <Typography
@@ -197,8 +269,13 @@ export const BufferReadsCell = ({
                                     expanded, row, stats, theme, hovered
                                 }: CellProps) => {
     return (
-        <TableCell style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme, hovered)}}>
-            {betterDiskSizeFromBlocks(row.buffers.effective_blocks_read)}
+        <TableCell
+            style={{
+                backgroundColor: getPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme, hovered),
+                color: getTextPercentageColor(row.buffers.effective_blocks_read, stats.max_blocks_read, theme, hovered)
+            }}
+        >
+            {formatBlocksToDiskSize(row.buffers.effective_blocks_read)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferReadsCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
             </Collapse>
@@ -211,18 +288,14 @@ export const BufferReadsCellCollapsedContent = ({row}: CellProps) => {
         <Box sx={{pt: 1}}>
 
             {Boolean(row.buffers.exclusive_reads) && (
-                <Typography
-                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_reads)}
-                </Typography>
+                <Typography fontSize={13}>Shared: {formatNumbers(row.buffers.exclusive_reads)}</Typography>
             )}
             {Boolean(row.buffers.exclusive_temp_reads) && (
-                <Typography
-                    variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_reads)}
+                <Typography fontSize={13}>Temp: {formatNumbers(row.buffers.exclusive_temp_reads)}
                 </Typography>
             )}
             {Boolean(row.buffers.exclusive_local_reads) && (
-                <Typography
-                    variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_reads)}
+                <Typography fontSize={13}>Local: {formatNumbers(row.buffers.exclusive_local_reads)}
                 </Typography>
             )}
 
@@ -235,8 +308,12 @@ export const BufferWrittenCell = ({
                                   }: CellProps) => {
     return (
         <TableCell
-            style={{backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme, hovered)}}>
-            {betterDiskSizeFromBlocks(row.buffers.effective_blocks_written)}
+            style={{
+                backgroundColor: getPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme, hovered),
+                color: getTextPercentageColor(row.buffers.effective_blocks_written, stats.max_blocks_written, theme, hovered)
+            }}
+        >
+            {formatBlocksToDiskSize(row.buffers.effective_blocks_written)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferWrittenCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
             </Collapse>
@@ -248,18 +325,15 @@ export const BufferWrittenCellCollapsedContent = ({row}: CellProps) => {
     return (
         <Box sx={{pt: 1}}>
             {Boolean(row.buffers.exclusive_written) && (
-                <Typography
-                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_written)}
+                <Typography fontSize={13}>Shared: {formatNumbers(row.buffers.exclusive_written)}
                 </Typography>
             )}
             {Boolean(row.buffers.exclusive_temp_written) && (
-                <Typography
-                    variant='subtitle2'>Temp: {betterNumbers(row.buffers.exclusive_temp_written)}
+                <Typography fontSize={13}>Temp: {formatNumbers(row.buffers.exclusive_temp_written)}
                 </Typography>
             )}
             {Boolean(row.buffers.exclusive_local_written) && (
-                <Typography
-                    variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_written)}
+                <Typography fontSize={13}>Local: {formatNumbers(row.buffers.exclusive_local_written)}
                 </Typography>
             )}
 
@@ -272,7 +346,7 @@ export const BufferHitsCell = ({
                                }: CellProps) => {
     return (
         <TableCell>
-            {betterDiskSizeFromBlocks(row.buffers.effective_blocks_hits)}
+            {formatBlocksToDiskSize(row.buffers.effective_blocks_hits)}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <BufferHitsCellCollapsedContent row={row} expanded={expanded} stats={stats}/>
             </Collapse>
@@ -284,13 +358,11 @@ export const BufferHitsCellCollapsedContent = ({row}: CellProps) => {
     return (
         <Box sx={{pt: 1}}>
             {Boolean(row.buffers.exclusive_hits) && (
-                <Typography
-                    variant='subtitle2'>Shared: {betterNumbers(row.buffers.exclusive_hits)}
+                <Typography fontSize={13}>Shared: {formatNumbers(row.buffers.exclusive_hits)}
                 </Typography>
             )}
             {Boolean(row.buffers.exclusive_local_hits) && (
-                <Typography
-                    variant='subtitle2'>Local: {betterNumbers(row.buffers.exclusive_local_hits)}
+                <Typography fontSize={13}>Local: {formatNumbers(row.buffers.exclusive_local_hits)}
                 </Typography>
             )}
         </Box>
@@ -300,13 +372,16 @@ export const BufferHitsCellCollapsedContent = ({row}: CellProps) => {
 
 export const RowsEstimationCell = ({row, theme, expanded, hovered}: CellProps) => {
     return (
-        <TableCell align="left" style={{backgroundColor: getEstimationColor(row.rows.estimation_factor, theme, hovered)}}>
+        <TableCell align="left" style={{
+            backgroundColor: getEstimationColor(row.rows.estimation_factor, theme, hovered),
+            color: getTextEstimationColor(row.rows.estimation_factor, theme, hovered)
+        }}>
             {getRowEstimateDirectionSymbol(row.rows.estimation_direction) + ' '}
             <GenericDetailsPopover
                 content={Math.round(row.rows.estimation_factor * 1000) / 1000}
                 name="Rows estimate factor"
             >
-                {betterNumbers(row.rows.estimation_factor)}
+                {formatNumbers(row.rows.estimation_factor)}
             </GenericDetailsPopover>
         </TableCell>
     )
@@ -370,7 +445,7 @@ export function NodeStats({expanded, row, stats, theme}: { expanded: boolean, ro
                 <Chip
                     style={{backgroundColor: getPercentageColor(row.costs.total_cost, stats.max_cost, theme)}}
                     icon={<DollarOutlined style={{fontSize: '0.75rem', color: 'inherit'}}/>}
-                    label={betterNumbers(row.costs.total_cost)}
+                    label={formatNumbers(row.costs.total_cost)}
                     sx={{ml: 1.25, pl: 1}}
                     size="small"
                 />

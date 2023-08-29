@@ -2,7 +2,7 @@ import MainCard from "../../MainCard";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import React from "react";
 import {Stats} from "../types";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter} from "../../utils";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter} from "../../utils";
 
 export interface GeneralStatsTableProps {
     stats: Stats
@@ -81,10 +81,10 @@ const Row = ({name, data}: { name: string, data: number }) => {
 
 const getMeasure = (name: string, data: number): string => {
     if (name.includes("time") || name.includes("duration")) {
-        return betterTiming(data)
+        return formatTiming(data)
     } else if (name.includes("blocks")) {
-        return betterDiskSizeFromBlocks(data)
+        return formatBlocksToDiskSize(data)
     }
 
-    return betterNumbers(data)
+    return formatNumbers(data)
 }

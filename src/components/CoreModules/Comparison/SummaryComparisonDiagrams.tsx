@@ -70,7 +70,7 @@ export const ComparisonDiagrams = ({
     useEffect(() => {
         const themeCopy = clone(theme)
         // @ts-ignore
-        themeCopy.diagram.node.width = 100
+        themeCopy.diagram.node.width = 200
         // @ts-ignore
         themeCopy.diagram.node.height = 50
 

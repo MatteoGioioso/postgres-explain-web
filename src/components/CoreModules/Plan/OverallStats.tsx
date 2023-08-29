@@ -1,10 +1,10 @@
 import MainCard from "../MainCard";
 import {Stats} from "./types"
 import {Box, Grid, Table, TableBody, TableCell, TableContainer, TableRow, Typography} from "@mui/material";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming} from "../utils";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming} from "../utils";
 import {Row} from "./table/Row";
 import React from "react";
-import {TimingCell, getRowEstimateDirectionSymbol} from "./table/Cells";
+import {ExclusiveTimingCell, getRowEstimateDirectionSymbol} from "./table/Cells";
 import {GenericDetailsPopover} from "../GenericDetailsPopover";
 
 interface OverallStatsProps {
@@ -44,16 +44,16 @@ export const OverallStats = ({stats}: OverallStatsProps) => {
                     >
 
                         <TableCell align="left">
-                            Execution time: {betterTiming(stats.execution_time)}
+                            Execution time: {formatTiming(stats.execution_time)}
                         </TableCell>
                         <TableCell align="left">
-                            Planning time: {betterTiming(stats.planning_time)}
+                            Planning time: {formatTiming(stats.planning_time)}
                         </TableCell>
                         <TableCell align="left">
-                            Total reads from Disk: {betterDiskSizeFromBlocks(stats.max_blocks_read)}
+                            Total reads from Disk: {formatBlocksToDiskSize(stats.max_blocks_read)}
                         </TableCell>
                         <TableCell align="left">
-                            Total written to Disk: {betterDiskSizeFromBlocks(stats.max_blocks_written)}
+                            Total written to Disk: {formatBlocksToDiskSize(stats.max_blocks_written)}
                         </TableCell>
                     </TableRow>
                 </TableBody>

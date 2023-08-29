@@ -12,7 +12,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Toolbar
+    Toolbar, Tooltip
 } from '@mui/material';
 import {headCells, isColumnShowing, RowsCellCollapsedContent} from "./table/Cells";
 import {Row} from "./table/Row";
@@ -33,9 +33,9 @@ function OrderTableHead({hidedColumns}: { hidedColumns: { [key: string]: boolean
                             key={headCell.id}
                             padding={headCell.disablePadding ? 'none' : 'normal'}
                         >
-                            <GenericDetailsPopover name={"description"} content={headCell.description}>
-                                {headCell.label}
-                            </GenericDetailsPopover>
+                            <Tooltip title={headCell.description}>
+                                <Box>{headCell.label}</Box>
+                            </Tooltip>
                         </TableCell>
                     ))}
             </TableRow>

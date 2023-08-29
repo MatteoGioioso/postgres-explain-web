@@ -1,12 +1,14 @@
-import {Box, Button, Divider, IconButton, Link, Modal, Paper, Snackbar, Stack, Typography} from "@mui/material";
+import {Box, Button, Divider, IconButton, Modal, Paper, Snackbar, Stack, Typography} from "@mui/material";
 import {ShareAltOutlined} from "@ant-design/icons";
 import React, {useContext, useState} from "react";
 import {ButtonAction, UploadButton} from "../Buttons";
 import {PlanForm} from "../PlanForm";
-import {QueryPlan} from "../types";
+import {QueryPlan, QueryPlanListItem} from "../types";
 import {FormikHelpers} from "formik/dist/types";
-import {betterTiming, getPercentageColor} from "../utils";
+import {formatTiming, getPercentageColor} from "../utils";
 import {TableTabsContext} from "./Contexts";
+import PlansListDropdown from "../PlansListDropdown";
+import {TABS_MAP} from "../../Web/PlanVisualizationWeb";
 
 const modalBoxStyles = {
     position: 'absolute' as 'absolute',
@@ -33,36 +35,45 @@ interface PlanToolbarProps {
     onSubmitOptimizationPlanForm: onSubmitOptimizationPlanForm
     uploadSharedPlan: (event: React.SyntheticEvent) => Promise<string>
     sharePlan: (planId: string) => void
+    selectPlan: (planId: string) => void
+    plansList: QueryPlanListItem[]
 }
 
-export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uploadSharedPlan}: PlanToolbarProps) => {
+export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uploadSharedPlan, plansList, selectPlan}: PlanToolbarProps) => {
     const [open, setOpen] = useState<boolean>(false)
     const [openModal, setOpenModal] = useState(false);
-    const {tabIndex, setTabIndex} = useContext(TableTabsContext);
+    const {setTabIndex} = useContext(TableTabsContext);
 
     return (
         <>
             <Paper
                 elevation={0}
                 sx={{
-                    p: 0.5,
+                    p: 1,
                     border: '1px solid',
                     borderColor: theme => theme.palette.grey['A800'],
                     borderRadius: 2,
                 }}
             >
                 <Stack direction='row'>
-
+                    <Stack direction='row'>
+                        <PlansListDropdown
+                            items={plansList}
+                            currentPlanId={plan.id}
+                            onClick={selectPlan}
+                        />
+                    </Stack>
                     <Stack direction='row' divider={<Divider orientation="vertical" flexItem/>}>
+
                         <Typography sx={{p: 1, whiteSpace: 'nowrap'}}>Execution
-                            time: <b>{betterTiming(plan.stats.execution_time)}</b></Typography>
+                            time: <b>{formatTiming(plan.stats.execution_time)}</b></Typography>
                         <Typography sx={{p: 1, whiteSpace: 'nowrap'}}>Planning
-                            time: <b>{betterTiming(plan.stats.planning_time)}</b></Typography>
+                            time: <b>{formatTiming(plan.stats.planning_time)}</b></Typography>
                         {Boolean(plan.jit_stats) && (
                             <>
                                 <Typography
                                     sx={{pt: 1, pb: 1, pl: 1, color: theme => theme.palette.primary.main, cursor: 'pointer'}}
-                                    onClick={() => setTabIndex(2)}
+                                    onClick={() => setTabIndex(TABS_MAP().stats.index)}
                                 >
                                     JIT
                                 </Typography>
@@ -75,7 +86,7 @@ export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uplo
                                         backgroundColor: theme => getPercentageColor(plan.jit_stats.Timing.Total, plan.stats.execution_time, theme)
                                     }}
                                 >
-                                    <b>{betterTiming(plan.jit_stats.Timing.Total)}</b>
+                                    <b>{formatTiming(plan.jit_stats.Timing.Total)}</b>
                                 </Typography>
                             </>
 
@@ -84,7 +95,7 @@ export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uplo
                             <>
                                 <Typography
                                     sx={{pt: 1, pb: 1, pl: 1, color: theme => theme.palette.primary.main, cursor: 'pointer'}}
-                                    onClick={() => setTabIndex(2)}
+                                    onClick={() => setTabIndex(TABS_MAP().stats.index)}
                                 >
                                     Triggers
                                 </Typography>
@@ -97,7 +108,7 @@ export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uplo
                                         backgroundColor: theme => getPercentageColor(plan.triggers_stats.max_time, plan.stats.execution_time, theme)
                                     }}
                                 >
-                                    <b>{betterTiming(plan.triggers_stats.max_time)}</b>
+                                    <b>{formatTiming(plan.triggers_stats.max_time)}</b>
                                 </Typography>
                             </>
                         )}

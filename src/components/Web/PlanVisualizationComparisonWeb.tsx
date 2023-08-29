@@ -1,23 +1,41 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
-import {Grid, Paper, Stack} from "@mui/material";
+import {Grid, Stack} from "@mui/material";
 import {GeneralStatsComparisonTable} from "../CoreModules/Comparison/GeneralStatsComparisonTable";
-import {TableTabs} from "../CoreModules/Plan/tabs/TableTabs";
+import {TableTabs} from "../CoreModules/TableTabs";
 import {SummaryComparisonDiagrams} from "../CoreModules/Comparison/SummaryComparisonDiagrams";
 import {queryExplainerService} from "./ioc";
 import {useNavigate, useParams} from "react-router-dom";
-import {ExplainedError, NodeComparison, PlanRow} from "../CoreModules/Plan/types";
+import {ExplainedError, NodeComparison, PlanRow, Stats} from "../CoreModules/Plan/types";
 import {WasmErrorDescription} from "./Errors";
 import {ComparePlanResponse} from "./QueryExplainer.service";
-import {SwapOutlined} from "@ant-design/icons";
-import {ButtonAction} from "../CoreModules/Buttons";
-import {TableTabsContext} from "../CoreModules/Plan/Contexts";
+import {TABS_MAP as planVisualizationTabsMap} from "./PlanVisualizationWeb"
+import {SelectChangeEvent} from "@mui/material/Select";
+import {QueryPlanListItem} from "../CoreModules/types";
+import {Toolbar} from "../CoreModules/Comparison/ComparisonToolbar";
+import {lowerFirst} from "lodash";
+
+export const TABS_MAP = () => {
+    return {
+        diagram: {
+            index: 0,
+            id: "diagram",
+            name: "Diagram"
+        },
+        stats: {
+            index: 1,
+            id: "stats",
+            name: "Stats"
+        },
+    }
+}
 
 const PlanVisualizationComparisonWeb = () => {
     const navigate = useNavigate();
     const [error, setError] = useState<ErrorReport>(null)
     const {plan_id, plan_id_to_compare} = useParams();
     const [comparisonResponse, setComparisonResponse] = useState<ComparePlanResponse>(null)
+    const [optimizations, setOptimizations] = useState<QueryPlanListItem[]>()
 
     async function fetchComparison(id, idToCompare) {
         try {
@@ -49,11 +67,16 @@ const PlanVisualizationComparisonWeb = () => {
     }
 
     function onClickPlanIdTitle(id: string) {
-        navigate(`/plans/${id}`)
+        navigate(`/plans/${id}`, {state: {tab: planVisualizationTabsMap().optimizations.id}})
     }
 
     async function fetchNodeComparison(node: PlanRow, nodeToCompare: PlanRow): Promise<NodeComparison> {
         return queryExplainerService.compareNodes(node, nodeToCompare)
+    }
+
+    function fetchOptimizations(planId: string) {
+        const optimizationsList = queryExplainerService.getOptimizationsList(planId);
+        setOptimizations(optimizationsList)
     }
 
     function onClickSwap() {
@@ -61,8 +84,23 @@ const PlanVisualizationComparisonWeb = () => {
         navigate(`/plans/${plan_id_to_compare}/comparisons/${plan_id}`)
     }
 
+    function onClickGoBackToOptimizations() {
+        navigate(`/plans/${plan_id}`, {state: {tab: planVisualizationTabsMap().optimizations.id}})
+    }
+
+    const handleChange = (e: SelectChangeEvent) => {
+        setComparisonResponse(null)
+        navigate(`/plans/${e.target.value}/comparisons/${plan_id_to_compare}`)
+    }
+
+    const handleChangeToCompare = (e: SelectChangeEvent) => {
+        setComparisonResponse(null)
+        navigate(`/plans/${plan_id}/comparisons/${e.target.value}`)
+    }
+
     useEffect(() => {
         fetchComparison(plan_id, plan_id_to_compare).then()
+        fetchOptimizations(plan_id)
     }, [])
 
     useEffect(() => {
@@ -70,92 +108,45 @@ const PlanVisualizationComparisonWeb = () => {
     }, [plan_id_to_compare, plan_id])
 
     return (
-        <Grid container>
-            <Toolbar
-                onClickSwap={onClickSwap}
-            />
-            {error && <ErrorAlert error={error} setError={setError}/>}
-            <Grid container>
-                <TableTabs
-                    tabs={[
-                        {
-                            name: "Diagrams",
-                            component: () => (
-                                <SummaryComparisonDiagrams
-                                    onClickPlanIdTitle={onClickPlanIdTitle}
-                                    onClickPlanToCompareIdTitle={onClickPlanIdTitle}
-                                    planToCompare={comparisonResponse.planToCompare}
-                                    plan={comparisonResponse.plan}
-                                    compareNode={fetchNodeComparison}
-                                />
-                            ),
-                            show: Boolean(comparisonResponse)
-                        },
-                        {
-                            name: "Stats",
-                            component: () => <GeneralStatsComparisonTable stats={comparisonResponse.comparison.general_stats}/>,
-                            show: Boolean(comparisonResponse)
-                        }
-                    ]}
-                />
-            </Grid>
-        </Grid>
-    )
-}
-
-const Toolbar = (props) => {
-    const navigate = useNavigate();
-    const {plan_id, plan_id_to_compare} = useParams();
-    const {tabIndex, setTabIndex} = useContext(TableTabsContext);
-
-    return (
         <>
-            <Paper
-                elevation={0}
-                sx={{
-                    position: 'absolute',
-                    right: '50%',
-                    top: 75,
-                    p: 0.5,
-                    border: '1px solid',
-                    transform: 'translate(50%, 0%)',
-                    borderColor: theme => theme.palette.grey['A800'],
-                    borderRadius: 2,
-                    zIndex: 999
-                }}
-            >
-                <Stack direction='row'>
-                    <ButtonAction
-                        onClick={props.onClickSwap}
-                        icon={<SwapOutlined/>}
+            <Stack direction='row' justifyContent='center'>
+                <Toolbar
+                    onClickSwap={onClickSwap}
+                    optimizations={optimizations}
+                    handleChange={handleChange}
+                    handleChangeToCompare={handleChangeToCompare}
+                    onClickGoBackToOptimizations={onClickGoBackToOptimizations}
+                />
+            </Stack>
+            <Grid container>
+
+                {error && <ErrorAlert error={error} setError={setError}/>}
+                <Grid container>
+                    <TableTabs
+                        tabMaps={TABS_MAP()}
+                        tabs={[
+                            {
+                                name: TABS_MAP().diagram.name,
+                                component: () => (
+                                    <SummaryComparisonDiagrams
+                                        onClickPlanIdTitle={onClickPlanIdTitle}
+                                        onClickPlanToCompareIdTitle={onClickPlanIdTitle}
+                                        planToCompare={comparisonResponse.planToCompare}
+                                        plan={comparisonResponse.plan}
+                                        compareNode={fetchNodeComparison}
+                                    />
+                                ),
+                                show: Boolean(comparisonResponse)
+                            },
+                            {
+                                name: TABS_MAP().stats.name,
+                                component: () => <GeneralStatsComparisonTable stats={comparisonResponse.comparison.general_stats}/>,
+                                show: Boolean(comparisonResponse)
+                            }
+                        ]}
                     />
-                </Stack>
-
-            </Paper>
-
-            <Paper
-                elevation={0}
-                sx={{
-                    position: 'absolute',
-                    right: 25,
-                    top: 75,
-                    p: 0.5,
-                    border: '1px solid',
-                    borderColor: theme => theme.palette.grey['A800'],
-                    borderRadius: 2,
-                    zIndex: 999
-                }}
-            >
-                <Stack direction='row'>
-                    <ButtonAction
-                        title="Back to optimizations"
-                        onClick={() => {
-                            navigate(`/plans/${plan_id}`, {state: {from: 'comparison'}})
-                        }}
-                    />
-                </Stack>
-
-            </Paper>
+                </Grid>
+            </Grid>
         </>
     )
 }

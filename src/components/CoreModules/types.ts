@@ -17,3 +17,5 @@ export interface QueryPlan extends Explained {
     alias?: string
     optimization_id?: string
 }
+
+export type tabMaps = { [key: string]: { name: string, index: number, id: string } }

@@ -2,7 +2,7 @@ import MainCard from "../../MainCard";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import React from "react";
 import {Trigger} from "../types";
-import {betterDiskSizeFromBlocks, betterNumbers, betterTiming, capitalizeFirstLetter, getPercentageColor} from "../../utils";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter, getPercentageColor} from "../../utils";
 
 export interface TriggersStatsTableProps {
     stats: Trigger[]
@@ -72,13 +72,13 @@ const Row = ({trigger, executionTime}: { trigger: Trigger, executionTime: number
                 {trigger.name}
             </TableCell>
             <TableCell sx={{backgroundColor: (theme) => getPercentageColor(trigger.time, executionTime, theme)}}>
-                <b>{betterTiming(trigger.time)}</b>
+                <b>{formatTiming(trigger.time)}</b>
             </TableCell>
             <TableCell>
                 {trigger.calls}
             </TableCell>
             <TableCell>
-                {betterTiming(trigger.avg_time)}
+                {formatTiming(trigger.avg_time)}
             </TableCell>
         </TableRow>
     )
@@ -111,10 +111,10 @@ const headCells = [
 
 const getMeasure = (name: string, data: number): string => {
     if (name.includes("time") || name.includes("duration")) {
-        return betterTiming(data)
+        return formatTiming(data)
     } else if (name.includes("blocks")) {
-        return betterDiskSizeFromBlocks(data)
+        return formatBlocksToDiskSize(data)
     }
 
-    return betterNumbers(data)
+    return formatNumbers(data)
 }

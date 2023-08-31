@@ -38,6 +38,7 @@ import {useParams} from "react-router-dom";
 import {NodeData, TableTabsContext} from "../Contexts";
 import {ButtonAction} from "../../Buttons";
 import {TABS_MAP} from "../../../Web/PlanVisualizationWeb";
+import {NumberTooltip} from "../../CustomTooltips";
 
 export const DetailsTable = () => {
     const theme = useTheme();
@@ -135,12 +136,7 @@ export const DetailsTable = () => {
                                     <RowsCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
                                     <b>Rows estimation:</b> {` `}
                                     {getRowEstimateDirectionSymbol(data.row.rows.estimation_direction) + ' '}
-                                    <GenericDetailsPopover
-                                        content={Math.round(data.row.rows.estimation_factor * 1000) / 1000}
-                                        name="Rows estimate factor"
-                                    >
-                                        {formatNumbers(data.row.rows.estimation_factor)}
-                                    </GenericDetailsPopover>
+                                    <NumberTooltip number={data.row.rows.estimation_factor} />
                                 </Row>
 
                                 {data.row.does_contain_buffers && (

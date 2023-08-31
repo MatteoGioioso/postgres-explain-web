@@ -610,6 +610,10 @@ export class PlanService {
           return
         }
 
+        if (this.parseBucketsAndBatchesV2(workerMatches[10], worker)) {
+          return
+        }
+
         // extra info
         const info = workerMatches[10].split(/: (.+)/).filter((x) => x)
         if (workerMatches[10]) {
@@ -727,6 +731,10 @@ export class PlanService {
           return
         }
 
+        if (this.parseBucketsAndBatchesV2(extraMatches[2], element as Node)) {
+          return
+        }
+
         // remove the " ms" unit in case of time
         let value: string | number = info[1].replace(/(\s*ms)$/, "")
         // try to convert to number
@@ -758,6 +766,67 @@ export class PlanService {
       return true
     }
     return false
+  }
+
+  private parseBucketsAndBatches(text: string, el: Node | Worker): boolean {
+    const bucketsRegex =
+        /^(\s*)(?:Buckets:\s+([\s\S]*?)\s+(?:Batches:\s+([\s\S]*?)\s+))?Memory Usage:\s+([\s\S]*?)\s*kB\s*$/gm
+    const bucketsMatches = bucketsRegex.exec(text)
+    if (bucketsMatches) {
+      const buckets = bucketsMatches[2].trim().split("(originally");
+      const batches = bucketsMatches[3].trim().split("(originally");
+      el["Buckets"] = buckets[0].trim()
+      if (buckets.length > 1) {
+        el["Buckets Originally"] = buckets[1].trim().replace(")", "")
+      }
+
+      el[NodeProp.BATCHES] = batches[0].trim()
+      if (batches.length > 1) {
+        el[NodeProp.BATCHES+" Originally"] = batches[1].trim().replace(")", "")
+      }
+      el["Memory Usage"] = bucketsMatches[4]
+      return true
+    }
+
+    return false
+  }
+
+  private parseBucketsAndBatchesV2(text: string, el: Node | Worker) {
+    const regex = /^(\s*)(Buckets|Batches):\s+([\s\S]*?)\s+(Memory Usage|Disk Usage):\s+(?:(\S*)kB)\s*$/g;
+    if (!regex.test(text)) return false;
+
+    const parts = text.split(/\s+/);
+
+    const memoryIndex = parts.findIndex(part => part === "Memory");
+    if (memoryIndex !== -1) {
+      el["Memory Usage"] = parts[memoryIndex + 2].replace("kB", "")
+    }
+
+    const diskIndex = parts.findIndex(part => part === "Disk");
+    if (diskIndex !== -1) {
+      el["Disk Usage"] = parts[diskIndex + 2].replace("kB", "")
+    }
+
+    const bucketsIndex = parts.findIndex(part => part === "Buckets:");
+    if (bucketsIndex !== -1) {
+      el["Buckets"] = parts[bucketsIndex + 1]
+      const partsFromBuckets = parts.slice(bucketsIndex)
+      const originallyIndex = partsFromBuckets.findIndex(part => part === "(originally");
+      if (originallyIndex !== -1) {
+        el["Buckets Originally"] = partsFromBuckets[originallyIndex + 1].replace(")", "")
+      }
+    }
+
+    const batchesIndex = parts.findIndex(part => part === "Batches:");
+    if (batchesIndex !== -1) {
+      el["Batches"] = parts[batchesIndex + 1]
+      const partsFromBatches = parts.slice(batchesIndex)
+      const originallyIndex = partsFromBatches.findIndex(part => part === "(originally");
+      if (originallyIndex !== -1) {
+        el["Batches Originally"] = partsFromBatches[originallyIndex + 1].replace(")", "")
+      }
+    }
+    return true
   }
 
   private parseSort(text: string, el: Node | Worker): boolean {

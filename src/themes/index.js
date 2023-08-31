@@ -47,7 +47,7 @@ export default function ThemeCustomization({children}) {
                     height: 150
                 },
                 text: {
-                    maxChars: 50
+                    maxChars: 35
                 }
             }
         }),

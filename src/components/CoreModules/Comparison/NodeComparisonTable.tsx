@@ -1,6 +1,19 @@
-import {Alert, AlertTitle, Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar} from "@mui/material";
+import {
+    Alert,
+    AlertTitle,
+    Box,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Toolbar,
+    Tooltip
+} from "@mui/material";
 import React from "react";
-import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter, truncateText} from "../utils";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter, truncateText, formatBigNumbers} from "../utils";
 import MainCard from "../MainCard";
 import {NodeComparison, PropComparison, PropStringComparison} from "../Plan/types";
 import {CheckOutlined, CloseOutlined, ReadOutlined, SwapRightOutlined} from "@ant-design/icons";
@@ -43,7 +56,6 @@ export const NodeComparisonTable = ({nodeComparison, planId, planIdToCompare, cl
                 )}
 
                 <Table
-                    title={"Node comparison"}
                     aria-labelledby="tableTitle"
                     sx={{
                         '& .MuiTableCell-root:first-of-type': {
@@ -145,21 +157,17 @@ const PropComparisonCells = ({data, name}: { data: PropComparison, name: string 
             </TableCell>
             <TableCell>
                 <Stack direction='row'>
-                    <GenericDetailsPopover name={name}
-                                           keepCloseCondition={keepClose(data.current, name)}
-                                           content={`${data.current} ${getUnit(name)}`}>
+                    <Tooltip arrow title={`${formatBigNumbers(data.current)} ${getUnit(name)}`}>
                         <b>{getMeasure(formattedName, data.current)}</b>
-                    </GenericDetailsPopover>
+                    </Tooltip>
                     <Box sx={{flex: '1 1 100%'}}></Box>
                     <SwapRightOutlined/>
                 </Stack>
             </TableCell>
             <TableCell>
-                <GenericDetailsPopover name={name}
-                                       keepCloseCondition={keepClose(data.to_compare, name)}
-                                       content={`${data.to_compare} ${getUnit(name)}`}>
+                <Tooltip arrow title={`${formatBigNumbers(data.to_compare)} ${getUnit(name)}`}>
                     <b>{getMeasure(formattedName, data.to_compare)}</b>
-                </GenericDetailsPopover>
+                </Tooltip>
             </TableCell>
             {data.current === data.to_compare && <TableCell>-</TableCell>}
             {data.current !== data.to_compare && (

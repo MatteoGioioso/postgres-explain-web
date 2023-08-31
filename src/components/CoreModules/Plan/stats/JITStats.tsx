@@ -3,6 +3,7 @@ import {Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, Tabl
 import React from "react";
 import {JIT} from "../types";
 import {formatBlocksToDiskSize, formatNumbers, formatTiming, capitalizeFirstLetter, getPercentageColor} from "../../utils";
+import {TimingTooltip} from "../../CustomTooltips";
 
 export interface JITStatsTableProps {
     stats: JIT
@@ -74,7 +75,7 @@ const Row = ({name, data, executionTime}: { name: string, data: any, executionTi
                             </TableCell>
                             <TableCell
                                 sx={{backgroundColor: (theme) => isTiming(data[k]) ? getPercentageColor(data[k], executionTime, theme) : 'inherit'}}>
-                                {isTiming(data[k]) ? data[k].toString() : formatTiming(data[k])}
+                                {isTiming(data[k]) ? (<TimingTooltip number={data[k]} />) : data[k].toString()}
                             </TableCell>
                         </TableRow>
                     ))}
@@ -85,5 +86,6 @@ const Row = ({name, data, executionTime}: { name: string, data: any, executionTi
 }
 
 function isTiming(value: number | boolean): boolean {
+    console.log(value, typeof value)
     return typeof value !== "boolean"
 }

@@ -63,7 +63,7 @@ export const TABS_MAP = () => {
         rawPlan: {
             index: 8,
             id: "raw_plan",
-            name: "Raw_plan"
+            name: "Raw plan"
         },
     }
 }

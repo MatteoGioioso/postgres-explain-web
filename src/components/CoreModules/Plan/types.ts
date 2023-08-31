@@ -249,6 +249,7 @@ export interface Timings {
 }
 export interface PlanRow {
   node_id: string;
+  node_short_id: number /* float64 */;
   node_fingerprint: string;
   node_parent_id: string;
   operation: string;

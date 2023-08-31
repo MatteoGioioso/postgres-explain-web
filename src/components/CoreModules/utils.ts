@@ -1,4 +1,4 @@
-import {PlanRow, Stats} from "./Plan/types";
+import {PlanRow, Property, Stats} from "./Plan/types";
 import {Edge, Node, Position} from "reactflow";
 import {Theme} from "@mui/material";
 
@@ -95,7 +95,8 @@ export function formatDiskSize(diskSize: number): string {
 }
 
 export function formatBigNumbers(n: number) {
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (Number.isSafeInteger(n)) return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return n.toFixed(3).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export const getFunctionFromKind = (kind: string) => {
@@ -296,3 +297,7 @@ export const getLayoutedElements = (elk: any, nodes: Node[], edges: Edge[], opti
         }))
         .catch(console.error);
 };
+
+export const renderStringProperty = (property: Property): string => {
+    return property.skip ? '' : `${getFunctionFromKind(property.kind)((property[property.type]))}`
+}

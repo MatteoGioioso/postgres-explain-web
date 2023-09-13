@@ -14,6 +14,8 @@ export type SaveQueryPlanRequest = {
   query?: string
   database?: string
   namespace?: string
+  optimization_id?: string
+  alias?: string
   parameters?: string[]
 }
 
@@ -32,6 +34,8 @@ export type GetQueryPlanResponse = {
   query_original_plan?: string
   query_fingerprint?: string
   query?: string
+  period_start?: GoogleProtobufTimestamp.Timestamp
+  alias?: string
 }
 
 export type GetQueryPlansListRequest = {

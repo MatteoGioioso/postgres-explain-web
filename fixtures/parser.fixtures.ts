@@ -123,7 +123,7 @@ Gather Merge  (cost=3746920.66..10099125.47 rows=51367424 width=44) (actual time
                                         {
                                             "Worker Number": 0,
                                             "Memory Usage": "524337",
-                                            "Disk Usage": "175520kB",
+                                            "Disk Usage": "175520",
                                             "Batches": "5"
                                         },
                                         {
@@ -139,7 +139,7 @@ Gather Merge  (cost=3746920.66..10099125.47 rows=51367424 width=44) (actual time
                                         {
                                             "Worker Number": 3,
                                             "Memory Usage": "524337",
-                                            "Disk Usage": "544128kB",
+                                            "Disk Usage": "544128",
                                             "Batches": "5"
                                         },
                                         {

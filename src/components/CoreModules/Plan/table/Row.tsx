@@ -1,6 +1,5 @@
 import {PlanRow, Stats} from "../types";
 import {Box, Collapse, Grid, IconButton, TableCell, TableRow, Typography} from "@mui/material";
-import {formatNumbers, formatTiming, getPercentageColor} from "../../utils";
 import React, {memo, useContext, useEffect, useState} from "react";
 import {
     BufferHitsCell,
@@ -18,7 +17,7 @@ import {ApartmentOutlined, CloseOutlined, DownOutlined} from "@ant-design/icons"
 import {ExpandMore} from "../ExpandMore";
 import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
-import {TABS_MAP} from "../../../Web/PlanVisualizationWeb";
+import {PLAN_TABS_MAP} from "../../tabsMaps";
 
 export interface RowProps {
     row: PlanRow
@@ -139,7 +138,7 @@ export const Row = memo(({row, stats, hidedColumns}: RowProps) => {
                                     <DownOutlined style={{fontSize: '10px'}}/>
                                 </ExpandMore>
                                 <IconButton onClick={() => {
-                                    setTabIndex(TABS_MAP().diagram.index)
+                                    setTabIndex(PLAN_TABS_MAP().diagram.index)
                                     // Probably a quirk or a bug with React flow, somehow setTimeout will help to focus on the now
                                     setTimeout(() => {
                                         switchToNode(row.node_id)

@@ -5,14 +5,12 @@ import {
     Comparison,
     ComparisonResponse,
     Explained,
-    ExplainedError,
     ExplainedResponse,
     NodeComparison,
     PlanRow
 } from "../CoreModules/Plan/types";
 import {NodeData} from "../CoreModules/Plan/Contexts";
 import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
-import {ErrorReport} from "../ErrorReporting";
 import {waitWebAssembly} from "./ioc";
 
 interface SaveQueryPlanBody {
@@ -65,7 +63,7 @@ export class QueryExplainerService {
         return this.plansStore.get(id)
     }
 
-    getQueryPlanNode(planId: string, nodeId: string): NodeData {
+    async getQueryPlanNode(planId: string, nodeId: string): Promise<NodeData> {
         const response: QueryPlan = this.plansStore.get(planId);
         const foundNode: PlanRow = response.summary.find(node => node.node_id === nodeId);
         return {

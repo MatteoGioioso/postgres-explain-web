@@ -18,7 +18,7 @@ import {DetailsTable} from "./diagram/DetailsTable";
 // @ts-ignore
 const elk = new ELK();
 
-export const Diagram = ({summary, stats}: SummaryTableProps) => {
+export const SummaryDiagram = ({summary, stats, queryExplainerService}: SummaryTableProps) => {
     const theme = useTheme();
     const {fitView, getNode} = useReactFlow()
     const [nodes, setNodes, onNodesChange] = useNodesState([])
@@ -48,7 +48,7 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
     return (
         <Grid container>
             <Grid item xs={4} sx={{pr: 2}} position='absolute' zIndex='999'>
-                <DetailsTable/>
+                <DetailsTable queryExplainerService={queryExplainerService} />
             </Grid>
 
             <Grid item xs={12}>
@@ -71,11 +71,5 @@ export const Diagram = ({summary, stats}: SummaryTableProps) => {
                 </div>
             </Grid>
         </Grid>
-    )
-}
-
-export const SummaryDiagram = ({summary, stats}: SummaryTableProps) => {
-    return (
-        <Diagram summary={summary} stats={stats}/>
     )
 }

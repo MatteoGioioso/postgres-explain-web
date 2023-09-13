@@ -610,7 +610,7 @@ export class PlanService {
           return
         }
 
-        if (this.parseBucketsAndBatchesV2(workerMatches[10], worker)) {
+        if (this.parseBucketsAndBatches(workerMatches[10], worker)) {
           return
         }
 
@@ -731,7 +731,7 @@ export class PlanService {
           return
         }
 
-        if (this.parseBucketsAndBatchesV2(extraMatches[2], element as Node)) {
+        if (this.parseBucketsAndBatches(extraMatches[2], element as Node)) {
           return
         }
 
@@ -768,30 +768,7 @@ export class PlanService {
     return false
   }
 
-  private parseBucketsAndBatches(text: string, el: Node | Worker): boolean {
-    const bucketsRegex =
-        /^(\s*)(?:Buckets:\s+([\s\S]*?)\s+(?:Batches:\s+([\s\S]*?)\s+))?Memory Usage:\s+([\s\S]*?)\s*kB\s*$/gm
-    const bucketsMatches = bucketsRegex.exec(text)
-    if (bucketsMatches) {
-      const buckets = bucketsMatches[2].trim().split("(originally");
-      const batches = bucketsMatches[3].trim().split("(originally");
-      el["Buckets"] = buckets[0].trim()
-      if (buckets.length > 1) {
-        el["Buckets Originally"] = buckets[1].trim().replace(")", "")
-      }
-
-      el[NodeProp.BATCHES] = batches[0].trim()
-      if (batches.length > 1) {
-        el[NodeProp.BATCHES+" Originally"] = batches[1].trim().replace(")", "")
-      }
-      el["Memory Usage"] = bucketsMatches[4]
-      return true
-    }
-
-    return false
-  }
-
-  private parseBucketsAndBatchesV2(text: string, el: Node | Worker) {
+  private parseBucketsAndBatches(text: string, el: Node | Worker) {
     const regex = /^(\s*)(Buckets|Batches):\s+([\s\S]*?)\s+(Memory Usage|Disk Usage):\s+(?:(\S*)kB)\s*$/g;
     if (!regex.test(text)) return false;
 

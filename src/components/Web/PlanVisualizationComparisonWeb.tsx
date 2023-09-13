@@ -9,11 +9,10 @@ import {useNavigate, useParams} from "react-router-dom";
 import {ExplainedError, NodeComparison, PlanRow, Stats} from "../CoreModules/Plan/types";
 import {WasmErrorDescription} from "./Errors";
 import {ComparePlanResponse} from "./QueryExplainer.service";
-import {TABS_MAP as planVisualizationTabsMap} from "./PlanVisualizationWeb"
+import {PLAN_TABS_MAP as planVisualizationTabsMap} from "../CoreModules/tabsMaps"
 import {SelectChangeEvent} from "@mui/material/Select";
 import {QueryPlanListItem} from "../CoreModules/types";
 import {Toolbar} from "../CoreModules/Comparison/ComparisonToolbar";
-import {lowerFirst} from "lodash";
 
 export const TABS_MAP = () => {
     return {

@@ -8,7 +8,7 @@ import {FormikHelpers} from "formik/dist/types";
 import {formatTiming, getPercentageColor} from "../utils";
 import {TableTabsContext} from "./Contexts";
 import PlansListDropdown from "../PlansListDropdown";
-import {TABS_MAP} from "../../Web/PlanVisualizationWeb";
+import {PLAN_TABS_MAP} from "../tabsMaps";
 
 const modalBoxStyles = {
     position: 'absolute' as 'absolute',
@@ -21,25 +21,30 @@ const modalBoxStyles = {
     p: 4,
 };
 
-type onSubmitOptimizationPlanForm = (afterSubmitCallback: () => void) => (values: any, formikHelpers: FormikHelpers<any>) => void | Promise<any>
-
 interface OptimizationFormModalProps {
     plan: QueryPlan,
     open: boolean
     setOpen: (b: boolean) => void
-    onSubmitOptimizationPlanForm: onSubmitOptimizationPlanForm
+    optimizationModalContent: (callback: () => void) => React.JSX.Element
 }
 
 interface PlanToolbarProps {
     plan: QueryPlan
-    onSubmitOptimizationPlanForm: onSubmitOptimizationPlanForm
     uploadSharedPlan: (event: React.SyntheticEvent) => Promise<string>
     sharePlan: (planId: string) => void
     selectPlan: (planId: string) => void
     plansList: QueryPlanListItem[]
+    optimizationModalContent: (callback: () => void) => React.JSX.Element
 }
 
-export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uploadSharedPlan, plansList, selectPlan}: PlanToolbarProps) => {
+export const PlanToolbar = ({
+                                optimizationModalContent,
+                                plan,
+                                sharePlan,
+                                uploadSharedPlan,
+                                plansList,
+                                selectPlan
+                            }: PlanToolbarProps) => {
     const [open, setOpen] = useState<boolean>(false)
     const [openModal, setOpenModal] = useState(false);
     const {setTabIndex} = useContext(TableTabsContext);
@@ -73,7 +78,7 @@ export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uplo
                             <>
                                 <Typography
                                     sx={{pt: 1, pb: 1, pl: 1, color: theme => theme.palette.primary.main, cursor: 'pointer'}}
-                                    onClick={() => setTabIndex(TABS_MAP().stats.index)}
+                                    onClick={() => setTabIndex(PLAN_TABS_MAP().stats.index)}
                                 >
                                     JIT
                                 </Typography>
@@ -95,7 +100,7 @@ export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uplo
                             <>
                                 <Typography
                                     sx={{pt: 1, pb: 1, pl: 1, color: theme => theme.palette.primary.main, cursor: 'pointer'}}
-                                    onClick={() => setTabIndex(TABS_MAP().stats.index)}
+                                    onClick={() => setTabIndex(PLAN_TABS_MAP().stats.index)}
                                 >
                                     Triggers
                                 </Typography>
@@ -150,13 +155,13 @@ export const PlanToolbar = ({plan, sharePlan, onSubmitOptimizationPlanForm, uplo
                 plan={plan}
                 open={openModal}
                 setOpen={setOpenModal}
-                onSubmitOptimizationPlanForm={onSubmitOptimizationPlanForm}
+                optimizationModalContent={optimizationModalContent}
             />
         </>
     )
 }
 
-const OptimizationFormModal = ({plan, setOpen, open, onSubmitOptimizationPlanForm}: OptimizationFormModalProps) => {
+const OptimizationFormModal = ({plan, setOpen, open, optimizationModalContent}: OptimizationFormModalProps) => {
     return (
         <Modal
             open={open}
@@ -170,8 +175,7 @@ const OptimizationFormModal = ({plan, setOpen, open, onSubmitOptimizationPlanFor
                     <Typography sx={{pl: 1}} variant='h4' fontWeight='100'>{plan.id}</Typography>
                 </Stack>
                 <Typography sx={{pb: 2}} variant='body1'>Write your optimized query here and compare it with the current one</Typography>
-
-                <PlanForm onSubmit={onSubmitOptimizationPlanForm(() => setOpen(false))}/>
+                {optimizationModalContent(() => setOpen(false))}
             </Box>
         </Modal>
     )

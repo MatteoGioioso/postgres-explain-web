@@ -32,15 +32,13 @@ import {
 import {ExpandMore} from "../ExpandMore";
 import {CloseOutlined, DownOutlined, TableOutlined, WarningOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
-import {GenericDetailsPopover} from "../../GenericDetailsPopover";
-import {queryExplainerService} from "../../../Web/ioc";
 import {useParams} from "react-router-dom";
 import {NodeData, TableTabsContext} from "../Contexts";
 import {ButtonAction} from "../../Buttons";
-import {TABS_MAP} from "../../../Web/PlanVisualizationWeb";
+import {PLAN_TABS_MAP} from "../../tabsMaps";
 import {NumberTooltip} from "../../CustomTooltips";
 
-export const DetailsTable = () => {
+export const DetailsTable = ({queryExplainerService}: { queryExplainerService: any }) => {
     const theme = useTheme();
     const {plan_id} = useParams();
     const [data, setData] = useState<NodeData>()
@@ -49,7 +47,9 @@ export const DetailsTable = () => {
 
     useEffect(() => {
         if (focusedNodeId) {
-            setData(queryExplainerService.getQueryPlanNode(plan_id, focusedNodeId))
+            queryExplainerService
+                .getQueryPlanNode(plan_id, focusedNodeId)
+                .then((resp: NodeData) => setData(resp))
         } else {
             setData(null)
         }
@@ -90,7 +90,7 @@ export const DetailsTable = () => {
                                                 // If the tab is set to, for example, Indexes, the app will crash because it won't find the row id
                                                 // of the main table. Moreover, the switchToRow cannot happen asynchronously, thus we must wait
                                                 // that setTabIndex has finished
-                                                await setTabIndex(TABS_MAP().table.index)
+                                                await setTabIndex(PLAN_TABS_MAP().table.index)
                                                 switchToRow()
                                             }}
                                         />
@@ -136,7 +136,7 @@ export const DetailsTable = () => {
                                     <RowsCellCollapsedContent row={data.row} expanded={true} stats={data.stats} theme={theme}/>
                                     <b>Rows estimation:</b> {` `}
                                     {getRowEstimateDirectionSymbol(data.row.rows.estimation_direction) + ' '}
-                                    <NumberTooltip number={data.row.rows.estimation_factor} />
+                                    <NumberTooltip number={data.row.rows.estimation_factor}/>
                                 </Row>
 
                                 {data.row.does_contain_buffers && (

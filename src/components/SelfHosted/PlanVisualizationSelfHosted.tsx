@@ -1,38 +1,35 @@
 import React, {useEffect, useState} from 'react';
-import {Box, Grid, Stack} from '@mui/material';
+
+import {Grid, Stack} from '@mui/material';
 import {SummaryDiagram} from "../CoreModules/Plan/SummaryDiagram";
 import {SummaryTable} from "../CoreModules/Plan/SummaryTable";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {useNavigate, useParams} from "react-router-dom";
 import {TableTabs, TabProp} from "../CoreModules/TableTabs";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
-import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
 import {queryExplainerService} from "./ioc";
-import {useFocus} from "../CoreModules/Plan/hooks";
-import {GeneralStats} from "../CoreModules/Plan/stats/GeneralStats";
 import {RawQuery} from "../CoreModules/Plan/stats/RawQuery";
+import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
+import {GeneralStats} from "../CoreModules/Plan/stats/GeneralStats";
+import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
+import {PlanNotFoundErrorDescription} from "./Errors";
+import {Optimizations} from "../Web/Optimizations";
 import {PlanToolbar} from "../CoreModules/Plan/PlanToolbar";
-import {QueryPlan, QueryPlanListItem, tabMaps} from "../CoreModules/types";
-import {PlanNotFoundErrorDescription, WasmErrorDescription} from "./Errors";
-import {Optimizations} from "./Optimizations";
-import {ExplainedError} from "../CoreModules/Plan/types";
-import {uploadSharablePlan} from "./utils";
+import {uploadSharablePlan} from "../Web/utils";
 import {PLAN_TABS_MAP} from "../CoreModules/tabsMaps";
 import {PlanForm} from "../CoreModules/PlanForm";
 
-const PlanVisualizationWeb = () => {
+const PlanVisualizationSelfHosted = () => {
     const navigate = useNavigate();
-    const [error, setError] = useState<ErrorReport>();
-    const {plan_id} = useParams();
+    const [error, setError] = useState<ErrorReport>()
+    const {cluster_id, plan_id} = useParams();
     const [enrichedQueryPlan, setEnrichedQueryPlan] = useState<QueryPlan>(null)
     const [optimizations, setOptimizations] = useState<QueryPlanListItem[]>(null)
     const [plansList, setPlansList] = useState<QueryPlanListItem[]>([])
 
-    const {closeFocusNavigation} = useFocus();
-
-    function fetchQueryPlan(planID: string) {
+    async function fetchQueryPlan(planID: string) {
         try {
-            const response = queryExplainerService.getQueryPlan(planID);
+            const response = await queryExplainerService.getQueryPlan({plan_id: planID});
             if (!response) {
                 setError({
                     error: "Plan not found",
@@ -54,78 +51,41 @@ const PlanVisualizationWeb = () => {
         }
     }
 
-    const downloadSharablePlan = (planId: string) => {
-        const queryPlan = queryExplainerService.getQueryPlan(planId);
-
-        const url = window.URL.createObjectURL(
-            new Blob([JSON.stringify(queryPlan, null, 2)]),
-        );
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute(
-            'download',
-            `${planId}.json`,
-        );
-
-        // Append to html link element page
-        document.body.appendChild(link);
-
-        // Start download
-        link.click();
-
-        // Clean up and remove the link
-        link.parentNode.removeChild(link)
-    }
-
-    const onSubmitPlanForm = (afterSubmitCallback: () => void) => async (values, {setErrors, setStatus, setSubmitting}) => {
+    async function fetchQueryPlansList(clusterId: string) {
         try {
-            const planId = await queryExplainerService.saveQueryPlan({
-                plan: values.plan,
-                alias: values.alias,
-                query: values.query,
-                optimization_id: enrichedQueryPlan.optimization_id
-            });
-            navigate(`/plans/${planId}`)
+            const queryPlanListItems = await queryExplainerService.getQueryPlansList({cluster_name: clusterId});
+            setPlansList(queryPlanListItems)
+            setError(null)
         } catch (e) {
-            try {
-                const out: ExplainedError = JSON.parse(e.message);
-                setError({
-                    ...out,
-                    description: <WasmErrorDescription error={out}/>
-                })
-            } catch (_) {
-                setError({
-                    error: e.message,
-                    error_details: "",
-                    error_stack: e.stack,
-                })
-            }
-        } finally {
-            afterSubmitCallback()
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
         }
     }
 
     const selectPlan = (planId: string) => {
-        navigate(`/plans/${planId}`)
+        navigate(`/clusters/${cluster_id}/plans/${planId}`)
     }
 
-    function fetchQueryPlansList() {
-        const queryPlansList = queryExplainerService.getQueryPlansList();
-        setPlansList(queryPlansList)
+    const sharePlan = (planId: string) => {
+
     }
 
-    function fetchOptimizations(planId: string) {
-        setOptimizations(queryExplainerService.getOptimizationsList(planId))
+    const onSubmitOptimizationForm = (afterSubmitCallback: () => void) => async (values, {setErrors, setStatus, setSubmitting}) => {
+
+        afterSubmitCallback()
     }
 
     useEffect(() => {
         window.history.replaceState({}, document.title)
-
-        fetchQueryPlan(plan_id)
-        fetchOptimizations(plan_id)
-        fetchQueryPlansList()
-        closeFocusNavigation()
+        Promise.all([
+            fetchQueryPlan(plan_id),
+            fetchQueryPlansList(cluster_id)
+        ]).then()
     }, [plan_id])
+
 
     function buildTableTabs(): TabProp[] {
         const obj = PLAN_TABS_MAP()
@@ -194,20 +154,21 @@ const PlanVisualizationWeb = () => {
                 <Stack direction='row' justifyContent='end'>
                     <PlanToolbar
                         plan={enrichedQueryPlan}
-                        sharePlan={downloadSharablePlan}
+                        sharePlan={sharePlan}
                         uploadSharedPlan={uploadSharablePlan}
                         plansList={plansList}
                         selectPlan={selectPlan}
                         optimizationModalContent={(callback) => (
                             <>
-                                <PlanForm onSubmit={onSubmitPlanForm(callback)}/>
+                                <PlanForm onSubmit={onSubmitOptimizationForm(callback)} />
                             </>
-                        )}
+                        )
+
+                        }
                     />
                 </Stack>
             )}
             <Grid container>
-
                 {error && <ErrorAlert error={error} setError={setError}/>}
                 <Grid container>
                     <TableTabs tabs={buildTableTabs()} tabMaps={PLAN_TABS_MAP()}/>
@@ -215,6 +176,6 @@ const PlanVisualizationWeb = () => {
             </Grid>
         </>
     );
-}
+};
 
-export default PlanVisualizationWeb;
+export default PlanVisualizationSelfHosted;

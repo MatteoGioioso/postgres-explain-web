@@ -171,21 +171,11 @@ const Row = ({query, onClickRow}: { query: Query, onClickRow: any }) => {
 }
 
 export function QueriesListTable({queries, mappings, onClickRow}: MetricsTableProps) {
-    const rowsPerPage = 5
-    const [page, setPage] = useState(0)
-    const [pageData, setPageData] = useState<Query[]>([])
-    const handleChangePage = (event: unknown, newPage: number) => {
-        setPage(newPage);
-    };
-
-    useEffect(() => {
-        setPageData(queries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage))
-    }, [page])
-
     return (
         <>
             <TableContainer
                 sx={{
+                    height: '30vh',
                     width: '100vw',
                     overflowX: 'auto',
                     position: 'relative',
@@ -195,6 +185,7 @@ export function QueriesListTable({queries, mappings, onClickRow}: MetricsTablePr
                 }}
             >
                 <Table
+                    stickyHeader
                     aria-labelledby="tableTitle"
                     sx={{
                         '& .MuiTableCell-root:first-of-type': {
@@ -215,20 +206,12 @@ export function QueriesListTable({queries, mappings, onClickRow}: MetricsTablePr
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {pageData.map((row) => {
+                        {queries.map((row) => {
                             return <Row query={row} onClickRow={onClickRow}/>
                         })}
                     </TableBody>
                 </Table>
             </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[]}
-                component="div"
-                count={queries.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-            />
         </>
     );
 }

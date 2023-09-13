@@ -12,7 +12,7 @@ import {ApartmentOutlined, DownOutlined} from "@ant-design/icons";
 import {useFocus} from "../hooks";
 import {TableTabsContext} from "../Contexts";
 import {useTheme} from "@mui/material/styles";
-import {TABS_MAP} from "../../../Web/PlanVisualizationWeb";
+import {PLAN_TABS_MAP} from "../../tabsMaps";
 
 export interface GenericStatsTableProps {
     stats: IndexesStats | TablesStats | NodesStats
@@ -123,7 +123,7 @@ const NodeSubRow = ({node}: { node: IndexNode | TableNode | NodeNode }) => {
     return (
         <Box sx={{pb: 0.45, pt: 0.45}}>
             <IconButton onClick={() => {
-                setTabIndex(TABS_MAP().diagram.index)
+                setTabIndex(PLAN_TABS_MAP().diagram.index)
                 setTimeout(() => {
                     switchToNode(node.id)
                 })

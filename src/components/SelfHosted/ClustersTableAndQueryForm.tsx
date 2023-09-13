@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {Box, Button, FormHelperText, Grid, Stack, TextField, Typography} from "@mui/material";
 import {QUERY_EXAMPLE_PLACEHOLDER} from "../utils";
 import {Formik} from "formik";
@@ -7,8 +8,9 @@ import {analyticsService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
 import {QueriesListTable} from "../CoreModules/Tables/QueriesListTable";
 import {PlansList} from "../CoreModules/PlansList";
-
-import {QueryPlan} from "../CoreModules/types";
+import {QueryPlanListItem} from "../CoreModules/types";
+import {GetQueriesListResponse} from "./proto/analytics.pb";
+import InputLabel from "@mui/material/InputLabel";
 
 const Wrapper = ({children, title, sx = {}, other}) => (
     <>
@@ -23,7 +25,7 @@ const Wrapper = ({children, title, sx = {}, other}) => (
                 {...other}
                 border
             >
-                <Box sx={{p: {xs: 2, sm: 2, md: 2, xl: 2}}}>{children}</Box>
+                <Box>{children}</Box>
             </MainCard>
         </Box>
     </>
@@ -40,48 +42,68 @@ const QueryForm = ({cluster_id}) => {
                 const planID = await queryExplainerService.saveQueryPlan({
                     query: values.query,
                     cluster_name: cluster_id,
-                    database: "postgres",
+                    database: "postgres"
                 });
                 navigate(`/clusters/${cluster_id}/plans/${planID}`)
             }}
             validate={values => {
                 const errors = {};
                 if (!values.query) {
+                    // @ts-ignore
                     errors.query = 'Required';
                 }
                 return errors;
             }}
         >
             {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
-                <form noValidate onSubmit={handleSubmit}>
+                <form noValidate onSubmit={handleSubmit} style={{padding: '40px'}}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
-                            <Stack spacing={1}>
-                                <TextField
-                                    fullWidth
-                                    error={Boolean(touched.query && errors.query)}
-                                    id="query"
-                                    type="text"
-                                    value={values.query}
-                                    name="query"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    placeholder={QUERY_EXAMPLE_PLACEHOLDER}
-                                    inputProps={{}}
-                                    multiline
-                                    rows={10}
-                                />
-                                {touched.query && errors.query && (
-                                    <FormHelperText error id="helper-text-plan-signup">
-                                        {errors.query}
-                                    </FormHelperText>
-                                )}
+                            <Stack spacing={2}>
+
+                                <Stack spacing={0}>
+                                    <InputLabel htmlFor="alias">Alias</InputLabel>
+                                    <TextField
+                                        fullWidth
+                                        id="alias"
+                                        type="text"
+                                        value={values.alias}
+                                        name="alias"
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        placeholder={'Plan alias'}
+                                        inputProps={{}}
+                                        rows={1}
+                                    />
+                                </Stack>
+                                <Stack spacing={0}>
+                                    <InputLabel htmlFor="query">Query*</InputLabel>
+                                    <TextField
+                                        fullWidth
+                                        error={Boolean(touched.query && errors.query)}
+                                        id="query"
+                                        type="text"
+                                        value={values.query}
+                                        name="query"
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        placeholder={QUERY_EXAMPLE_PLACEHOLDER}
+                                        inputProps={{}}
+                                        multiline
+                                        rows={10}
+                                    />
+                                    {touched.query && errors.query && (
+                                        <FormHelperText error id="helper-text-plan-signup">
+                                            {errors.query as string}
+                                        </FormHelperText>
+                                    )}
+                                </Stack>
                             </Stack>
                         </Grid>
 
                         {errors.submit && (
                             <Grid item xs={12}>
-                                <FormHelperText error>{errors.submit}</FormHelperText>
+                                <FormHelperText error>{errors.submit as string}</FormHelperText>
                             </Grid>
                         )}
                         <Grid item xs={12}>
@@ -102,18 +124,18 @@ const QueryForm = ({cluster_id}) => {
 export const ClustersTableAndQueryForm = () => {
     const {cluster_id} = useParams();
     const [plansList, setPlansList] = useState([])
-    const [queriesList, setQueriesList] = useState({queries: []})
+    const [queriesList, setQueriesList] = useState(undefined)
     const navigate = useNavigate();
 
     useEffect(() => {
         Promise
             .all([
                 queryExplainerService.getQueryPlansList({cluster_name: cluster_id}),
-                analyticsService.getQueriesList({cluster_name: cluster_id,})]
+                analyticsService.getQueriesList({cluster_name: cluster_id})]
             )
             .then(responses => {
-                setPlansList(responses[0])
-                setQueriesList(responses[1])
+                setPlansList(responses[0] as QueryPlanListItem[])
+                setQueriesList(responses[1] as GetQueriesListResponse)
             })
             .catch(e => {
                 console.error(e)
@@ -139,12 +161,11 @@ export const ClustersTableAndQueryForm = () => {
         navigate(`/clusters/${cluster_id}/plans/${item.id}`)
     }
 
-
     return (
         <>
             <Grid container>
                 <Grid item xs={12}>
-                    <Wrapper sx={{pr: 2, pt: 2}} title={"Queries list"}>
+                    <Wrapper sx={{pt: 2}} title={"Queries list"}>
                         {Boolean(queriesList?.queries?.length) && (
                             <QueriesListTable
                                 mappings={queriesList.mappings}

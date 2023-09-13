@@ -145,6 +145,7 @@ export interface StatsFromPlan {
   plan: {
     'Execution Time': number /* float64 */;
     'Planning Time': number /* float64 */;
+    JIT?: JIT;
   };
   'Execution Time': number /* float64 */;
   'Planning Time': number /* float64 */;

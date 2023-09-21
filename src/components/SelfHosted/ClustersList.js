@@ -2,7 +2,7 @@ import {Box, Chip, Grid, Stack, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {infoService} from "./ioc";
 import MainCard from "../CoreModules/MainCard";
-import {CheckOutlined, ExclamationOutlined, FallOutlined} from "@ant-design/icons";
+import {CheckOutlined, ExclamationOutlined} from "@ant-design/icons";
 import {useTheme} from "@mui/material/styles";
 import {useNavigate} from "react-router-dom";
 
@@ -63,11 +63,11 @@ const ClustersList = () => {
                                 </Grid>
                             </Grid>
                         </Stack>
-                        <Box sx={{pt: 2.25}}>
-                            <Typography variant="h6" color="textSecondary">
-                                {cluster.hostname}:{cluster.port}
-                            </Typography>
-                        </Box>
+                        {/*<Box sx={{pt: 2.25}}>*/}
+                        {/*    <Typography variant="h6" color="textSecondary">*/}
+                        {/*        {cluster.hostname}:{cluster.port}*/}
+                        {/*    </Typography>*/}
+                        {/*</Box>*/}
                     </MainCard>
                 </Grid>
             ))}

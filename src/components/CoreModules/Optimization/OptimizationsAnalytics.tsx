@@ -64,7 +64,7 @@ const OptimizationChart = ({optimizations}: OptimizationsAnalyticsProps) => {
         // @ts-ignore
         setOptions((prevState) => ({
             ...prevState,
-            colors: [theme.palette.primary.main],
+            colors: [theme.palette.primary.main, theme.palette.primary[700]],
             xaxis: {
                 categories: optimizations.map((opt, index) => `#${index+1}`),
                 axisBorder: {
@@ -127,6 +127,10 @@ const OptimizationChart = ({optimizations}: OptimizationsAnalyticsProps) => {
                 name: 'Execution time (s)',
                 data: optimizations.map(opt => Math.round(opt.executionTime) / 1000)
             },
+            {
+                name: 'Planning time (s)',
+                data: optimizations.map(opt => Math.round(opt.planningTime) / 1000)
+            },
         ]);
     }, []);
 
@@ -146,6 +150,9 @@ const OptimizationToolTip = ({series, seriesIndex, dataPointIndex, w, optimizati
             </Typography>
             <Typography variant='body2'>
                 Execution time: {formatTiming((optimizations as QueryPlanListItem[])[dataPointIndex].executionTime)}
+            </Typography>
+            <Typography variant='body2'>
+                Planning time: {formatTiming((optimizations as QueryPlanListItem[])[dataPointIndex].planningTime)}
             </Typography>
             <Typography variant='subtitle1'>
                 {formatDate((optimizations as QueryPlanListItem[])[dataPointIndex].period_start)}

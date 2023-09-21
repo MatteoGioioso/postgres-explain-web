@@ -7,25 +7,28 @@ import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {useNavigate, useParams} from "react-router-dom";
 import {TableTabs, TabProp} from "../CoreModules/TableTabs";
 import {RawPlan} from "../CoreModules/Plan/stats/RawPlan";
-import {queryExplainerService} from "./ioc";
+import {infoService, queryExplainerService} from "./ioc";
 import {RawQuery} from "../CoreModules/Plan/stats/RawQuery";
 import {GenericStatsTable, indexesHeadCells, nodesHeadCells, tablesHeadCells} from "../CoreModules/Plan/stats/GenericStatsTable";
 import {GeneralStats} from "../CoreModules/Plan/stats/GeneralStats";
 import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
 import {PlanNotFoundErrorDescription} from "./Errors";
-import {Optimizations} from "../Web/Optimizations";
+import {Optimizations} from "./Optimizations";
 import {PlanToolbar} from "../CoreModules/Plan/PlanToolbar";
 import {uploadSharablePlan} from "../Web/utils";
 import {PLAN_TABS_MAP} from "../CoreModules/tabsMaps";
 import {PlanForm} from "../CoreModules/PlanForm";
+import {QueryForm} from "../CoreModules/QueryForm";
+import {Instance} from "./proto/info.pb";
 
 const PlanVisualizationSelfHosted = () => {
     const navigate = useNavigate();
     const [error, setError] = useState<ErrorReport>()
     const {cluster_id, plan_id} = useParams();
     const [enrichedQueryPlan, setEnrichedQueryPlan] = useState<QueryPlan>(null)
-    const [optimizations, setOptimizations] = useState<QueryPlanListItem[]>(null)
+    const [optimizationsList, setOptimizationsList] = useState<QueryPlanListItem[]>(null)
     const [plansList, setPlansList] = useState<QueryPlanListItem[]>([])
+    const [clusterInstancesList, setClusterInstancesList] = useState<Instance[]>([])
 
     async function fetchQueryPlan(planID: string) {
         try {
@@ -42,6 +45,7 @@ const PlanVisualizationSelfHosted = () => {
             }
             setEnrichedQueryPlan(response)
             setError(null)
+            return response
         } catch (e) {
             setError({
                 error: e.message,
@@ -65,6 +69,40 @@ const PlanVisualizationSelfHosted = () => {
         }
     }
 
+    async function fetchOptimizations(clusterId: string, plan: QueryPlan) {
+        try {
+            const response = await queryExplainerService.getOptimizationsList({
+                cluster_name: clusterId,
+                query_fingerprint: plan.query_fingerprint,
+                optimization_id: plan.optimization_id,
+                order: "oldest"
+            });
+            setOptimizationsList(response)
+            setError(null)
+        } catch (e) {
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
+        }
+    }
+
+    async function fetchClusterInstances(clusterId: string) {
+        try {
+            const instances = await infoService.getClusterInstancesList({cluster_name: cluster_id});
+            setClusterInstancesList(instances)
+            setError(null)
+        } catch (e) {
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
+        }
+
+    }
+
     const selectPlan = (planId: string) => {
         navigate(`/clusters/${cluster_id}/plans/${planId}`)
     }
@@ -74,16 +112,38 @@ const PlanVisualizationSelfHosted = () => {
     }
 
     const onSubmitOptimizationForm = (afterSubmitCallback: () => void) => async (values, {setErrors, setStatus, setSubmitting}) => {
-
-        afterSubmitCallback()
+        try {
+            setError(null)
+            const planId = await queryExplainerService.saveQueryPlan({
+                query: values.query,
+                cluster_name: cluster_id,
+                instance_name: values.instanceName,
+                database: "postgres",
+                optimization_id: enrichedQueryPlan.optimization_id
+            })
+            navigate(`/clusters/${cluster_id}/plans/${planId}`)
+        } catch (e) {
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
+        } finally {
+            afterSubmitCallback()
+        }
     }
 
     useEffect(() => {
         window.history.replaceState({}, document.title)
         Promise.all([
             fetchQueryPlan(plan_id),
-            fetchQueryPlansList(cluster_id)
-        ]).then()
+            fetchQueryPlansList(cluster_id),
+            fetchClusterInstances(cluster_id),
+        ]).then(resp => {
+            fetchOptimizations(cluster_id, resp[0] as QueryPlan).then()
+        })
+
+
     }, [plan_id])
 
 
@@ -132,8 +192,8 @@ const PlanVisualizationSelfHosted = () => {
             },
             {
                 name: obj.optimizations.name,
-                component: () => <Optimizations optimizations={optimizations}/>,
-                show: Boolean(optimizations?.length > 1)
+                component: () => <Optimizations optimizations={optimizationsList}/>,
+                show: Boolean(optimizationsList?.length > 1)
             },
             {
                 name: obj.query.name,
@@ -160,11 +220,9 @@ const PlanVisualizationSelfHosted = () => {
                         selectPlan={selectPlan}
                         optimizationModalContent={(callback) => (
                             <>
-                                <PlanForm onSubmit={onSubmitOptimizationForm(callback)} />
+                                <QueryForm clusterInstancesList={clusterInstancesList} onSubmit={onSubmitOptimizationForm(callback)}/>
                             </>
-                        )
-
-                        }
+                        )}
                     />
                 </Stack>
             )}

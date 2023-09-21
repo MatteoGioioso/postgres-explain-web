@@ -25,11 +25,18 @@ export type Query = {
   text?: string
   parameters?: string[]
   plan_ids?: string[]
-  metrics?: MetricValues[]
+  metrics?: {[key: string]: MetricValues}
 }
 
 export type MetricValues = {
-  value?: number
+  rate?: number
+  cnt?: number
+  sum?: number
+  min?: number
+  max?: number
+  avg?: number
+  p99?: number
+  percent_of_total?: number
 }
 
 export type MetricInfo = {

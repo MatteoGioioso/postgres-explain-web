@@ -1,7 +1,6 @@
-import {AnalyticsRepository} from "../datalayer/Analytics.repository";
-import {GetQueriesListRequest, GetQueriesListResponse} from "../proto/analytics.pb";
 import {InfoRepository} from "../datalayer/Info.repository";
-import {GetClustersRequest, GetClustersResponse} from "../proto/info.pb";
+import {GetClusterInstancesRequest, GetClusterInstancesResponse, GetClustersRequest, GetClustersResponse, Instance} from "../proto/info.pb";
+import {GetOptimizationsListRequest} from "../proto/query_explainer.pb";
 
 
 export class InfoService {
@@ -13,5 +12,10 @@ export class InfoService {
 
     async getClustersList(body: GetClustersRequest): Promise<GetClustersResponse> {
         return await this.infoRepository.getClustersList(body)
+    }
+
+    async getClusterInstancesList(body: GetClusterInstancesRequest): Promise<Instance[]> {
+        const clusterInstancesResponse = await this.infoRepository.getClusterInstancesList(body);
+        return clusterInstancesResponse.instances
     }
 }

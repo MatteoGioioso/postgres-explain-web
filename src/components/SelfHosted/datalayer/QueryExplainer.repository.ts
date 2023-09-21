@@ -1,4 +1,5 @@
 import {
+    GetOptimizationsListRequest, GetOptimizationsListResponse,
     GetQueryPlanRequest,
     GetQueryPlanResponse, GetQueryPlansListRequest, GetQueryPlansListResponse,
     QueryExplainer,
@@ -20,4 +21,7 @@ export class QueryExplainerRepository {
 
     getQueryPlans = async (body: GetQueryPlansListRequest): Promise<GetQueryPlansListResponse> => QueryExplainer
         .GetQueryPlansList(body, {pathPrefix: this.ORIGIN})
+
+    getQueryOptimizations = async (body: GetOptimizationsListRequest): Promise<GetOptimizationsListResponse> => QueryExplainer
+        .GetOptimizationsList(body, {pathPrefix: this.ORIGIN})
 }

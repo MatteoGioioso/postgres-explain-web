@@ -6,6 +6,9 @@ export interface QueryPlanListItem {
     period_start: Date
     alias?: string
     executionTime?: number
+    planningTime?: number
+    optimization_id?: string
+    query_fingerprint?: string
 }
 
 export interface QueryPlan extends Explained {
@@ -16,6 +19,7 @@ export interface QueryPlan extends Explained {
     period_start?: Date
     alias?: string
     optimization_id?: string
+    query_fingerprint?: string
 }
 
 export type tabMaps = { [key: string]: { name: string, index: number, id: string } }

@@ -1,5 +1,10 @@
 import {QueryExplainerRepository} from "../datalayer/QueryExplainer.repository";
-import {GetQueryPlanRequest, GetQueryPlansListRequest, SaveQueryPlanRequest} from "../proto/query_explainer.pb";
+import {
+    GetOptimizationsListRequest,
+    GetQueryPlanRequest,
+    GetQueryPlansListRequest,
+    SaveQueryPlanRequest
+} from "../proto/query_explainer.pb";
 import {Explained, PlanRow, Triggers} from "../../CoreModules/Plan/types";
 import {PlanService} from "../../CoreModules/Plan/parser";
 import {QueryPlan, QueryPlanListItem} from "../../CoreModules/types";
@@ -35,7 +40,9 @@ export class QueryExplainerService {
             stats: parsedResponse.stats,
             summary: parsedResponse.summary,
             original_plan: response.query_original_plan,
-            query: response.query
+            query: response.query,
+            optimization_id: response.optimization_id,
+            query_fingerprint: response.query_fingerprint
         }
     }
 
@@ -58,6 +65,24 @@ export class QueryExplainerService {
                 id: plan.id,
                 query: plan.query,
                 period_start: new Date(plan.period_start as number)
+            }))
+        }
+
+        return []
+    }
+
+    async getOptimizationsList(body: GetOptimizationsListRequest): Promise<QueryPlanListItem[]> {
+        const response = await this.queryExplainerRepository.getQueryOptimizations(body);
+
+        if (response.plans?.length) {
+            return response.plans.map(plan => ({
+                id: plan.id,
+                query: plan.query,
+                period_start: new Date(plan.period_start as number),
+                optimization_id: plan.optimization_id,
+                query_fingerprint: plan.query_fingerprint,
+                executionTime: plan.execution_time,
+                planningTime: plan.planning_time
             }))
         }
 

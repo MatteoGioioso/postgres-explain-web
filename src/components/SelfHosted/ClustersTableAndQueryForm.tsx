@@ -1,18 +1,14 @@
-// @ts-nocheck
-import {Box, Button, FormHelperText, Grid, Stack, TextField, Typography} from "@mui/material";
-import {QUERY_EXAMPLE_PLACEHOLDER} from "../utils";
-import {Formik} from "formik";
+import {Box, Grid, Typography} from "@mui/material";
 import MainCard from "../CoreModules/MainCard";
 import {useNavigate, useParams} from "react-router-dom";
-import {analyticsService, queryExplainerService} from "./ioc";
+import {infoService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
-import {QueriesListTable} from "../CoreModules/Tables/QueriesListTable";
 import {PlansList} from "../CoreModules/PlansList";
 import {QueryPlanListItem} from "../CoreModules/types";
-import {GetQueriesListResponse} from "./proto/analytics.pb";
-import InputLabel from "@mui/material/InputLabel";
+import {Instance} from "./proto/info.pb";
+import {QueryForm} from "../CoreModules/QueryForm";
 
-const Wrapper = ({children, title, sx = {}, other}) => (
+const Wrapper = ({children, title, sx = {}}) => (
     <>
         <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
@@ -22,7 +18,6 @@ const Wrapper = ({children, title, sx = {}, other}) => (
         <Box sx={{...sx}}>
             <MainCard
                 content={false}
-                {...other}
                 border
             >
                 <Box>{children}</Box>
@@ -31,116 +26,40 @@ const Wrapper = ({children, title, sx = {}, other}) => (
     </>
 );
 
-const QueryForm = ({cluster_id}) => {
-    const navigate = useNavigate();
-    return (
-        <Formik
-            initialValues={{
-                plan: ''
-            }}
-            onSubmit={async (values, {setErrors, setStatus, setSubmitting}) => {
-                const planID = await queryExplainerService.saveQueryPlan({
-                    query: values.query,
-                    cluster_name: cluster_id,
-                    database: "postgres"
-                });
-                navigate(`/clusters/${cluster_id}/plans/${planID}`)
-            }}
-            validate={values => {
-                const errors = {};
-                if (!values.query) {
-                    // @ts-ignore
-                    errors.query = 'Required';
-                }
-                return errors;
-            }}
-        >
-            {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
-                <form noValidate onSubmit={handleSubmit} style={{padding: '40px'}}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <Stack spacing={2}>
-
-                                <Stack spacing={0}>
-                                    <InputLabel htmlFor="alias">Alias</InputLabel>
-                                    <TextField
-                                        fullWidth
-                                        id="alias"
-                                        type="text"
-                                        value={values.alias}
-                                        name="alias"
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        placeholder={'Plan alias'}
-                                        inputProps={{}}
-                                        rows={1}
-                                    />
-                                </Stack>
-                                <Stack spacing={0}>
-                                    <InputLabel htmlFor="query">Query*</InputLabel>
-                                    <TextField
-                                        fullWidth
-                                        error={Boolean(touched.query && errors.query)}
-                                        id="query"
-                                        type="text"
-                                        value={values.query}
-                                        name="query"
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        placeholder={QUERY_EXAMPLE_PLACEHOLDER}
-                                        inputProps={{}}
-                                        multiline
-                                        rows={10}
-                                    />
-                                    {touched.query && errors.query && (
-                                        <FormHelperText error id="helper-text-plan-signup">
-                                            {errors.query as string}
-                                        </FormHelperText>
-                                    )}
-                                </Stack>
-                            </Stack>
-                        </Grid>
-
-                        {errors.submit && (
-                            <Grid item xs={12}>
-                                <FormHelperText error>{errors.submit as string}</FormHelperText>
-                            </Grid>
-                        )}
-                        <Grid item xs={12}>
-                            <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit"
-                                    variant="contained"
-                                    color="primary">
-                                Explain
-                            </Button>
-                        </Grid>
-
-                    </Grid>
-                </form>
-            )}
-        </Formik>
-    )
-}
-
 export const ClustersTableAndQueryForm = () => {
     const {cluster_id} = useParams();
     const [plansList, setPlansList] = useState([])
+    const [clusterInstancesList, setClusterInstancesList] = useState<Instance[]>([])
     const [queriesList, setQueriesList] = useState(undefined)
     const navigate = useNavigate();
 
     useEffect(() => {
         Promise
             .all([
-                queryExplainerService.getQueryPlansList({cluster_name: cluster_id}),
-                analyticsService.getQueriesList({cluster_name: cluster_id})]
+                    queryExplainerService.getQueryPlansList({cluster_name: cluster_id}),
+                    infoService.getClusterInstancesList({cluster_name: cluster_id})
+                    // analyticsService.getQueriesList({cluster_name: cluster_id})
+                ]
             )
             .then(responses => {
                 setPlansList(responses[0] as QueryPlanListItem[])
-                setQueriesList(responses[1] as GetQueriesListResponse)
+                setClusterInstancesList(responses[1])
+                // setQueriesList(responses[1] as GetQueriesListResponse)
             })
             .catch(e => {
                 console.error(e)
             })
     }, []);
+
+    async function onSubmitCustomQuery(values, {setErrors, setStatus, setSubmitting}) {
+        const planID = await queryExplainerService.saveQueryPlan({
+            query: values.query,
+            cluster_name: cluster_id,
+            instance_name: values.instanceName,
+            database: "postgres"
+        });
+        navigate(`/clusters/${cluster_id}/plans/${planID}`)
+    }
 
     const onClickRow = async (queryId, query, params) => {
         try {
@@ -163,24 +82,28 @@ export const ClustersTableAndQueryForm = () => {
 
     return (
         <>
-            <Grid container>
-                <Grid item xs={12}>
-                    <Wrapper sx={{pt: 2}} title={"Queries list"}>
-                        {Boolean(queriesList?.queries?.length) && (
-                            <QueriesListTable
-                                mappings={queriesList.mappings}
-                                queries={queriesList.queries}
-                                onClickRow={onClickRow}
-                            />
-                        )}
-                    </Wrapper>
-                </Grid>
-            </Grid>
-            <Box sx={{pt: 4}}/>
+            {/*<Grid container>*/}
+            {/*    <Grid item xs={12}>*/}
+            {/*        <Wrapper sx={{pt: 2}} title={"Queries list"}>*/}
+            {/*            {Boolean(queriesList?.queries?.length) && (*/}
+            {/*                <QueriesListTable*/}
+            {/*                    mappings={queriesList.mappings}*/}
+            {/*                    queries={queriesList.queries}*/}
+            {/*                    onClickRow={onClickRow}*/}
+            {/*                />*/}
+            {/*            )}*/}
+            {/*        </Wrapper>*/}
+            {/*    </Grid>*/}
+            {/*</Grid>*/}
+            {/*<Box sx={{pt: 4}}/>*/}
             <Grid container>
                 <Grid item xs={8}>
                     <Wrapper sx={{pt: 2, pr: 2}} title="Custom query">
-                        <QueryForm cluster_id={cluster_id}/>
+                        {Boolean(clusterInstancesList?.length) && (
+                            <Box sx={{p: 3}}>
+                                <QueryForm clusterInstancesList={clusterInstancesList} onSubmit={onSubmitCustomQuery}/>
+                            </Box>
+                        )}
                     </Wrapper>
                 </Grid>
                 <Grid item xs={4}>

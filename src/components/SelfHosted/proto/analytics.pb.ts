@@ -6,6 +6,7 @@
 
 import * as fm from "./fetch.pb"
 import * as GoogleProtobufTimestamp from "./google/protobuf/timestamp.pb"
+import * as BorealisV1beta1Shared from "./shared.pb"
 export type GetQueriesListRequest = {
   period_start_from?: GoogleProtobufTimestamp.Timestamp
   period_start_to?: GoogleProtobufTimestamp.Timestamp
@@ -25,18 +26,7 @@ export type Query = {
   text?: string
   parameters?: string[]
   plan_ids?: string[]
-  metrics?: {[key: string]: MetricValues}
-}
-
-export type MetricValues = {
-  rate?: number
-  cnt?: number
-  sum?: number
-  min?: number
-  max?: number
-  avg?: number
-  p99?: number
-  percent_of_total?: number
+  metrics?: {[key: string]: BorealisV1beta1Shared.MetricValues}
 }
 
 export type MetricInfo = {

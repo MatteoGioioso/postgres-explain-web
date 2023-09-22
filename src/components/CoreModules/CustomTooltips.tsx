@@ -5,9 +5,10 @@ import {useTheme} from "@mui/material/styles";
 
 interface CustomTooltipProps {
     text: string
+    maxChar: number
 }
 
-export const TextTooltip = ({text, ...props}: CustomTooltipProps) => {
+export const TextTooltip = ({text, maxChar, ...props}: CustomTooltipProps) => {
     const theme = useTheme();
     return (
         <Tooltip
@@ -16,7 +17,7 @@ export const TextTooltip = ({text, ...props}: CustomTooltipProps) => {
             {...props}
         >
             {/* @ts-ignore */}
-            {getTooltipContent(truncateText(text, theme.diagram.text.maxChar), true)}
+            {getTooltipContent(truncateText(text, maxChar), true)}
         </Tooltip>
     )
 }

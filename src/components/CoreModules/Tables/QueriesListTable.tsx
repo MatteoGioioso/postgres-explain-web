@@ -18,6 +18,7 @@ import {GenericDetailsPopover} from "../GenericDetailsPopover";
 import {truncateText} from "../utils";
 import MainCard from "../MainCard";
 import {Formik} from "formik";
+import {QueryModal} from "./QueryModal";
 
 export interface MetricsTableProps {
     mappings: MetricInfo[]
@@ -37,105 +38,6 @@ function Head({mapping}: { mapping: MetricInfo }) {
     );
 }
 
-const RowModal = ({open, handleClose, query, onClick}: { open: boolean, handleClose: any, query: Query, onClick: any }) => {
-    return (
-        <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-            sx={{overflow: 'scroll'}}
-        >
-            <MainCard
-                sx={{
-                    position: 'absolute' as 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: "70%",
-                    bgcolor: 'background.paper',
-                    p: 1,
-                }}
-            >
-                <Typography id="modal-modal-title" variant="h4" component="h2">
-                    Explain query
-                </Typography>
-                <Highlight classname='sql'>
-                    {query.text}
-                </Highlight>
-                {query.parameters?.length > 0 ? (
-                    <Formik
-                        initialValues={{}}
-                        onSubmit={(values, {setErrors, setStatus, setSubmitting}) => {
-                            const parameters = Object.keys(values).map(key => values[key]);
-                            onClick(query.id, query.text, parameters)
-                        }}
-                        validate={values => {
-                            const errors = {};
-                            if (Object.keys(values).length !== query.parameters.length) {
-                                query.parameters.forEach(param => {
-                                    if (!values[param]) {
-                                        errors[param] = 'Required';
-                                    }
-                                })
-                            }
-                            return errors;
-                        }}
-                    >
-                        {({errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values}) => (
-                            <form noValidate onSubmit={handleSubmit}>
-                                <Grid container spacing={1}>
-                                    {query.parameters.map((param) => (
-                                        <Grid item xs={2} display='inline-flex'>
-                                            <Typography sx={{pr: 2}}>
-                                                {param}=
-                                            </Typography>
-                                            <TextField
-                                                fullWidth
-                                                error={Boolean(errors[param])}
-                                                id={param}
-                                                type="text"
-                                                value={values[param]}
-                                                name={param}
-                                                onBlur={handleBlur}
-                                                onChange={handleChange}
-                                                inputProps={{}}
-                                            />
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                                <Box sx={{pt: 2}}/>
-                                <Button
-                                    disableElevation
-                                    size="large"
-                                    type="submit"
-                                    variant="contained"
-                                    color="primary"
-                                >
-                                    Explain
-                                </Button>
-                            </form>
-                        )}
-                    </Formik>
-                ) : (
-                    <Button
-                        disableElevation
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                            onClick(query.id, query.text, null)
-                        }}
-                    >
-                        Explain
-                    </Button>
-                )}
-            </MainCard>
-        </Modal>
-    )
-}
-
 const Row = ({query, onClickRow}: { query: Query, onClickRow: any }) => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
@@ -143,7 +45,7 @@ const Row = ({query, onClickRow}: { query: Query, onClickRow: any }) => {
 
     return (
         <>
-            <RowModal open={open} handleClose={handleClose} query={query} onClick={onClickRow}/>
+            <QueryModal open={open} handleClose={handleClose} query={query} onClick={onClickRow} clusterInstancesList={[]}/>
             <TableRow
                 hover
                 role="checkbox"

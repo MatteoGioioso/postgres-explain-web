@@ -8,15 +8,19 @@ export interface ChartObject {
     layout: Layout;
 }
 
+// load by wait events (Average Active Session)
 export interface AAS {
     layout: any,
     data: PlotData[]
+    total: number
+    upperRange: number
 }
 
 export interface TableData {
     aas: AAS
     name: string
-    id: string
+    fingerprint: string
+    parameters: string[]
 }
 
 export interface TopQueriesTableData extends TableData {
@@ -69,7 +73,6 @@ export class ActivitiesService {
         for (const traceKey of Object.keys(response.traces || {})) {
             const trace = response.traces![traceKey];
 
-            // @ts-ignore
             traces.push({
                 x: trace.x_values_timestamp ? trace.x_values_timestamp : [],
                 y: trace.y_values_float ? trace.y_values_float : [],
@@ -85,10 +88,9 @@ export class ActivitiesService {
                     color: trace.color,
                 },
                 opacity: 0.9,
-            });
+            } as PlotData);
         }
 
-        // @ts-ignore
         const layout: Layout = {
             barmode: 'stack',
             yaxis: {
@@ -118,7 +120,7 @@ export class ActivitiesService {
                     },
                 },
             ],
-        };
+        } as Layout;
 
         return {
             traces, layout,
@@ -142,40 +144,46 @@ export class ActivitiesService {
             const trace = response.traces![traceKey];
 
             for (let i = 0; i < trace.y_values_float!.length; i++) {
-                const d = tableDataArray[i];
+                const data = tableDataArray[i];
+                const fingerprint = trace.x_values_string![i]
+                const queryText = response.queries_metadata[fingerprint].text
 
-                if (d) {
-                    tableDataArray[i].aas.data.push(this.getTraceFromTemplate(trace, i, traceKey));
+                if (data) {
+                    tableDataArray[i].aas.data.push(this.getTraceFromTemplate(trace, queryText, i, traceKey));
                 } else {
                     tableDataArray.push({
-                        name: trace.x_values_string![i],
+                        name: queryText,
                         aas: {
                             layout: {},
-                            data: [this.getTraceFromTemplate(trace, i, traceKey)],
+                            data: [this.getTraceFromTemplate(trace, queryText, i, traceKey)],
                         },
-                        id: trace.x_values_metadata["fingerprint"].meta[i]
-                    });
+                        fingerprint: fingerprint,
+                        parameters: response.queries_metadata[fingerprint].parameters
+                    } as TopQueriesTableData);
                 }
             }
         }
 
         const highestRankedSQL: TableData = tableDataArray[0];
         const highestTotal = this.getTotal(highestRankedSQL);
-        const SCALE_DOWN_FACTOR = 1.2;
 
         for (let i = 0; i < tableDataArray.length; i++) {
             const total = this.getTotal(tableDataArray[i]);
-            const upperRange = (Math.round(((total * 100) / highestTotal)) / 100) / SCALE_DOWN_FACTOR;
+            const upperRange = Math.round(((total * 100) / highestTotal));
+            tableDataArray[i].aas.total = total
 
             if (upperRange === 0) {
-                tableDataArray[i].aas.layout = this.getLayoutFromTemplate([0, 0.001]);
+                tableDataArray[i].aas.layout = this.getLayoutFromTemplate();
+                tableDataArray[i].aas.upperRange = 0.001
+
             } else {
-                tableDataArray[i].aas.layout = this.getLayoutFromTemplate([0, upperRange]);
+                tableDataArray[i].aas.layout = this.getLayoutFromTemplate();
+                tableDataArray[i].aas.upperRange = upperRange
             }
         }
 
         for (let i = 0; i < tableDataArray.length; i++) {
-            const id = tableDataArray[i].id;
+            const id = tableDataArray[i].fingerprint;
             if (response.queries_metrics) {
                 const metrics = response.queries_metrics[id].metrics
                 for (const metricsKey in metrics) {
@@ -197,7 +205,7 @@ export class ActivitiesService {
         return total;
     }
 
-    private getLayoutFromTemplate = (domain: number[]) => ({
+    private getLayoutFromTemplate = (): Layout => ({
         autosize: true,
         height: 20,
         margin: {
@@ -215,7 +223,7 @@ export class ActivitiesService {
             zeroline: false,
             visible: false,
             fixedrange: true,
-            domain,
+            // domain,
         },
         yaxis: {
             showgrid: false,
@@ -223,15 +231,16 @@ export class ActivitiesService {
             visible: false,
             fixedrange: true,
         },
-    });
+    } as Layout);
 
-    private getTraceFromTemplate = (trace: Trace, i: number, name: string) => ({
+    private getTraceFromTemplate = (trace: Trace, queryText: string, i: number, name: string): PlotData => ({
         x: [trace.y_values_float![i]],
-        y: [trace.x_values_string![i]],
+        y: [queryText],
         name: name,
         type: 'bar',
         orientation: 'h',
         hoverinfo: 'none',
+        width: 1,
         marker: {
             line: {
                 color: 'grey',
@@ -240,7 +249,7 @@ export class ActivitiesService {
             color: trace.color,
         },
         opacity: 0.9,
-    });
+    } as PlotData);
 
     private hideZeroYValuesTraceFromLegend(trace: Trace): boolean {
         return trace.y_values_float?.reduce((a, b) => a + b, 0) !== 0;

@@ -1,24 +1,23 @@
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
-import React from "react";
-import {TableData, TopQueriesTableData} from "../../SelfHosted/services/Activities.service";
+import {Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
+import React, {useState} from "react";
+import {TopQueriesTableData} from "../../SelfHosted/services/Activities.service";
 import {MetricInfo} from "../../SelfHosted/proto/analytics.pb";
-import {GenericDetailsPopover} from "../GenericDetailsPopover";
+import {MouseOverPopover} from "../GenericDetailsPopover";
 import Plot from 'react-plotly.js';
-import Highlight from 'react-highlight'
 import {getMetricsColumns, getMetricsKeys, Metric, metricsInfoMap} from "./utils";
-import {truncateText} from "../utils";
-import {TextTooltip} from "../CustomTooltips";
+import {formatNumbers, truncateText} from "../utils";
+import {CustomToolTip, InfoToolTip, TextTooltip} from "../CustomTooltips";
+import {onClickExplainTopQuery, QueryModal} from "./QueryModal";
+import {Instance} from "../../SelfHosted/proto/info.pb";
 
 
 interface TopQueriesTableProps {
-    tableDataArray: readonly TopQueriesTableData[],
-    isLoading?: boolean,
-    onQueryDetailsPanelToggle?: any,
-    topQueryTableSelectedItems?: any,
-    onTopQueryTableSelectItems?: any
+    tableDataArray: readonly TopQueriesTableData[]
+    onClickExplainTopQuery: onClickExplainTopQuery
+    clusterInstancesList: Instance[]
 }
 
-export function TopQueriesTable({tableDataArray}: TopQueriesTableProps) {
+export function TopQueriesTable({tableDataArray, onClickExplainTopQuery, clusterInstancesList}: TopQueriesTableProps) {
     return (
         <>
             <TableContainer
@@ -46,8 +45,8 @@ export function TopQueriesTable({tableDataArray}: TopQueriesTableProps) {
                 >
                     <TableHead>
                         <TableRow>
-                            <Head mapping={{key: 'load', Title: 'Load'}}/>
-                            <Head mapping={{key: 'sql', Title: 'SQL'}}/>
+                            <Head mapping={{key: 'Load by wait events (Active Average Session)', Title: 'Load'}}/>
+                            <Head mapping={{key: 'SQL statement', Title: 'SQL'}}/>
                             {Object.values(metricsInfoMap).map((metric: Metric) => (
                                 <Head mapping={{key: metric.key, Title: metric.title}}/>
                             ))}
@@ -55,7 +54,8 @@ export function TopQueriesTable({tableDataArray}: TopQueriesTableProps) {
                     </TableHead>
                     <TableBody>
                         {tableDataArray.map((tableData) => {
-                            return <Row tableData={tableData}/>
+                            return <Row tableData={tableData} onClickExplainTopQuery={onClickExplainTopQuery}
+                                        clusterInstancesList={clusterInstancesList}/>
                         })}
                     </TableBody>
                 </Table>
@@ -66,44 +66,85 @@ export function TopQueriesTable({tableDataArray}: TopQueriesTableProps) {
 
 interface RowProps {
     tableData: TopQueriesTableData
+    onClickExplainTopQuery: onClickExplainTopQuery
+    clusterInstancesList: Instance[]
 }
 
-function Row({tableData}: RowProps) {
+function Row({tableData, onClickExplainTopQuery, clusterInstancesList}: RowProps) {
+    const [popData, setPopData] = useState<Array<{ name: string, x: number, color: string }>>([{color: "", x: 0, name: ""}]);
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
     return (
-        <TableRow
-            hover
-            role="checkbox"
-            sx={{'&:last-child td, &:last-child th': {border: 0}}}
-            tabIndex={-1}
-            key={tableData.id}
-        >
-            <TableCell>
-                <Plot
-                    data={tableData.aas.data}
-                    layout={tableData.aas.layout}
-                    config={{displayModeBar: false}}
-                    // style={{width: '50%'}}
-                    // onClick={(data) => {
-                    //     const map = data.points.filter(d => d.x !== 0).map(d => ({
-                    //         x: d.x,
-                    //         color: d.data.marker.color,
-                    //         name: d.data.name
-                    //     }));
-                    //     setPopData(map)
-                    // }}
-                />
-            </TableCell>
-            <TableCell>
-                <code>
-                    <TextTooltip text={tableData.name} maxChar={60} />
-                </code>
-            </TableCell>
-            {getMetricsColumns(tableData).map(val => (
-                <TableCell>
-                    {val}
+        <>
+            <QueryModal
+                open={open}
+                handleClose={handleClose}
+                query={{
+                    parameters: tableData.parameters,
+                    text: tableData.name,
+                    fingerprint: tableData.fingerprint
+                }}
+                onClick={onClickExplainTopQuery}
+                clusterInstancesList={clusterInstancesList}
+            />
+            <TableRow
+                hover
+                role="checkbox"
+                sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                tabIndex={-1}
+                key={tableData.fingerprint}
+            >
+                <TableCell
+                    onMouseEnter={() => {
+                        const map = tableData.aas.data.filter(d => d.x[0] !== 0).map(d => ({
+                            x: d.x,
+                            color: d.marker.color,
+                            name: d.name
+                        })).sort(function (a, b) {
+                            return b.x - a.x;
+                        });
+                        setPopData(map as any)
+                    }}
+                >
+                    <Stack direction='row' spacing={1}>
+                        <MouseOverPopover
+                            name={"summary"}
+                            content={
+                                popData.map(d => (
+                                    <div key={d.name} style={{color: d.color}}>&#9632;
+                                        <p style={{
+                                            color: '#2f2f2f',
+                                            display: "inline"
+                                        }}>{d.name}: {formatNumbers(d.x)}</p>
+                                    </div>
+                                ))}
+                        >
+                            <Plot
+                                data={tableData.aas.data}
+                                layout={tableData.aas.layout}
+                                config={{displayModeBar: false}}
+                                style={{width: tableData.aas.upperRange * 4}}
+                            />
+                        </MouseOverPopover>
+                        <Typography>
+                            {formatNumbers(tableData.aas.total)}
+                        </Typography>
+                    </Stack>
                 </TableCell>
-            ))}
-        </TableRow>
+                <TableCell
+                    onClick={() => handleOpen()}
+                >
+                    <CustomToolTip text={""} maxChar={0} info={tableData.name} children={<code>{truncateText(tableData.name, 60)}</code>}/>
+                </TableCell>
+                {getMetricsColumns(tableData).map(val => (
+                    <TableCell>
+                        {val}
+                    </TableCell>
+                ))}
+            </TableRow>
+        </>
     )
 }
 
@@ -112,9 +153,7 @@ function Head({mapping}: { mapping: MetricInfo }) {
         <TableCell
             key={mapping.key}
         >
-            <GenericDetailsPopover name={"description"} content={mapping.key}>
-                {mapping.Title}
-            </GenericDetailsPopover>
+            <InfoToolTip info={mapping.key} text={mapping.Title} maxChar={20}/>
         </TableCell>
     );
 }

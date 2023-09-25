@@ -6,6 +6,36 @@ import {useTheme} from "@mui/material/styles";
 interface CustomTooltipProps {
     text: string
     maxChar: number
+    info?: string | number
+    children?: any
+}
+
+export const CustomToolTip = ({children, info, ...props}: CustomTooltipProps) => {
+    const theme = useTheme();
+    return (
+        <Tooltip
+            arrow
+            title={info}
+            {...props}
+        >
+            {/* @ts-ignore */}
+            {getTooltipContent(children, true)}
+        </Tooltip>
+    )
+}
+
+export const InfoToolTip = ({text, info, maxChar, ...props}: CustomTooltipProps) => {
+    const theme = useTheme();
+    return (
+        <Tooltip
+            arrow
+            title={info}
+            {...props}
+        >
+            {/* @ts-ignore */}
+            {getTooltipContent(truncateText(text, maxChar), true)}
+        </Tooltip>
+    )
 }
 
 export const TextTooltip = ({text, maxChar, ...props}: CustomTooltipProps) => {
@@ -61,7 +91,8 @@ function getTooltipContent(children: any, isEnabled: boolean) {
             cursor: isEnabled && 'pointer',
             textDecoration: isEnabled && 'underline',
             width: 'fit-content',
-            textDecorationColor: theme => theme.palette.secondary.light
+            textDecorationColor: theme => theme.palette.secondary.light,
+            fontWeight: 'inherit'
         }}
     >
         {children}

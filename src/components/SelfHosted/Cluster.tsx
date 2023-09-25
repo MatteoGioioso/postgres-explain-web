@@ -12,6 +12,7 @@ import {ChartObject, TableData} from "./services/Activities.service";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import moment from "moment"
 import {TopQueriesTable} from "../CoreModules/Tables/TopQueriesTable";
+import {PlotRelayoutEvent} from "plotly.js";
 
 const Wrapper = ({children, title = "", sx = {}}) => (
     <>
@@ -31,7 +32,7 @@ const Wrapper = ({children, title = "", sx = {}}) => (
     </>
 );
 
-export const ClustersTableAndQueryForm = () => {
+export const Cluster = () => {
     const {cluster_id} = useParams();
     const [plansList, setPlansList] = useState([])
     const [clusterInstancesList, setClusterInstancesList] = useState<Instance[]>([])
@@ -79,19 +80,18 @@ export const ClustersTableAndQueryForm = () => {
         navigate(`/clusters/${cluster_id}/plans/${planID}`)
     }
 
-    const onClickRow = async (queryId, query, params) => {
+    const onClickExplainTopQuery = async (queryId, query, params, instanceName, database) => {
         try {
             const planID = await queryExplainerService.saveQueryPlan({
                 query_id: queryId,
                 query,
                 cluster_name: cluster_id,
-                database: "postgres",
+                instance_name: instanceName,
+                database: database || "postgres",
                 parameters: params,
             });
             navigate(`/clusters/${cluster_id}/plans/${planID}`)
         } catch (e) {
-            // TODO error handling
-            console.error(e)
             setError({
                 error: e.message,
                 error_stack: "",
@@ -106,20 +106,6 @@ export const ClustersTableAndQueryForm = () => {
 
     return (
         <>
-            {/*<Grid container>*/}
-            {/*    <Grid item xs={12}>*/}
-            {/*        <Wrapper sx={{pt: 2}} title={"Queries list"}>*/}
-            {/*            {Boolean(queriesList?.queries?.length) && (*/}
-            {/*                <QueriesListTable*/}
-            {/*                    mappings={queriesList.mappings}*/}
-            {/*                    queries={queriesList.queries}*/}
-            {/*                    onClickRow={onClickRow}*/}
-            {/*                />*/}
-            {/*            )}*/}
-            {/*        </Wrapper>*/}
-            {/*    </Grid>*/}
-            {/*</Grid>*/}
-            {/*<Box sx={{pt: 4}}/>*/}
             <Grid container>
                 {error && <ErrorAlert error={error} setError={setError}/>}
                 <Grid item xs={12}>
@@ -129,10 +115,9 @@ export const ClustersTableAndQueryForm = () => {
                                 data={activities.traces}
                                 layout={activities.layout}
                                 useResizeHandler
-                                // onRelayout={(e: PlotRelayoutEvent) => {
-                                //     // @ts-ignore
-                                //     setTimerange(e["xaxis.range[0]"], e["xaxis.range[1]"])
-                                // }}
+                                onRelayout={(e: PlotRelayoutEvent) => {
+                                    // setTimerange(e["xaxis.range[0]"], e["xaxis.range[1]"])
+                                }}
                                 config={{displayModeBar: false}}
                                 style={{width: '100%', height: '100%'}}
                             />
@@ -142,7 +127,8 @@ export const ClustersTableAndQueryForm = () => {
                 <Grid item xs={12}>
                     <Wrapper sx={{pt: 2}}>
                         {Boolean(topQueries?.length > 0) && (
-                            <TopQueriesTable tableDataArray={topQueries} />
+                            <TopQueriesTable tableDataArray={topQueries} onClickExplainTopQuery={onClickExplainTopQuery}
+                                             clusterInstancesList={clusterInstancesList}/>
                         )}
                     </Wrapper>
                 </Grid>
@@ -167,4 +153,4 @@ export const ClustersTableAndQueryForm = () => {
     )
 }
 
-export default ClustersTableAndQueryForm
+export default Cluster

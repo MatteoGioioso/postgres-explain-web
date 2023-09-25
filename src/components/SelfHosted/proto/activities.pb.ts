@@ -23,7 +23,6 @@ export type Trace = {
   x_values_float?: number[]
   x_values_string?: string[]
   y_values_float?: number[]
-  x_values_metadata?: {[key: string]: Metadata}
   color?: string
 }
 
@@ -35,6 +34,12 @@ export type QueriesMetrics = {
   metrics?: {[key: string]: BorealisV1beta1Shared.MetricValues}
 }
 
+export type QueryMetadata = {
+  fingerprint?: string
+  parameters?: string[]
+  text?: string
+}
+
 export type GetTopQueriesRequest = {
   period_start_from?: GoogleProtobufTimestamp.Timestamp
   period_start_to?: GoogleProtobufTimestamp.Timestamp
@@ -44,6 +49,7 @@ export type GetTopQueriesRequest = {
 export type GetTopQueriesResponse = {
   traces?: {[key: string]: Trace}
   queries_metrics?: {[key: string]: QueriesMetrics}
+  queries_metadata?: {[key: string]: QueryMetadata}
 }
 
 export type GetQueryDetailsRequest = {

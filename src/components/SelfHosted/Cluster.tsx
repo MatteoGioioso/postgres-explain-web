@@ -3,18 +3,18 @@ import MainCard from "../CoreModules/MainCard";
 import {useNavigate, useParams} from "react-router-dom";
 import {activitiesService, infoService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
-import {PlansList} from "../CoreModules/PlansList";
 import {QueryPlanListItem} from "../CoreModules/types";
 import {Instance} from "./proto/info.pb";
-import {QueryForm} from "../CoreModules/QueryForm";
 import Plot from 'react-plotly.js';
 import {ChartObject, TableData} from "./services/Activities.service";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
-import moment from "moment"
 import {TopQueriesTable} from "../CoreModules/Tables/TopQueriesTable";
 import {PlotRelayoutEvent} from "plotly.js";
+import {useAutoRefresh} from "../CoreModules/autoRefresher";
+import {ClusterToolbar} from "./components/ClusterToolbar";
+import {useTimeIntervals} from "../CoreModules/timeIntervals";
 
-const Wrapper = ({children, title = "", sx = {}}) => (
+export const Wrapper = ({children, title = "", sx = {}}) => (
     <>
         <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
@@ -34,60 +34,60 @@ const Wrapper = ({children, title = "", sx = {}}) => (
 
 export const Cluster = () => {
     const {cluster_id} = useParams();
-    const [plansList, setPlansList] = useState([])
     const [clusterInstancesList, setClusterInstancesList] = useState<Instance[]>([])
     const [activities, setActivities] = useState<ChartObject>(undefined)
     const [topQueries, setTopQueries] = useState<TableData[]>(undefined)
-    const [queriesList, setQueriesList] = useState(undefined)
     const [error, setError] = useState<ErrorReport>()
     const navigate = useNavigate();
+    const {timeInterval, setTimeInterval} = useTimeIntervals();
+
+    const fetchActivities = () => {
+        Promise.all([
+            activitiesService.getProfile({
+                from: timeInterval.from(),
+                to: timeInterval.to(),
+                clusterName: cluster_id
+            }),
+            activitiesService.getTopQueries({
+                from: timeInterval.from(),
+                to: timeInterval.to(),
+                clusterName: cluster_id
+            })
+        ]).then(responses => {
+            setActivities(responses[0] as ChartObject)
+            setTopQueries(responses[1] as TableData[])
+        }).catch(e => {
+            // TODO handle error
+            console.error(e)
+        })
+    }
+
+    const {refreshInterval, setRefreshInterval} = useAutoRefresh([fetchActivities]);
 
     useEffect(() => {
-        Promise
-            .all([
-                    queryExplainerService.getQueryPlansList({cluster_name: cluster_id}),
-                    infoService.getClusterInstancesList({cluster_name: cluster_id}),
-                    activitiesService.getProfile({
-                        from: moment(new Date()).subtract(1, 'hour').utc().format('YYYY-MM-DDTHH:mm:ssZ'),
-                        to: moment(new Date()).utc().format('YYYY-MM-DDTHH:mm:ssZ'),
-                        clusterName: cluster_id
-                    }),
-                    activitiesService.getTopQueries({
-                        from: moment(new Date()).subtract(1, 'hour').utc().format('YYYY-MM-DDTHH:mm:ssZ'),
-                        to: moment(new Date()).utc().format('YYYY-MM-DDTHH:mm:ssZ'),
-                        clusterName: cluster_id
-                    })
-                ]
-            )
-            .then(responses => {
-                setPlansList(responses[0] as QueryPlanListItem[])
-                setClusterInstancesList(responses[1] as Instance[])
-                setActivities(responses[2] as ChartObject)
-                setTopQueries(responses[3] as TableData[])
+        fetchActivities()
+    }, [timeInterval.id]);
+
+    useEffect(() => {
+        infoService
+            .getClusterInstancesList({cluster_name: cluster_id})
+            .then(response => {
+                setClusterInstancesList(response)
             })
             .catch(e => {
+                // TODO handle error
                 console.error(e)
             })
     }, []);
 
-    async function onSubmitCustomQuery(values, {setErrors, setStatus, setSubmitting}) {
-        const planID = await queryExplainerService.saveQueryPlan({
-            query: values.query,
-            cluster_name: cluster_id,
-            instance_name: values.instanceName,
-            database: "postgres"
-        });
-        navigate(`/clusters/${cluster_id}/plans/${planID}`)
-    }
-
-    const onClickExplainTopQuery = async (queryId, query, params, instanceName, database) => {
+    const onClickExplainTopQuery = async (queryId, query, params, instanceName) => {
         try {
             const planID = await queryExplainerService.saveQueryPlan({
                 query_id: queryId,
                 query,
                 cluster_name: cluster_id,
                 instance_name: instanceName,
-                database: database || "postgres",
+                database: "postgres",
                 parameters: params,
             });
             navigate(`/clusters/${cluster_id}/plans/${planID}`)
@@ -100,12 +100,15 @@ export const Cluster = () => {
         }
     }
 
-    const onClickPlansList = (item) => {
-        navigate(`/clusters/${cluster_id}/plans/${item.id}`)
-    }
-
     return (
         <>
+            <ClusterToolbar
+                onSelectAutoRefreshInterval={setRefreshInterval}
+                autoRefreshInterval={refreshInterval}
+                timeInterval={timeInterval}
+                onSelectTimeInterval={setTimeInterval}
+            />
+            <Box sx={{pt: 2}}/>
             <Grid container>
                 {error && <ErrorAlert error={error} setError={setError}/>}
                 <Grid item xs={12}>
@@ -116,7 +119,7 @@ export const Cluster = () => {
                                 layout={activities.layout}
                                 useResizeHandler
                                 onRelayout={(e: PlotRelayoutEvent) => {
-                                    // setTimerange(e["xaxis.range[0]"], e["xaxis.range[1]"])
+                                    // setTimeInterval(e["xaxis.range[0]"], e["xaxis.range[1]"])
                                 }}
                                 config={{displayModeBar: false}}
                                 style={{width: '100%', height: '100%'}}
@@ -132,22 +135,7 @@ export const Cluster = () => {
                         )}
                     </Wrapper>
                 </Grid>
-                <Grid item xs={8}>
-                    <Wrapper sx={{pt: 2, pr: 2}} title="Custom query">
-                        {Boolean(clusterInstancesList?.length) && (
-                            <Box sx={{p: 3}}>
-                                <QueryForm clusterInstancesList={clusterInstancesList} onSubmit={onSubmitCustomQuery}/>
-                            </Box>
-                        )}
-                    </Wrapper>
-                </Grid>
-                <Grid item xs={4}>
-                    <Wrapper sx={{pt: 2}} title="Plans">
-                        {Boolean(plansList?.length) && (
-                            <PlansList items={plansList} clusterId={cluster_id} onClick={onClickPlansList}/>
-                        )}
-                    </Wrapper>
-                </Grid>
+
             </Grid>
         </>
     )

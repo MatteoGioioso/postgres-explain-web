@@ -23,13 +23,18 @@ const HeaderContent = () => {
                 )
             }
 
-            {/*<Button component={RouterLink} to={`/clusters/${cluster_id}`} variant='outlined' sx={{ml: 1, pt: 0.3, pb: 0.3}}>*/}
-            {/*    <Box sx={{flexShrink: 0}}>*/}
-            {/*        <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>*/}
-            {/*            <Typography variant="subtitle1">Plans list</Typography>*/}
-            {/*        </Stack>*/}
-            {/*    </Box>*/}
-            {/*</Button>*/}
+            {
+                pathname !== `/clusters/${cluster_id}/plans` && (
+                    <Button component={RouterLink} to={`/clusters/${cluster_id}/plans`} variant='outlined' sx={{ml: 1, pt: 0.3, pb: 0.3}}>
+                        <Box sx={{flexShrink: 0}}>
+                            <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>
+                                <Typography variant="subtitle1">Plans</Typography>
+                            </Stack>
+                        </Box>
+                    </Button>
+                )
+            }
+            
             {/*{!matchesXs && <Search/>}*/}
 
             <Box sx={{width: '100%', ml: 1}}/>

@@ -22,7 +22,7 @@ export function TopQueriesTable({tableDataArray, onClickExplainTopQuery, cluster
         <>
             <TableContainer
                 sx={{
-                    height: '40vh',
+                    height: '50vh',
                     width: '100vw',
                     overflowX: 'auto',
                     position: 'relative',
@@ -98,13 +98,17 @@ function Row({tableData, onClickExplainTopQuery, clusterInstancesList}: RowProps
             >
                 <TableCell
                     onMouseEnter={() => {
-                        const map = tableData.aas.data.filter(d => d.x[0] !== 0).map(d => ({
-                            x: d.x,
-                            color: d.marker.color,
-                            name: d.name
-                        })).sort(function (a, b) {
-                            return b.x - a.x;
-                        });
+                        const map = tableData.aas.data
+                            .filter(d => d.x[0] !== 0)
+                            .map(d => ({
+                                x: d.x,
+                                color: d.marker.color,
+                                name: d.name
+                            }))
+                            .sort(function (a, b) {
+                                // @ts-ignore
+                                return b.x - a.x;
+                            });
                         setPopData(map as any)
                     }}
                 >

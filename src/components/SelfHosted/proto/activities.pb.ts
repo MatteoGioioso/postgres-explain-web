@@ -26,10 +26,6 @@ export type Trace = {
   color?: string
 }
 
-export type Metadata = {
-  meta?: string[]
-}
-
 export type QueriesMetrics = {
   metrics?: {[key: string]: BorealisV1beta1Shared.MetricValues}
 }
@@ -38,6 +34,8 @@ export type QueryMetadata = {
   fingerprint?: string
   parameters?: string[]
   text?: string
+  examples_text?: string[]
+  plans_id?: string[]
 }
 
 export type GetTopQueriesRequest = {
@@ -63,18 +61,6 @@ export type GetQueryDetailsResponse = {
   traces?: {[key: string]: Trace}
 }
 
-export type GetTopWaitEventsLoadByGroupNameRequest = {
-  period_start_from?: GoogleProtobufTimestamp.Timestamp
-  period_start_to?: GoogleProtobufTimestamp.Timestamp
-  cluster_name?: string
-  group_name?: string
-}
-
-export type GetTopWaitEventsLoadByGroupNameResponse = {
-  traces?: {[key: string]: Trace}
-  groups?: string
-}
-
 export class Activities {
   static GetProfile(req: GetProfileRequest, initReq?: fm.InitReq): Promise<GetProfileResponse> {
     return fm.fetchReq<GetProfileRequest, GetProfileResponse>(`/v0/activities/GetProfile`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
@@ -84,8 +70,5 @@ export class Activities {
   }
   static GetQueryDetails(req: GetQueryDetailsRequest, initReq?: fm.InitReq): Promise<GetQueryDetailsResponse> {
     return fm.fetchReq<GetQueryDetailsRequest, GetQueryDetailsResponse>(`/v0/activities/GetQueryDetails`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
-  }
-  static GetTopWaitEventsLoadByGroupName(req: GetTopWaitEventsLoadByGroupNameRequest, initReq?: fm.InitReq): Promise<GetTopWaitEventsLoadByGroupNameResponse> {
-    return fm.fetchReq<GetTopWaitEventsLoadByGroupNameRequest, GetTopWaitEventsLoadByGroupNameResponse>(`/v0/activities/GetTopWaitEventsLoadByGroupName`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
   }
 }

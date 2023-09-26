@@ -1,6 +1,6 @@
 import {ActivitiesRepository} from "../datalayer/Activities.repository";
 import {Layout, PlotData} from 'plotly.js';
-import {GetTopQueriesResponse, Trace} from "../proto/activities.pb";
+import {GetTopQueriesResponse, QueryMetadata, Trace} from "../proto/activities.pb";
 import {MetricValues} from "../proto/shared.pb";
 
 export interface ChartObject {
@@ -10,7 +10,7 @@ export interface ChartObject {
 
 // load by wait events (Average Active Session)
 export interface AAS {
-    layout: any,
+    layout: Layout,
     data: PlotData[]
     total: number
     upperRange: number
@@ -146,7 +146,8 @@ export class ActivitiesService {
             for (let i = 0; i < trace.y_values_float!.length; i++) {
                 const data = tableDataArray[i];
                 const fingerprint = trace.x_values_string![i]
-                const queryText = response.queries_metadata[fingerprint].text
+                const {text: queryText, parameters}: QueryMetadata = response.queries_metadata[fingerprint]
+                const totalLoad = response.queries_metrics[fingerprint].metrics["cpu_total_load"].sum
 
                 if (data) {
                     tableDataArray[i].aas.data.push(this.getTraceFromTemplate(trace, queryText, i, traceKey));
@@ -156,25 +157,25 @@ export class ActivitiesService {
                         aas: {
                             layout: {},
                             data: [this.getTraceFromTemplate(trace, queryText, i, traceKey)],
+                            total: totalLoad
                         },
                         fingerprint: fingerprint,
-                        parameters: response.queries_metadata[fingerprint].parameters
+                        parameters: parameters
                     } as TopQueriesTableData);
                 }
             }
         }
 
         const highestRankedSQL: TableData = tableDataArray[0];
-        const highestTotal = this.getTotal(highestRankedSQL);
+        const highestTotal = highestRankedSQL.aas.total;
 
         for (let i = 0; i < tableDataArray.length; i++) {
-            const total = this.getTotal(tableDataArray[i]);
+            const total = tableDataArray[i].aas.total;
             const upperRange = Math.round(((total * 100) / highestTotal));
-            tableDataArray[i].aas.total = total
 
             if (upperRange === 0) {
                 tableDataArray[i].aas.layout = this.getLayoutFromTemplate();
-                tableDataArray[i].aas.upperRange = 0.001
+                tableDataArray[i].aas.upperRange = 1
 
             } else {
                 tableDataArray[i].aas.layout = this.getLayoutFromTemplate();
@@ -193,16 +194,6 @@ export class ActivitiesService {
         }
 
         return tableDataArray;
-    }
-
-    private getTotal(rankedQuery: TopQueriesTableData): number {
-        let total = 0;
-
-        for (const data of rankedQuery.aas.data) {
-            total += data.x[0];
-        }
-
-        return total;
     }
 
     private getLayoutFromTemplate = (): Layout => ({

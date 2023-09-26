@@ -12,8 +12,9 @@ const HelpLoadableWeb = Loadable(lazy(() => import('./components/Web/HelpWeb')))
 const PlanVisualizationComparisonWeb = Loadable(lazy(() => import('./components/Web/PlanVisualizationComparisonWeb')))
 
 const PlanVisualizationLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/PlanVisualizationSelfHosted')))
-const ClustersTableLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/Cluster')));
+const ClustersLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/Cluster')));
 const ClustersListLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/ClustersList')))
+const PlansLoadableSelfHosted = Loadable(lazy(() => import('./components/SelfHosted/Plans')))
 
 const WebRoutes = () => ({
     path: '/',
@@ -54,7 +55,11 @@ const SelfHostedRoutes = () => ({
         },
         {
             path: '/clusters/:cluster_id',
-            element: <ClustersTableLoadableSelfHosted/>
+            element: <ClustersLoadableSelfHosted/>
+        },
+        {
+            path: '/clusters/:cluster_id/plans',
+            element: <PlansLoadableSelfHosted />
         },
         {
             path: '/clusters/:cluster_id/plans/:plan_id',

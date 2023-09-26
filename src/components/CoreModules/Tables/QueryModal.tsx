@@ -8,7 +8,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import {Instance} from "../../SelfHosted/proto/info.pb";
 
-export type onClickExplainTopQuery = (fingerprint: string, query: string, parameters: string[], instanceName: string, database: string) => void
+export type onClickExplainTopQuery = (fingerprint: string, query: string, parameters: string[], instanceName: string) => void
 
 interface QueryModalProps {
     open: boolean,
@@ -41,18 +41,18 @@ export const QueryModal = ({open, handleClose, query, onClick, clusterInstancesL
                 <Typography id="modal-modal-title" variant="h5">
                     Explain query: {query.fingerprint}
                 </Typography>
+                {/*@ts-ignore*/}
                 <Highlight classname='sql'>
-                    {query.text}
+                    {query.text as string}
                 </Highlight>
                 {query.parameters?.length > 0 ? (
                     <Formik
                         initialValues={{
                             instanceName: '',
-                            database: ''
                         }}
                         onSubmit={(values, {setErrors, setStatus, setSubmitting}) => {
                             const parameters = Object.keys(values).filter(key => key.startsWith("$")).map(key => values[key]);
-                            onClick(query.id, query.text, parameters, values.instanceName, values.database)
+                            onClick(query.id, query.text, parameters, values.instanceName)
                             handleClose()
                         }}
                         validate={values => {
@@ -121,34 +121,6 @@ export const QueryModal = ({open, handleClose, query, onClick, clusterInstancesL
                                         {touched.instanceName && errors.instanceName && (
                                             <FormHelperText error id="helper-text-plan-signup">
                                                 {errors.instanceName as string}
-                                            </FormHelperText>
-                                        )}
-                                    </Grid>
-
-                                    <Grid item xs={4}>
-
-                                        <InputLabel htmlFor="database">Databases*</InputLabel>
-                                        <TextField
-                                            select
-                                            fullWidth
-                                            id="database"
-                                            type="text"
-                                            value={values.database}
-                                            name="database"
-                                            onBlur={handleBlur}
-                                            onChange={handleChange}
-                                            inputProps={{}}
-                                            error={Boolean(touched.database && errors.database)}
-                                        >
-                                            {[].map(database => (
-                                                <MenuItem key={database.id} value={database.id}>
-                                                    {database.name}
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
-                                        {touched.database && errors.database && (
-                                            <FormHelperText error id="helper-text-plan-signup">
-                                                {errors.database as string}
                                             </FormHelperText>
                                         )}
                                     </Grid>

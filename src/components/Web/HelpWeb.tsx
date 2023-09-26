@@ -36,7 +36,7 @@ const HelpWeb = () => {
                 <br/>
                 <Typography variant='h5' fontWeight='100'>
                     This tool accept any kind of text format, but to get the best out of it I recommend using the following command: <br/>
-                    <Highlight classname='sql'>EXPLAIN (ANALYZE, FORMAT JSON, BUFFERS, VERBOSE) ...</Highlight>
+                    <Highlight className='sql'>EXPLAIN (ANALYZE, FORMAT JSON, BUFFERS, VERBOSE) ...</Highlight>
                     Also be sure to paste your original query. <br/><br/>
                     If you don't understand something you can try to hover on it, most of the things have explanatory tooltip. If you still
                     have problems, don't hesitate to open a new issue

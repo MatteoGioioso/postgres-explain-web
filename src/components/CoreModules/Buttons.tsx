@@ -8,6 +8,7 @@ import {UploadOutlined} from "@ant-design/icons";
 interface ButtonActionProps extends ButtonProps {
     title?: string
     icon?: React.JSX.Element
+    reverseIconPosition?: boolean
 }
 
 interface ButtonLinkProps extends ButtonActionProps {
@@ -28,21 +29,22 @@ export const ButtonLink = ({title, to, icon, ...buttonProps}: ButtonLinkProps) =
     )
 }
 
-export const ButtonAction = ({title, icon, ...buttonProps}: ButtonActionProps) => {
+export const ButtonAction = ({title, icon, reverseIconPosition, ...buttonProps}: ButtonActionProps) => {
     return (
         // @ts-ignore
         <Button sx={{ml: 1, pt: 0.3, pb: 0.3, pl: 3, pr: 3}} {...buttonProps}>
-            <ButtonInternal title={title} icon={icon}/>
+            <ButtonInternal title={title} icon={icon} reverseIconPosition={reverseIconPosition}/>
         </Button>
     )
 }
 
-const ButtonInternal = ({title, icon}: ButtonActionProps) => {
+const ButtonInternal = ({title, icon, reverseIconPosition}: ButtonActionProps) => {
     return (
         <Box sx={{flexShrink: 0}}>
             <Stack direction="row" spacing={2} alignItems="center" sx={{p: 0.5}}>
+                {reverseIconPosition && Boolean(icon) && icon}
                 {Boolean(title) && <Typography variant="subtitle1">{title}</Typography>}
-                {Boolean(icon) && icon}
+                {reverseIconPosition || Boolean(icon) && icon}
             </Stack>
         </Box>
     )

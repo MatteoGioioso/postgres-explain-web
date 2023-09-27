@@ -28,7 +28,7 @@ export const metricsInfoMap = {
 
 export const getMetricsKeys = (excludedColumns?: string[]) => Object.keys(metricsInfoMap).filter(k => !excludedColumns?.includes(k)).map(k => k)
 
-export const getMetricsColumns = (tableData: TopQueriesTableData) => {
+export const getMetricsColumns = (tableData: TopQueriesTableData): {val: string, key: string}[] => {
     return Object
         .keys(metricsInfoMap)
         .map(metricKey => {
@@ -36,17 +36,29 @@ export const getMetricsColumns = (tableData: TopQueriesTableData) => {
 
             const metricObj = tableData[metric.key]
             if (!metricObj) {
-                return
+                return {
+                    val: "",
+                    key: ""
+                }
             }
 
             const metricVal = metricObj[metric.type]
             switch (metric.unit) {
                 case 'ms':
-                    return metricVal ? formatTiming(metricVal) : '-'
+                    return {
+                        val: metricVal ? formatTiming(metricVal) : '-',
+                        key: metricKey
+                    }
                 case 'bytes':
-                    return metricVal ? formatBlocksToDiskSize(metricVal) : '-'
+                    return {
+                        val: metricVal ? formatBlocksToDiskSize(metricVal) : '-',
+                        key: metricKey
+                    }
                 default:
-                    return metricVal ? formatNumbers(metricVal) : '-'
+                    return {
+                        val: metricVal ? formatNumbers(metricVal) : '-',
+                        key: metricKey
+                    }
             }
         })
 }

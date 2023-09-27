@@ -12,7 +12,8 @@ import {TopQueriesTable} from "../CoreModules/Tables/TopQueriesTable";
 import {PlotRelayoutEvent} from "plotly.js";
 import {useAutoRefresh} from "../CoreModules/autoRefresher";
 import {ClusterToolbar} from "./components/ClusterToolbar";
-import {useTimeIntervals} from "../CoreModules/timeIntervals";
+import {getTime, getTimeIntervalName, useTimeIntervals} from "../CoreModules/timeIntervals";
+import dayjs from "dayjs";
 
 export const Wrapper = ({children, title = "", sx = {}}) => (
     <>
@@ -80,14 +81,12 @@ export const Cluster = () => {
             })
     }, []);
 
-    const onClickExplainTopQuery = async (queryId, query, params, instanceName) => {
+    const onClickExplainTopQuery = async (fingerprint, params, instanceName) => {
         try {
             const planID = await queryExplainerService.saveQueryPlan({
-                query_id: queryId,
-                query,
+                query_fingerprint: fingerprint,
                 cluster_name: cluster_id,
                 instance_name: instanceName,
-                database: "postgres",
                 parameters: params,
             });
             navigate(`/clusters/${cluster_id}/plans/${planID}`)
@@ -119,9 +118,20 @@ export const Cluster = () => {
                                 layout={activities.layout}
                                 useResizeHandler
                                 onRelayout={(e: PlotRelayoutEvent) => {
-                                    // setTimeInterval(e["xaxis.range[0]"], e["xaxis.range[1]"])
+                                    console.log(e)
+                                    if (e.autosize || Object.keys(e).length === 0) return;
+
+                                    const from = e["xaxis.range[0]"].toString()
+                                    const to = e["xaxis.range[1]"].toString()
+
+                                    setTimeInterval({
+                                        to: () => getTime(to),
+                                        from: () => getTime(from),
+                                        name: getTimeIntervalName(from, to),
+                                        id: getTimeIntervalName(from, to)
+                                    })
                                 }}
-                                config={{displayModeBar: false}}
+                                config={{displayModeBar: false, doubleClick: false}}
                                 style={{width: '100%', height: '100%'}}
                             />
                         )}
@@ -130,8 +140,11 @@ export const Cluster = () => {
                 <Grid item xs={12}>
                     <Wrapper sx={{pt: 2}}>
                         {Boolean(topQueries?.length > 0) && (
-                            <TopQueriesTable tableDataArray={topQueries} onClickExplainTopQuery={onClickExplainTopQuery}
-                                             clusterInstancesList={clusterInstancesList}/>
+                            <TopQueriesTable
+                                tableDataArray={topQueries}
+                                onClickExplainTopQuery={onClickExplainTopQuery}
+                                clusterInstancesList={clusterInstancesList}
+                            />
                         )}
                     </Wrapper>
                 </Grid>

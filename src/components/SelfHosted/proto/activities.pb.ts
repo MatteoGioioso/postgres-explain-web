@@ -36,6 +36,7 @@ export type QueryMetadata = {
   text?: string
   examples_text?: string[]
   plans_id?: string[]
+  database?: string
 }
 
 export type GetTopQueriesRequest = {

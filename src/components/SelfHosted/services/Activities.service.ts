@@ -2,6 +2,9 @@ import {ActivitiesRepository} from "../datalayer/Activities.repository";
 import {Layout, PlotData} from 'plotly.js';
 import {GetTopQueriesResponse, QueryMetadata, Trace} from "../proto/activities.pb";
 import {MetricValues} from "../proto/shared.pb";
+import {emptyLayout} from "./utils";
+import dayjs from "dayjs";
+import {convertToLocalTime, convertToUTCTime} from "../../CoreModules/timeIntervals";
 
 export interface ChartObject {
     traces: PlotData[];
@@ -63,18 +66,34 @@ export class ActivitiesService {
 
     async getProfile(args: GetProfileArgs): Promise<ChartObject> {
         const response = await this.activitiesRepository.getProfile({
-            period_start_to: args.to,
-            period_start_from: args.from,
+            period_start_to: convertToUTCTime(args.to),
+            period_start_from: convertToUTCTime(args.from),
             cluster_name: args.clusterName,
         });
 
+        if (Object.keys(response).length === 0) {
+            return {
+                layout: emptyLayout(args.from, args.to),
+                traces: []
+            }
+        }
+
         const traces: PlotData[] = [];
+
+        // Convert the timestamps to local time, since every trace is always present we pick one
+        // and convert it instead of converting everyone
+        const timeZonedTimestamps = response
+            .traces["CPU"]
+            .x_values_timestamp
+            .map(value => convertToLocalTime(value.toString()))
 
         for (const traceKey of Object.keys(response.traces || {})) {
             const trace = response.traces![traceKey];
 
             traces.push({
-                x: trace.x_values_timestamp ? trace.x_values_timestamp : [],
+                x: trace.x_values_timestamp
+                    ? timeZonedTimestamps
+                    : [],
                 y: trace.y_values_float ? trace.y_values_float : [],
                 name: traceKey,
                 hoverinfo: this.hideZeroValuesFromHoverbox(trace),
@@ -133,6 +152,10 @@ export class ActivitiesService {
             period_start_to: args.to,
             cluster_name: args.clusterName,
         });
+
+        if (Object.keys(topSQLReply).length === 0) {
+            return undefined
+        }
 
         return this.processDataAndLayout(topSQLReply);
     }

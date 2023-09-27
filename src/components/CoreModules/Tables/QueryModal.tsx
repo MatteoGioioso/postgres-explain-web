@@ -8,7 +8,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import {Instance} from "../../SelfHosted/proto/info.pb";
 
-export type onClickExplainTopQuery = (fingerprint: string, query: string, parameters: string[], instanceName: string) => void
+export type onClickExplainTopQuery = (fingerprint: string, parameters: string[], instanceName: string) => void
 
 interface QueryModalProps {
     open: boolean,
@@ -52,7 +52,7 @@ export const QueryModal = ({open, handleClose, query, onClick, clusterInstancesL
                         }}
                         onSubmit={(values, {setErrors, setStatus, setSubmitting}) => {
                             const parameters = Object.keys(values).filter(key => key.startsWith("$")).map(key => values[key]);
-                            onClick(query.id, query.text, parameters, values.instanceName)
+                            onClick(query.fingerprint, parameters, values.instanceName)
                             handleClose()
                         }}
                         validate={values => {

@@ -29,10 +29,10 @@ export const ButtonLink = ({title, to, icon, ...buttonProps}: ButtonLinkProps) =
     )
 }
 
-export const ButtonAction = ({title, icon, reverseIconPosition, ...buttonProps}: ButtonActionProps) => {
+export const ButtonAction = ({title, icon, reverseIconPosition, sx, ...buttonProps}: ButtonActionProps) => {
     return (
         // @ts-ignore
-        <Button sx={{ml: 1, pt: 0.3, pb: 0.3, pl: 3, pr: 3}} {...buttonProps}>
+        <Button sx={{ml: 1, pt: 0.3, pb: 0.3, pl: 3, pr: 3, ...sx}} {...buttonProps}>
             <ButtonInternal title={title} icon={icon} reverseIconPosition={reverseIconPosition}/>
         </Button>
     )

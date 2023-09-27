@@ -54,8 +54,14 @@ export function TopQueriesTable({tableDataArray, onClickExplainTopQuery, cluster
                     </TableHead>
                     <TableBody>
                         {tableDataArray.map((tableData) => {
-                            return <Row tableData={tableData} onClickExplainTopQuery={onClickExplainTopQuery}
-                                        clusterInstancesList={clusterInstancesList}/>
+                            return (
+                                <Row
+                                    key={tableData.fingerprint}
+                                    tableData={tableData}
+                                    onClickExplainTopQuery={onClickExplainTopQuery}
+                                    clusterInstancesList={clusterInstancesList}
+                                />
+                            )
                         })}
                     </TableBody>
                 </Table>
@@ -142,9 +148,9 @@ function Row({tableData, onClickExplainTopQuery, clusterInstancesList}: RowProps
                 >
                     <CustomToolTip text={""} maxChar={0} info={tableData.name} children={<code>{truncateText(tableData.name, 60)}</code>}/>
                 </TableCell>
-                {getMetricsColumns(tableData).map(val => (
-                    <TableCell>
-                        {val}
+                {getMetricsColumns(tableData).map(col => (
+                    <TableCell key={tableData.fingerprint+col.key}>
+                        {col.val}
                     </TableCell>
                 ))}
             </TableRow>

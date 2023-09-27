@@ -62,6 +62,10 @@ const SelfHostedRoutes = () => ({
             element: <PlansLoadableSelfHosted />
         },
         {
+            path: '/clusters/:cluster_id/queries/:query_fingerprint',
+            element: <div/> // QueryDetails
+        },
+        {
             path: '/clusters/:cluster_id/plans/:plan_id',
             element: <PlanVisualizationLoadableSelfHosted/>
         },

@@ -12,6 +12,7 @@ export type SaveQueryPlanRequest = {
   instance_name?: string
   cluster_name?: string
   query_id?: string
+  query_fingerprint?: string
   query?: string
   database?: string
   optimization_id?: string

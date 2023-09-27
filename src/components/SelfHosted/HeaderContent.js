@@ -34,7 +34,7 @@ const HeaderContent = () => {
                     </Button>
                 )
             }
-            
+
             {/*{!matchesXs && <Search/>}*/}
 
             <Box sx={{width: '100%', ml: 1}}/>

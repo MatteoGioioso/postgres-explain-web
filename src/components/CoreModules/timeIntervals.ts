@@ -38,6 +38,12 @@ export const INTERVALS: Interval[] = [
         id: "Last 15_minutes"
     },
     {
+        name: "Last 30 minutes",
+        from: getAgo(1 / 2),
+        to: getNow(),
+        id: "Last 30_minutes"
+    },
+    {
         name: "Last 1 hour",
         from: getAgo(1),
         to: getNow(),

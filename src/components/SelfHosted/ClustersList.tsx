@@ -5,18 +5,26 @@ import MainCard from "../CoreModules/MainCard";
 import {CheckOutlined, ExclamationOutlined} from "@ant-design/icons";
 import {useTheme} from "@mui/material/styles";
 import {useNavigate} from "react-router-dom";
+import {AUTO_REFRESH_INTERVALS, useAutoRefresh} from "../CoreModules/autoRefresher";
 
 const ClustersList = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const [clusters, setClusters] = useState([])
 
-    useEffect(() => {
+    const fetchClusterList = () => {
         infoService.getClustersList({}).then(resp => {
             setClusters(resp.clusters)
         }).catch(e => {
+            // TODO error handling
             console.error(e)
         })
+    }
+
+    const {setRefreshInterval} = useAutoRefresh([fetchClusterList]);
+
+    useEffect(() => {
+        setRefreshInterval(AUTO_REFRESH_INTERVALS[2])
     }, [])
 
     function onCardClick(cluster) {
@@ -42,7 +50,7 @@ const ClustersList = () => {
                             <Grid container alignItems="flex-end">
                                 <Grid item>
                                     <Chip
-                                        variant="combined"
+                                        variant='outlined'
                                         style={{
                                             backgroundColor: cluster.status === "online" ? theme.palette.success.main : theme.palette.error.main,
                                             margin: 0,

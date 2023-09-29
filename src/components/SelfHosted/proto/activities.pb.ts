@@ -37,12 +37,16 @@ export type QueryMetadata = {
   examples_text?: string[]
   plans_id?: string[]
   database?: string
+  is_query_truncated?: boolean
+  query_sha?: string
+  is_query_explainable?: boolean
 }
 
 export type GetTopQueriesRequest = {
   period_start_from?: GoogleProtobufTimestamp.Timestamp
   period_start_to?: GoogleProtobufTimestamp.Timestamp
   cluster_name?: string
+  fingerprint?: string
 }
 
 export type GetTopQueriesResponse = {
@@ -55,7 +59,7 @@ export type GetQueryDetailsRequest = {
   period_start_from?: GoogleProtobufTimestamp.Timestamp
   period_start_to?: GoogleProtobufTimestamp.Timestamp
   cluster_name?: string
-  query_id?: string
+  query_fingerprint?: string
 }
 
 export type GetQueryDetailsResponse = {
@@ -68,6 +72,9 @@ export class Activities {
   }
   static GetTopQueries(req: GetTopQueriesRequest, initReq?: fm.InitReq): Promise<GetTopQueriesResponse> {
     return fm.fetchReq<GetTopQueriesRequest, GetTopQueriesResponse>(`/v0/activities/GetTopQueries`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
+  }
+  static GetTopQueriesByFingerprint(req: GetTopQueriesRequest, initReq?: fm.InitReq): Promise<GetTopQueriesResponse> {
+    return fm.fetchReq<GetTopQueriesRequest, GetTopQueriesResponse>(`/v0/activities/GetTopQueriesByFingerprint`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
   }
   static GetQueryDetails(req: GetQueryDetailsRequest, initReq?: fm.InitReq): Promise<GetQueryDetailsResponse> {
     return fm.fetchReq<GetQueryDetailsRequest, GetQueryDetailsResponse>(`/v0/activities/GetQueryDetails`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})

@@ -72,9 +72,7 @@ export const Cluster = () => {
     useEffect(() => {
         infoService
             .getClusterInstancesList({cluster_name: cluster_id})
-            .then(response => {
-                setClusterInstancesList(response)
-            })
+            .then(setClusterInstancesList)
             .catch(e => {
                 // TODO handle error
                 console.error(e)
@@ -106,6 +104,7 @@ export const Cluster = () => {
                 autoRefreshInterval={refreshInterval}
                 timeInterval={timeInterval}
                 onSelectTimeInterval={setTimeInterval}
+                refresh={() => fetchActivities()}
             />
             <Box sx={{pt: 2}}/>
             <Grid container>
@@ -118,7 +117,6 @@ export const Cluster = () => {
                                 layout={activities.layout}
                                 useResizeHandler
                                 onRelayout={(e: PlotRelayoutEvent) => {
-                                    console.log(e)
                                     if (e.autosize || Object.keys(e).length === 0) return;
 
                                     const from = e["xaxis.range[0]"].toString()

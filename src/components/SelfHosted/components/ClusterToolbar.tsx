@@ -1,4 +1,4 @@
-import {AppBar, Box, Toolbar} from "@mui/material";
+import {AppBar, Box, IconButton, Toolbar} from "@mui/material";
 import React from "react";
 import MenuItem from "@mui/material/MenuItem";
 import Select, {SelectChangeEvent} from "@mui/material/Select";
@@ -16,13 +16,15 @@ export interface ClusterToolbarProps {
     onSelectAutoRefreshInterval: (interval: number) => void
     autoRefreshInterval: number
     timeInterval: Interval
+    refresh: () => void
 }
 
 export const ClusterToolbar = ({
                                    onSelectAutoRefreshInterval,
                                    autoRefreshInterval,
                                    onSelectTimeInterval,
-                                   timeInterval
+                                   timeInterval,
+                                   refresh
                                }: ClusterToolbarProps) => {
     return (
         <>
@@ -43,6 +45,7 @@ export const ClusterToolbar = ({
                     <AutoRefreshIntervalsDropdown
                         autoRefreshInterval={autoRefreshInterval}
                         onSelectAutoRefreshInterval={onSelectAutoRefreshInterval}
+                        refresh={refresh}
                     />
                 </Toolbar>
             </AppBar>
@@ -53,16 +56,19 @@ export const ClusterToolbar = ({
 export interface AutoRefreshIntervalsDropdownProps {
     onSelectAutoRefreshInterval: (interval: number) => void
     autoRefreshInterval: number
+    refresh: () => void
 }
 
-export const AutoRefreshIntervalsDropdown = ({onSelectAutoRefreshInterval, autoRefreshInterval}: AutoRefreshIntervalsDropdownProps) => {
+export const AutoRefreshIntervalsDropdown = ({onSelectAutoRefreshInterval, autoRefreshInterval, refresh}: AutoRefreshIntervalsDropdownProps) => {
     const handleChange = (event: SelectChangeEvent) => {
         onSelectAutoRefreshInterval(Number(event.target.value))
     };
 
     return (
         <>
-            <SyncOutlined/>
+            <IconButton onClick={refresh}>
+                <SyncOutlined/>
+            </IconButton>
             <FormControl sx={{minWidth: 90}} size="small">
                 <Select
                     sx={{

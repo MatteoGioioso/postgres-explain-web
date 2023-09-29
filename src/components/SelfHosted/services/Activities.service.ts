@@ -23,6 +23,8 @@ export interface TableData {
     aas: AAS
     name: string
     fingerprint: string
+    isNotExplainable: boolean
+    isTruncated: boolean
     parameters: string[]
 }
 
@@ -169,19 +171,22 @@ export class ActivitiesService {
             for (let i = 0; i < trace.y_values_float!.length; i++) {
                 const data = tableDataArray[i];
                 const fingerprint = trace.x_values_string![i]
-                const {text: queryText, parameters}: QueryMetadata = response.queries_metadata[fingerprint]
+                const metadata = response.queries_metadata[fingerprint];
+                const {text: queryText, parameters}: QueryMetadata = metadata
                 const totalLoad = response.queries_metrics[fingerprint].metrics["cpu_total_load"].sum
 
                 if (data) {
                     tableDataArray[i].aas.data.push(this.getTraceFromTemplate(trace, queryText, i, traceKey));
                 } else {
                     tableDataArray.push({
-                        name: queryText,
+                        name: metadata.is_query_truncated ? queryText + '...' : queryText,
                         aas: {
                             layout: {},
                             data: [this.getTraceFromTemplate(trace, queryText, i, traceKey)],
                             total: totalLoad
                         },
+                        isNotExplainable: metadata.is_query_explainable,
+                        isTruncated: metadata.is_query_truncated,
                         fingerprint: fingerprint,
                         parameters: parameters
                     } as TopQueriesTableData);

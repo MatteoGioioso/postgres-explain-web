@@ -5,13 +5,8 @@ import React, {useState, useEffect} from 'react';
 import {ApexOptions} from "apexcharts";
 import MainCard from "../MainCard";
 import {
-    areRowsOverEstimated,
     formatDate,
-    formatNumbers,
     formatTiming,
-    getEstimationColor,
-    getPercentage,
-    getPercentageColor
 } from "../utils";
 import {renderToString} from 'react-dom/server'
 import {Box, Chip, Grid, Stack, Typography} from "@mui/material";

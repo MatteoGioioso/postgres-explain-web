@@ -1,14 +1,16 @@
-import {Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
+import {Box, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 import React, {useState} from "react";
 import {TopQueriesTableData} from "../../SelfHosted/services/Activities.service";
 import {MetricInfo} from "../../SelfHosted/proto/analytics.pb";
 import {MouseOverPopover} from "../GenericDetailsPopover";
 import Plot from 'react-plotly.js';
-import {getMetricsColumns, getMetricsKeys, Metric, metricsInfoMap} from "./utils";
+import {getMetricsColumns, Metric, metricsInfoMap} from "./utils";
 import {formatNumbers, truncateText} from "../utils";
-import {CustomToolTip, InfoToolTip, TextTooltip} from "../CustomTooltips";
+import {CustomToolTip, InfoToolTip} from "../CustomTooltips";
 import {onClickExplainTopQuery, QueryModal} from "./QueryModal";
 import {Instance} from "../../SelfHosted/proto/info.pb";
+import {StopOutlined, WarningOutlined} from "@ant-design/icons";
+import {useTheme} from "@mui/material/styles";
 
 
 interface TopQueriesTableProps {
@@ -77,6 +79,7 @@ interface RowProps {
 }
 
 function Row({tableData, onClickExplainTopQuery, clusterInstancesList}: RowProps) {
+    const theme = useTheme();
     const [popData, setPopData] = useState<Array<{ name: string, x: number, color: string }>>([{color: "", x: 0, name: ""}]);
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
@@ -87,11 +90,7 @@ function Row({tableData, onClickExplainTopQuery, clusterInstancesList}: RowProps
             <QueryModal
                 open={open}
                 handleClose={handleClose}
-                query={{
-                    parameters: tableData.parameters,
-                    text: tableData.name,
-                    fingerprint: tableData.fingerprint
-                }}
+                tableData={tableData}
                 onClick={onClickExplainTopQuery}
                 clusterInstancesList={clusterInstancesList}
             />
@@ -144,12 +143,34 @@ function Row({tableData, onClickExplainTopQuery, clusterInstancesList}: RowProps
                     </Stack>
                 </TableCell>
                 <TableCell
-                    onClick={() => handleOpen()}
+                    onClick={() => !tableData.isNotExplainable && handleOpen()}
                 >
+                    {!tableData.isNotExplainable || (
+                        <>
+                            <CustomToolTip
+                                text={""}
+                                maxChar={0}
+                                info={"Query cannot be explained"}
+                                children={<StopOutlined style={{color: theme.palette.error.main, fontSize: '0.8rem'}}/>}
+                            />
+                            <Box sx={{pr: 2, display: 'inline'}}/>
+                        </>
+                    )}
+                    {!tableData.isTruncated || (
+                        <>
+                            <CustomToolTip
+                                text={""}
+                                maxChar={0}
+                                info={"Query is truncated"}
+                                children={<WarningOutlined style={{color: theme.palette.warning.light, fontSize: '0.8rem'}}/>}
+                            />
+                            <Box sx={{pr: 2, display: 'inline'}}/>
+                        </>
+                    )}
                     <CustomToolTip text={""} maxChar={0} info={tableData.name} children={<code>{truncateText(tableData.name, 60)}</code>}/>
                 </TableCell>
                 {getMetricsColumns(tableData).map(col => (
-                    <TableCell key={tableData.fingerprint+col.key}>
+                    <TableCell key={tableData.fingerprint + col.key}>
                         {col.val}
                     </TableCell>
                 ))}

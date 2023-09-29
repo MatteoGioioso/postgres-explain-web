@@ -1,7 +1,6 @@
 import {Tooltip, Typography} from "@mui/material";
 import React from "react";
 import {formatBigNumbers, formatNumbers, formatTiming, truncateText} from "./utils";
-import {useTheme} from "@mui/material/styles";
 
 interface CustomTooltipProps {
     text: string
@@ -11,7 +10,6 @@ interface CustomTooltipProps {
 }
 
 export const CustomToolTip = ({children, info, ...props}: CustomTooltipProps) => {
-    const theme = useTheme();
     return (
         <Tooltip
             arrow
@@ -25,7 +23,6 @@ export const CustomToolTip = ({children, info, ...props}: CustomTooltipProps) =>
 }
 
 export const InfoToolTip = ({text, info, maxChar, ...props}: CustomTooltipProps) => {
-    const theme = useTheme();
     return (
         <Tooltip
             arrow
@@ -39,7 +36,6 @@ export const InfoToolTip = ({text, info, maxChar, ...props}: CustomTooltipProps)
 }
 
 export const TextTooltip = ({text, maxChar, ...props}: CustomTooltipProps) => {
-    const theme = useTheme();
     return (
         <Tooltip
             arrow

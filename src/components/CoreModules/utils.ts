@@ -30,6 +30,9 @@ export const formatNumbers = (num: number): string => {
     }
 
     if (num <= ONE) {
+        if (num <= 1/1000) {
+            return "< 0.001"
+        }
         return `${Math.floor(num * 1000) / 1000}`
     }
 

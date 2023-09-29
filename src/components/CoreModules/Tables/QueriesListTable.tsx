@@ -45,7 +45,7 @@ const Row = ({query, onClickRow}: { query: Query, onClickRow: any }) => {
 
     return (
         <>
-            <QueryModal open={open} handleClose={handleClose} query={query} onClick={onClickRow} clusterInstancesList={[]}/>
+            <QueryModal open={open} handleClose={handleClose} tableData={null} onClick={onClickRow} clusterInstancesList={[]}/>
             <TableRow
                 hover
                 role="checkbox"

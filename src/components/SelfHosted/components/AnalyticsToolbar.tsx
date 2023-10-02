@@ -19,13 +19,13 @@ export interface ClusterToolbarProps {
     refresh: () => void
 }
 
-export const ClusterToolbar = ({
-                                   onSelectAutoRefreshInterval,
-                                   autoRefreshInterval,
-                                   onSelectTimeInterval,
-                                   timeInterval,
-                                   refresh
-                               }: ClusterToolbarProps) => {
+export const AnalyticsToolbar = ({
+                                     onSelectAutoRefreshInterval,
+                                     autoRefreshInterval,
+                                     onSelectTimeInterval,
+                                     timeInterval,
+                                     refresh
+                                 }: ClusterToolbarProps) => {
     return (
         <>
             <AppBar position="static" color='inherit' elevation={0}
@@ -59,7 +59,11 @@ export interface AutoRefreshIntervalsDropdownProps {
     refresh: () => void
 }
 
-export const AutoRefreshIntervalsDropdown = ({onSelectAutoRefreshInterval, autoRefreshInterval, refresh}: AutoRefreshIntervalsDropdownProps) => {
+export const AutoRefreshIntervalsDropdown = ({
+                                                 onSelectAutoRefreshInterval,
+                                                 autoRefreshInterval,
+                                                 refresh
+                                             }: AutoRefreshIntervalsDropdownProps) => {
     const handleChange = (event: SelectChangeEvent) => {
         onSelectAutoRefreshInterval(Number(event.target.value))
     };

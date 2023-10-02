@@ -4,9 +4,9 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {QueryPlanListItem} from "../CoreModules/types";
 import {Instance} from "./proto/info.pb";
-import {Wrapper} from "./Cluster";
 import {QueryForm} from "../CoreModules/QueryForm";
 import {PlansList} from "../CoreModules/PlansList";
+import {Wrapper} from "../CoreModules/Wrapper";
 
 const Plans = () => {
     const [plansList, setPlansList] = useState([])

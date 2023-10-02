@@ -20,10 +20,10 @@ interface UploadButtonProps extends IconButtonProps {
 }
 
 
-export const ButtonLink = ({title, to, icon, ...buttonProps}: ButtonLinkProps) => {
+export const ButtonLink = ({title, to, icon, sx, ...buttonProps}: ButtonLinkProps) => {
     return (
         // @ts-ignore
-        <Button component={RouterLink} to={to} sx={{ml: 1, pt: 0.3, pb: 0.3, pl: 3, pr: 3}} {...buttonProps}>
+        <Button component={RouterLink} to={to} sx={{ml: 1, pt: 0.3, pb: 0.3, pl: 3, pr: 3, ...sx}} {...buttonProps}>
             <ButtonInternal title={title} icon={icon}/>
         </Button>
     )

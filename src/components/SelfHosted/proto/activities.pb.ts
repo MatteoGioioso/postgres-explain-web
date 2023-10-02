@@ -30,6 +30,10 @@ export type QueriesMetrics = {
   metrics?: {[key: string]: BorealisV1beta1Shared.MetricValues}
 }
 
+export type QueriesWaitEvents = {
+  traces?: {[key: string]: Trace}
+}
+
 export type QueryMetadata = {
   fingerprint?: string
   parameters?: string[]
@@ -39,7 +43,7 @@ export type QueryMetadata = {
   database?: string
   is_query_truncated?: boolean
   query_sha?: string
-  is_query_explainable?: boolean
+  is_query_not_explainable?: boolean
 }
 
 export type GetTopQueriesRequest = {
@@ -66,6 +70,12 @@ export type GetQueryDetailsResponse = {
   traces?: {[key: string]: Trace}
 }
 
+export type GetTopQueriesByFingerprintResponse = {
+  traces?: {[key: string]: Trace}
+  query_metrics?: QueriesMetrics
+  queries_metadata?: {[key: string]: QueryMetadata}
+}
+
 export class Activities {
   static GetProfile(req: GetProfileRequest, initReq?: fm.InitReq): Promise<GetProfileResponse> {
     return fm.fetchReq<GetProfileRequest, GetProfileResponse>(`/v0/activities/GetProfile`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
@@ -73,8 +83,8 @@ export class Activities {
   static GetTopQueries(req: GetTopQueriesRequest, initReq?: fm.InitReq): Promise<GetTopQueriesResponse> {
     return fm.fetchReq<GetTopQueriesRequest, GetTopQueriesResponse>(`/v0/activities/GetTopQueries`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
   }
-  static GetTopQueriesByFingerprint(req: GetTopQueriesRequest, initReq?: fm.InitReq): Promise<GetTopQueriesResponse> {
-    return fm.fetchReq<GetTopQueriesRequest, GetTopQueriesResponse>(`/v0/activities/GetTopQueriesByFingerprint`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
+  static GetTopQueriesByFingerprint(req: GetTopQueriesRequest, initReq?: fm.InitReq): Promise<GetTopQueriesByFingerprintResponse> {
+    return fm.fetchReq<GetTopQueriesRequest, GetTopQueriesByFingerprintResponse>(`/v0/activities/GetTopQueriesByFingerprint`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})
   }
   static GetQueryDetails(req: GetQueryDetailsRequest, initReq?: fm.InitReq): Promise<GetQueryDetailsResponse> {
     return fm.fetchReq<GetQueryDetailsRequest, GetQueryDetailsResponse>(`/v0/activities/GetQueryDetails`, {...initReq, method: "POST", body: JSON.stringify(req, fm.replacer)})

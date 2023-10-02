@@ -1,5 +1,11 @@
 import {
-    GetProfileRequest, GetProfileResponse, Activities, GetTopQueriesRequest, GetTopQueriesResponse
+    GetProfileRequest,
+    GetProfileResponse,
+    Activities,
+    GetTopQueriesRequest,
+    GetTopQueriesResponse,
+    GetTopQueriesByFingerprintResponse,
+    GetQueryDetailsRequest, GetQueryDetailsResponse
 } from "../proto/activities.pb";
 
 export class ActivitiesRepository {
@@ -14,4 +20,10 @@ export class ActivitiesRepository {
 
     getTopQueries = async (body: GetTopQueriesRequest): Promise<GetTopQueriesResponse> => Activities
         .GetTopQueries(body, {pathPrefix: this.ORIGIN});
+
+    getTopQueriesByFingerprint = async (body: GetTopQueriesRequest): Promise<GetTopQueriesByFingerprintResponse> => Activities
+        .GetTopQueriesByFingerprint(body, {pathPrefix: this.ORIGIN})
+
+    getQueryDetails = async (body: GetQueryDetailsRequest): Promise<GetQueryDetailsResponse> => Activities
+        .GetQueryDetails(body, {pathPrefix: this.ORIGIN})
 }

@@ -1,39 +1,19 @@
-import {Box, Grid, Typography} from "@mui/material";
-import MainCard from "../CoreModules/MainCard";
+import {Box, Grid} from "@mui/material";
 import {useNavigate, useParams} from "react-router-dom";
 import {activitiesService, infoService, queryExplainerService} from "./ioc";
 import React, {useEffect, useState} from "react";
-import {QueryPlanListItem} from "../CoreModules/types";
 import {Instance} from "./proto/info.pb";
 import Plot from 'react-plotly.js';
 import {ChartObject, TableData} from "./services/Activities.service";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
-import {TopQueriesTable} from "../CoreModules/Tables/TopQueriesTable";
+import {TopQueriesTable} from "../CoreModules/Activities/TopQueriesTable";
 import {PlotRelayoutEvent} from "plotly.js";
 import {useAutoRefresh} from "../CoreModules/autoRefresher";
-import {ClusterToolbar} from "./components/ClusterToolbar";
+import {AnalyticsToolbar} from "./components/AnalyticsToolbar";
 import {getTime, getTimeIntervalName, useTimeIntervals} from "../CoreModules/timeIntervals";
-import dayjs from "dayjs";
+import {Wrapper} from "../CoreModules/Wrapper";
 
-export const Wrapper = ({children, title = "", sx = {}}) => (
-    <>
-        <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-                <Typography variant="h5">{title}</Typography>
-            </Grid>
-        </Grid>
-        <Box sx={{...sx}}>
-            <MainCard
-                content={false}
-                border
-            >
-                <Box>{children}</Box>
-            </MainCard>
-        </Box>
-    </>
-);
-
-export const Cluster = () => {
+export const Activities = () => {
     const {cluster_id} = useParams();
     const [clusterInstancesList, setClusterInstancesList] = useState<Instance[]>([])
     const [activities, setActivities] = useState<ChartObject>(undefined)
@@ -58,8 +38,11 @@ export const Cluster = () => {
             setActivities(responses[0] as ChartObject)
             setTopQueries(responses[1] as TableData[])
         }).catch(e => {
-            // TODO handle error
-            console.error(e)
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
         })
     }
 
@@ -74,8 +57,11 @@ export const Cluster = () => {
             .getClusterInstancesList({cluster_name: cluster_id})
             .then(setClusterInstancesList)
             .catch(e => {
-                // TODO handle error
-                console.error(e)
+                setError({
+                    error: e.message,
+                    error_stack: "",
+                    error_details: ""
+                })
             })
     }, []);
 
@@ -99,7 +85,7 @@ export const Cluster = () => {
 
     return (
         <>
-            <ClusterToolbar
+            <AnalyticsToolbar
                 onSelectAutoRefreshInterval={setRefreshInterval}
                 autoRefreshInterval={refreshInterval}
                 timeInterval={timeInterval}
@@ -110,8 +96,8 @@ export const Cluster = () => {
             <Grid container>
                 {error && <ErrorAlert error={error} setError={setError}/>}
                 <Grid item xs={12}>
-                    <Wrapper sx={{pt: 2}} title="Activities">
-                        {Boolean(activities) && (
+                    {Boolean(activities) && (
+                        <Wrapper sx={{pt: 2}} title="Activities">
                             <Plot
                                 data={activities.traces}
                                 layout={activities.layout}
@@ -132,19 +118,22 @@ export const Cluster = () => {
                                 config={{displayModeBar: false, doubleClick: false}}
                                 style={{width: '100%', height: '100%'}}
                             />
-                        )}
-                    </Wrapper>
+                        </Wrapper>
+                    )}
+
                 </Grid>
                 <Grid item xs={12}>
-                    <Wrapper sx={{pt: 2}}>
-                        {Boolean(topQueries?.length > 0) && (
+                    {Boolean(topQueries?.length > 0) && (
+
+                        <Wrapper sx={{pt: 2}}>
                             <TopQueriesTable
                                 tableDataArray={topQueries}
                                 onClickExplainTopQuery={onClickExplainTopQuery}
                                 clusterInstancesList={clusterInstancesList}
                             />
-                        )}
-                    </Wrapper>
+                        </Wrapper>
+                    )}
+
                 </Grid>
 
             </Grid>
@@ -152,4 +141,4 @@ export const Cluster = () => {
     )
 }
 
-export default Cluster
+export default Activities

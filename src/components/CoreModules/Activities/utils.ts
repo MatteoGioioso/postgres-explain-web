@@ -1,4 +1,4 @@
-import {TableData, TopQueriesTableData} from "../../SelfHosted/services/Activities.service";
+import {TableData, TopQueriesByFingerprintTableData, TopQueriesTableData} from "../../SelfHosted/services/Activities.service";
 import {formatBlocksToDiskSize, formatNumbers, formatTiming} from "../utils";
 
 export interface Metric {
@@ -28,7 +28,7 @@ export const metricsInfoMap = {
 
 export const getMetricsKeys = (excludedColumns?: string[]) => Object.keys(metricsInfoMap).filter(k => !excludedColumns?.includes(k)).map(k => k)
 
-export const getMetricsColumns = (tableData: TopQueriesTableData): {val: string, key: string}[] => {
+export const getMetricsColumns = (tableData: TopQueriesTableData): { val: string, key: string }[] => {
     return Object
         .keys(metricsInfoMap)
         .map(metricKey => {
@@ -61,4 +61,25 @@ export const getMetricsColumns = (tableData: TopQueriesTableData): {val: string,
                     }
             }
         })
+}
+
+
+export interface PopupWaitEventsSummary {
+    name: string,
+    x: number,
+    color: string
+}
+
+export const getPopupWaitEventsSummary = (tableData: TopQueriesTableData | TopQueriesByFingerprintTableData): PopupWaitEventsSummary[] => {
+    return tableData.aas.data
+        .filter(d => d.x[0] !== 0)
+        .map(d => ({
+            // @ts-ignore
+            x: d.x as number,
+            color: d.marker.color as string,
+            name: d.name
+        }))
+        .sort(function (a, b) {
+            return b.x - a.x;
+        });
 }

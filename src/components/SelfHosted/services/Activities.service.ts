@@ -1,10 +1,10 @@
 import {ActivitiesRepository} from "../datalayer/Activities.repository";
-import {Layout, PlotData} from 'plotly.js';
+import {Layout, LayoutAxis, PlotData} from 'plotly.js';
 import {GetTopQueriesResponse, QueryMetadata, Trace} from "../proto/activities.pb";
 import {MetricValues} from "../proto/shared.pb";
 import {emptyLayout} from "./utils";
-import dayjs from "dayjs";
 import {convertToLocalTime, convertToUTCTime} from "../../CoreModules/timeIntervals";
+import {formatBlocksToDiskSize, formatNumbers, formatTiming} from "../../CoreModules/utils";
 
 export interface ChartObject {
     traces: PlotData[];
@@ -52,8 +52,11 @@ export interface TopQueriesByFingerprintTableData extends TableData {
 }
 
 export interface QueryDetailsType {
-    layout: Layout
-    data: PlotData[]
+    [key: string]: {
+        layout: Layout,
+        data: PlotData[],
+        name: string
+    }
 }
 
 interface GetProfileArgs {
@@ -228,7 +231,7 @@ export class ActivitiesService {
             query_fingerprint: args.fingerprint
         });
 
-        let metrics: PlotData[] = [];
+        let queryDetails: QueryDetailsType = {};
 
         // Convert the timestamps to local time, since every trace is always present we pick one
         // and convert it instead of converting everyone
@@ -237,35 +240,17 @@ export class ActivitiesService {
             .x_values_timestamp
             .map(value => convertToLocalTime(value.toString()))
 
-        let i = 0;
-        for (const metricKey of Object.keys(response.traces || {})) {
-            const trace = response.traces![metricKey];
-            i++
-
-            metrics.push({
-                x: timeZonedTimestamps,
-                y: trace.y_values_float,
-                name: metricKey,
-                type: 'scatter',
-                mode: "lines",
-                line: {color: this.pastelColors()},
-            } as PlotData)
-        }
-
-        metrics = metrics.sort((a, b) => {
-            return Math.max(...a.y as number[]) - Math.max(...b.y as number[])
-        }).map((a, i) => ({
-            ...a,
-            yaxis: 'y' + i,
-        }))
-
-        // TODO unified hover:
-        // - https://stackoverflow.com/questions/73428753/plotly-how-to-display-y-values-when-hovering-on-two-subplots-sharing-x-axis
-        // - https://codepen.io/suribabu_95/pen/wpBBEx?editors=1011
-        // - https://plotly.com/javascript/hover-events/#coupled-hover-events
+        // https://stackoverflow.com/questions/73428753/plotly-how-to-display-y-values-when-hovering-on-two-subplots-sharing-x-axis/75339658#75339658
         const layout = {
-            height: 1200,
+            margin: {
+                t: 10, b: 40
+            },
+            showlegend: true,
+            height: 150,
             hovermode: 'x unified',
+            yaxis: {
+                fixedrange: true
+            },
             xaxis: {
                 range: [
                     args.from,
@@ -273,17 +258,123 @@ export class ActivitiesService {
                 ],
                 type: 'date',
             },
-            legend: {traceorder: 'reversed'}
+            legend: {traceorder: 'reversed', x: 1, y: 0.5},
         } as Layout
 
-        metrics.forEach((metric, i) => {
-            layout["yaxis" + (i + 1)] = {domain: [i / metrics.length, (i + 1) / metrics.length]}
-        })
+        const blocksHit = this.getMetricsFromQueryDetails(
+            response.traces,
+            timeZonedTimestamps,
+            ["total_blks_hit"],
+            trace => trace.y_values_float.map(value => formatBlocksToDiskSize(value)),
+            {colors: ['#edcba9']}
+        );
 
-        return {
-            layout,
-            data: metrics
+        const blocksRead = this.getMetricsFromQueryDetails(
+            response.traces,
+            timeZonedTimestamps,
+            ["total_blks_read"],
+            trace => trace.y_values_float.map(value => formatBlocksToDiskSize(value)),
+            {colors: ['#b9e6c3']}
+        );
+
+        const blocksWritten = this.getMetricsFromQueryDetails(
+            response.traces,
+            timeZonedTimestamps,
+            ["total_blks_written"],
+            trace => trace.y_values_float.map(value => formatBlocksToDiskSize(value)),
+            {colors: ['#81e5cc']}
+        );
+
+        const queryTimePerCall = this.getMetricsFromQueryDetails(
+            response.traces,
+            timeZonedTimestamps,
+            ["query_time_per_call"],
+            trace => trace.y_values_float.map(value => formatTiming(value)),
+            {colors: ["#d4fccb"]}
+        );
+
+        const rowsSent = this.getMetricsFromQueryDetails(
+            response.traces,
+            timeZonedTimestamps,
+            ["rows_sent"],
+            trace => trace.y_values_float.map(value => formatNumbers(value)),
+            {colors: ['#bc85fe']}
+        );
+
+        const numQueries = this.getMetricsFromQueryDetails(
+            response.traces,
+            timeZonedTimestamps,
+            ["rows_sent"],
+            trace => trace.y_values_float.map(value => formatNumbers(value)),
+            {colors: ['#94eabf']}
+        );
+
+
+        queryDetails["BlockHit"] = {
+            layout: layout,
+            data: blocksHit,
+            name: "Total blocks hit"
         }
+
+        queryDetails["BlockWritten"] = {
+            layout: layout,
+            data: blocksWritten,
+            name: "Total blocks written"
+        }
+
+        queryDetails["BlockRead"] = {
+            layout: layout,
+            data: blocksRead,
+            name: "Total blocks read"
+        }
+
+        queryDetails["QueryTime"] = {
+            layout: layout,
+            data: queryTimePerCall,
+            name: "Query time"
+        }
+
+        queryDetails["RowSent"] = {
+            layout: layout,
+            data: rowsSent,
+            name: "Rows sent"
+        }
+
+        queryDetails["NumQueries"] = {
+            layout: layout,
+            data: numQueries,
+            name: "Number of queries"
+        }
+
+        return queryDetails
+    }
+
+    private getMetricsFromQueryDetails(
+        traces: { [p: string]: Trace },
+        timeZonedTimestamps: string[],
+        keys: string[],
+        customDataFunc: (trace: Trace) => string[],
+        options?: { colors?: string[] }
+    ) {
+        let metrics: PlotData[] = [];
+
+        for (let i = 0; i < keys.length; i++) {
+            const metricKey = keys[i];
+            const trace = traces![metricKey];
+
+            metrics.push({
+                x: timeZonedTimestamps,
+                y: trace.y_values_float,
+                customdata: customDataFunc(trace),
+                hovertemplate: `${metricKey}: <b>%{customdata}</b>,  %{y} <extra></extra>`,
+                name: metricKey,
+                type: 'scatter',
+                mode: "lines+markers",
+                line: {color: options.colors[i], shape: 'spline'},
+            } as PlotData)
+        }
+
+        return metrics;
     }
 
     private setTopQueriesLayout(tableDataArray: TopQueriesByFingerprintTableData[] | TopQueriesTableData[]) {

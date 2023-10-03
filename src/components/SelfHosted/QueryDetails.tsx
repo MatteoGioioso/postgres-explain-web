@@ -3,13 +3,14 @@ import {activitiesService} from "./ioc";
 import {useTimeIntervals} from "../CoreModules/timeIntervals";
 import React, {useEffect, useState} from "react";
 import {AnalyticsToolbar} from "./components/AnalyticsToolbar";
-import {Box, Grid} from "@mui/material";
+import {Box, Grid, Stack} from "@mui/material";
 import {ErrorAlert, ErrorReport} from "../ErrorReporting";
 import {Wrapper} from "../CoreModules/Wrapper";
 import {useAutoRefresh} from "../CoreModules/autoRefresher";
 import {QueryDetailsType, TopQueriesByFingerprintTableData} from "./services/Activities.service";
 import {TopQueriesByFingerprintTable} from "../CoreModules/Activities/TopQueriesByFingerprintTable";
 import Plot from "react-plotly.js";
+import Plotly from 'plotly.js-cartesian-dist-min'
 
 const QueryDetails = () => {
     const {cluster_id, query_fingerprint} = useParams();
@@ -17,6 +18,7 @@ const QueryDetails = () => {
     const {timeInterval, setTimeInterval} = useTimeIntervals();
     const [topQueriesByFingerprint, setTopQueriesByFingerprint] = useState<TopQueriesByFingerprintTableData[]>(undefined)
     const [queryDetails, setQueryDetails] = useState<QueryDetailsType>(undefined)
+    const [plotRefsMap, setPlotRefsMap] = useState<{ [key: string]: any }>({})
 
     const fetchQueryDetails = () => {
         Promise
@@ -39,6 +41,7 @@ const QueryDetails = () => {
                 setQueryDetails(responses[1] as QueryDetailsType)
             })
             .catch(e => {
+                console.error(e)
                 setError({
                     error: e.message,
                     error_stack: "",
@@ -51,7 +54,7 @@ const QueryDetails = () => {
 
     useEffect(() => {
         fetchQueryDetails()
-    }, [])
+    }, [timeInterval.id])
 
     return (
         <>
@@ -63,7 +66,7 @@ const QueryDetails = () => {
                 refresh={() => fetchQueryDetails()}
             />
             <Box sx={{pt: 2}}/>
-            <Grid container>
+            <Grid container spacing={2}>
                 {error && <ErrorAlert error={error} setError={setError}/>}
 
                 <Grid item xs={12}>
@@ -81,15 +84,43 @@ const QueryDetails = () => {
 
                 <Grid item xs={12}>
                     {Boolean(queryDetails) && (
-                        <Wrapper sx={{pt: 2}}>
-                            <Plot
-                                data={queryDetails.data}
-                                layout={queryDetails.layout}
-                                useResizeHandler
-                                config={{displayModeBar: false}}
-                                style={{width: '100%', height: '100%'}}
-                            />
-                        </Wrapper>
+                        Object.values(queryDetails).map(detail => (
+                            <>
+                                <Box sx={{pt: 3}}/>
+                                <Wrapper sx={{pt: 1}} title={detail.name}>
+                                    <Plot
+                                        onInitialized={(figure, graphDiv) => {
+                                            setPlotRefsMap(prevState => ({
+                                                ...prevState,
+                                                [detail.name]: graphDiv
+                                            }))
+                                        }}
+                                        data={detail.data}
+                                        layout={detail.layout}
+                                        useResizeHandler
+                                        config={{displayModeBar: false}}
+                                        style={{width: '100%', height: '100%'}}
+                                        onHover={event => {
+                                            const points = event.points
+                                                .map(point => ({curveNumber: point.curveNumber, pointNumber: point.pointNumber}));
+
+                                            Object
+                                                .keys(plotRefsMap)
+                                                .filter(key => key !== detail.name)
+                                                .forEach(key => Plotly.Fx.hover(plotRefsMap[key], points))
+                                        }}
+                                        onUnhover={event => {
+                                            Object
+                                                .keys(plotRefsMap)
+                                                .filter(key => key !== detail.name)
+                                                .forEach(key => {
+                                                    Plotly.Fx.hover(plotRefsMap[key], [])
+                                                })
+                                        }}
+                                    />
+                                </Wrapper>
+                            </>
+                        ))
                     )}
                 </Grid>
             </Grid>

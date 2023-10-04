@@ -1,4 +1,11 @@
-import {GetClusterInstancesRequest, GetClusterInstancesResponse, GetClustersRequest, GetClustersResponse, Info} from "../proto/info.pb";
+import {
+    GetClusterInstancesRequest,
+    GetClusterInstancesResponse,
+    GetClustersRequest,
+    GetClustersResponse,
+    GetDatabasesRequest, GetDatabasesResponse,
+    Info
+} from "../proto/info.pb";
 
 export class InfoRepository {
     private readonly ORIGIN: string;
@@ -12,4 +19,7 @@ export class InfoRepository {
 
     getClusterInstancesList = async (body: GetClusterInstancesRequest): Promise<GetClusterInstancesResponse> => Info
         .GetClusterInstances(body, {pathPrefix: this.ORIGIN})
+
+    getDatabasesList = async (body: GetDatabasesRequest): Promise<GetDatabasesResponse> => Info
+        .GetDatabases(body, {pathPrefix: this.ORIGIN})
 }

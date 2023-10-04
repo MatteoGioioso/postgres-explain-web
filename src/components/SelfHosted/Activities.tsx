@@ -65,23 +65,29 @@ export const Activities = () => {
             })
     }, []);
 
-    const onClickExplainTopQuery = async (fingerprint, params, instanceName) => {
-        try {
-            const planID = await queryExplainerService.saveQueryPlan({
-                query_fingerprint: fingerprint,
-                cluster_name: cluster_id,
-                instance_name: instanceName,
-                parameters: params,
-            });
-            navigate(`/clusters/${cluster_id}/plans/${planID}`)
-        } catch (e) {
-            setError({
-                error: e.message,
-                error_stack: "",
-                error_details: ""
-            })
-        }
+    const onClickExplainTopQuery = async (fingerprint: string, params: string[], instanceName: string) => {
+        const planID = await queryExplainerService.saveQueryPlan({
+            query_fingerprint: fingerprint,
+            cluster_name: cluster_id,
+            instance_name: instanceName,
+            parameters: params,
+        });
+        navigate(`/clusters/${cluster_id}/plans/${planID}`)
     }
+
+    const OnPlotRelayout = (e: PlotRelayoutEvent) => {
+        if (e.autosize || Object.keys(e).length === 0) return;
+
+        const from = e["xaxis.range[0]"].toString()
+        const to = e["xaxis.range[1]"].toString()
+
+        setTimeInterval({
+            to: () => getTime(to),
+            from: () => getTime(from),
+            name: getTimeIntervalName(from, to),
+            id: getTimeIntervalName(from, to)
+        })
+    };
 
     return (
         <>
@@ -102,19 +108,7 @@ export const Activities = () => {
                                 data={activities.traces}
                                 layout={activities.layout}
                                 useResizeHandler
-                                onRelayout={(e: PlotRelayoutEvent) => {
-                                    if (e.autosize || Object.keys(e).length === 0) return;
-
-                                    const from = e["xaxis.range[0]"].toString()
-                                    const to = e["xaxis.range[1]"].toString()
-
-                                    setTimeInterval({
-                                        to: () => getTime(to),
-                                        from: () => getTime(from),
-                                        name: getTimeIntervalName(from, to),
-                                        id: getTimeIntervalName(from, to)
-                                    })
-                                }}
+                                onRelayout={OnPlotRelayout}
                                 config={{displayModeBar: false, doubleClick: false}}
                                 style={{width: '100%', height: '100%'}}
                             />

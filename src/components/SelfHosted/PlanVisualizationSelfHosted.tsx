@@ -19,7 +19,7 @@ import {uploadSharablePlan} from "../Web/utils";
 import {PLAN_TABS_MAP} from "../CoreModules/tabsMaps";
 import {PlanForm} from "../CoreModules/PlanForm";
 import {QueryForm} from "../CoreModules/QueryForm";
-import {Instance} from "./proto/info.pb";
+import {Database, Instance} from "./proto/info.pb";
 
 const PlanVisualizationSelfHosted = () => {
     const navigate = useNavigate();
@@ -29,6 +29,7 @@ const PlanVisualizationSelfHosted = () => {
     const [optimizationsList, setOptimizationsList] = useState<QueryPlanListItem[]>(null)
     const [plansList, setPlansList] = useState<QueryPlanListItem[]>([])
     const [clusterInstancesList, setClusterInstancesList] = useState<Instance[]>([])
+    const [databasesList, setDatabasesList] = useState<Database[]>([])
 
     async function fetchQueryPlan(planID: string) {
         try {
@@ -44,7 +45,6 @@ const PlanVisualizationSelfHosted = () => {
                 return
             }
             setEnrichedQueryPlan(response)
-            setError(null)
             return response
         } catch (e) {
             setError({
@@ -59,7 +59,6 @@ const PlanVisualizationSelfHosted = () => {
         try {
             const queryPlanListItems = await queryExplainerService.getQueryPlansList({cluster_name: clusterId});
             setPlansList(queryPlanListItems)
-            setError(null)
         } catch (e) {
             setError({
                 error: e.message,
@@ -78,7 +77,6 @@ const PlanVisualizationSelfHosted = () => {
                 order: "oldest"
             });
             setOptimizationsList(response)
-            setError(null)
         } catch (e) {
             setError({
                 error: e.message,
@@ -92,7 +90,6 @@ const PlanVisualizationSelfHosted = () => {
         try {
             const instances = await infoService.getClusterInstancesList({cluster_name: cluster_id});
             setClusterInstancesList(instances)
-            setError(null)
         } catch (e) {
             setError({
                 error: e.message,
@@ -101,6 +98,19 @@ const PlanVisualizationSelfHosted = () => {
             })
         }
 
+    }
+
+    async function fetchDatabasesList(cluster_id: string) {
+        try {
+            const databases = await infoService.getDatabasesList({cluster_name: cluster_id});
+            setDatabasesList(databases)
+        } catch (e) {
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
+        }
     }
 
     const selectPlan = (planId: string) => {
@@ -139,6 +149,7 @@ const PlanVisualizationSelfHosted = () => {
             fetchQueryPlan(plan_id),
             fetchQueryPlansList(cluster_id),
             fetchClusterInstances(cluster_id),
+            fetchDatabasesList(cluster_id)
         ]).then(resp => {
             fetchOptimizations(cluster_id, resp[0] as QueryPlan).then()
         })
@@ -220,7 +231,11 @@ const PlanVisualizationSelfHosted = () => {
                         selectPlan={selectPlan}
                         optimizationModalContent={(callback) => (
                             <>
-                                <QueryForm clusterInstancesList={clusterInstancesList} onSubmit={onSubmitOptimizationForm(callback)}/>
+                                <QueryForm
+                                    databasesList={databasesList}
+                                    clusterInstancesList={clusterInstancesList}
+                                    onSubmit={onSubmitOptimizationForm(callback)}
+                                />
                             </>
                         )}
                     />

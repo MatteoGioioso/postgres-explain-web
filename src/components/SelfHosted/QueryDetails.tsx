@@ -1,6 +1,6 @@
-import {useParams} from "react-router-dom";
-import {activitiesService} from "./ioc";
-import {useTimeIntervals} from "../CoreModules/timeIntervals";
+import {useNavigate, useParams} from "react-router-dom";
+import {activitiesService, infoService, queryExplainerService} from "./ioc";
+import {getTime, getTimeIntervalName, useTimeIntervals} from "../CoreModules/timeIntervals";
 import React, {useEffect, useState} from "react";
 import {AnalyticsToolbar} from "./components/AnalyticsToolbar";
 import {Box, Grid, Stack} from "@mui/material";
@@ -11,6 +11,10 @@ import {QueryDetailsType, TopQueriesByFingerprintTableData} from "./services/Act
 import {TopQueriesByFingerprintTable} from "../CoreModules/Activities/TopQueriesByFingerprintTable";
 import Plot from "react-plotly.js";
 import Plotly from 'plotly.js-cartesian-dist-min'
+import {PlotRelayoutEvent} from "plotly.js";
+import {Instance} from "./proto/info.pb";
+import {QueryPlan, QueryPlanListItem} from "../CoreModules/types";
+import {PlansList} from "../CoreModules/PlansList";
 
 const QueryDetails = () => {
     const {cluster_id, query_fingerprint} = useParams();
@@ -19,6 +23,40 @@ const QueryDetails = () => {
     const [topQueriesByFingerprint, setTopQueriesByFingerprint] = useState<TopQueriesByFingerprintTableData[]>(undefined)
     const [queryDetails, setQueryDetails] = useState<QueryDetailsType>(undefined)
     const [plotRefsMap, setPlotRefsMap] = useState<{ [key: string]: any }>({})
+    const [clusterInstancesList, setClusterInstancesList] = useState<Instance[]>([])
+    const [optimizationsList, setOptimizationsList] = useState<QueryPlanListItem[]>(null)
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        infoService
+            .getClusterInstancesList({cluster_name: cluster_id})
+            .then(setClusterInstancesList)
+            .catch(e => {
+                setError({
+                    error: e.message,
+                    error_stack: "",
+                    error_details: ""
+                })
+            })
+    }, []);
+
+    async function fetchOptimizations() {
+        try {
+            const response = await queryExplainerService.getOptimizationsList({
+                cluster_name: cluster_id,
+                query_fingerprint: query_fingerprint,
+                order: "oldest"
+            });
+            setOptimizationsList(response)
+            setError(null)
+        } catch (e) {
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
+        }
+    }
 
     const fetchQueryDetails = () => {
         Promise
@@ -56,6 +94,64 @@ const QueryDetails = () => {
         fetchQueryDetails()
     }, [timeInterval.id])
 
+    useEffect(() => {
+        fetchOptimizations()
+    }, []);
+
+    const OnPlotRelayout = (e: PlotRelayoutEvent) => {
+        if (e.autosize || Object.keys(e).length === 0) return;
+
+        const from = e["xaxis.range[0]"].toString()
+        const to = e["xaxis.range[1]"].toString()
+
+        setTimeInterval({
+            to: () => getTime(to),
+            from: () => getTime(from),
+            name: getTimeIntervalName(from, to),
+            id: getTimeIntervalName(from, to)
+        })
+    };
+
+    const onPlotHover = (event, detail) => {
+        const points = event.points
+            .map(point => ({curveNumber: point.curveNumber, pointNumber: point.pointNumber}));
+
+        Object
+            .keys(plotRefsMap)
+            .filter(key => key !== detail.name)
+            .forEach(key => Plotly.Fx.hover(plotRefsMap[key], points))
+    };
+
+    const onPlotUnhover = (event, detail) => {
+        Object
+            .keys(plotRefsMap)
+            .filter(key => key !== detail.name)
+            .forEach(key => {
+                Plotly.Fx.hover(plotRefsMap[key], [])
+            })
+    };
+
+    const onClickExplainTopQuery = async (querySha: string, params: string[], instanceName: string) => {
+        try {
+            const planID = await queryExplainerService.saveQueryPlan({
+                cluster_name: cluster_id,
+                instance_name: instanceName,
+                query_sha: querySha,
+            });
+            navigate(`/clusters/${cluster_id}/plans/${planID}`)
+        } catch (e) {
+            setError({
+                error: e.message,
+                error_stack: "",
+                error_details: ""
+            })
+        }
+    }
+
+    const onClickRelatedPlan = (item: QueryPlanListItem) => {
+        navigate(`/clusters/${cluster_id}/plans/${item.id}`)
+    }
+
     return (
         <>
             <AnalyticsToolbar
@@ -69,59 +165,57 @@ const QueryDetails = () => {
             <Grid container spacing={2}>
                 {error && <ErrorAlert error={error} setError={setError}/>}
 
-                <Grid item xs={12}>
+                <Grid item xs={8}>
                     {Boolean(topQueriesByFingerprint) && (
                         <Wrapper sx={{pt: 2}} title="Activities">
                             <TopQueriesByFingerprintTable
                                 tableDataArray={topQueriesByFingerprint}
-                                onClickExplainTopQuery={() => {
-                                }}
-                                clusterInstancesList={[]}
+                                onClickExplainTopQuery={onClickExplainTopQuery}
+                                clusterInstancesList={clusterInstancesList}
                             />
                         </Wrapper>
                     )}
                 </Grid>
 
-                <Grid item xs={12}>
-                    {Boolean(queryDetails) && (
-                        Object.values(queryDetails).map(detail => (
-                            <>
-                                <Box sx={{pt: 3}}/>
-                                <Wrapper sx={{pt: 1}} title={detail.name}>
-                                    <Plot
-                                        onInitialized={(figure, graphDiv) => {
-                                            setPlotRefsMap(prevState => ({
-                                                ...prevState,
-                                                [detail.name]: graphDiv
-                                            }))
-                                        }}
-                                        data={detail.data}
-                                        layout={detail.layout}
-                                        useResizeHandler
-                                        config={{displayModeBar: false}}
-                                        style={{width: '100%', height: '100%'}}
-                                        onHover={event => {
-                                            const points = event.points
-                                                .map(point => ({curveNumber: point.curveNumber, pointNumber: point.pointNumber}));
+                <Grid item xs={4}>
+                        <Wrapper sx={{pt: 2}} title="Related plans">
+                            {Boolean(optimizationsList) && (
+                                <PlansList items={optimizationsList} sx={{height: "30vh"}} onClick={onClickRelatedPlan} />
+                            )}
+                        </Wrapper>
+                </Grid>
 
-                                            Object
-                                                .keys(plotRefsMap)
-                                                .filter(key => key !== detail.name)
-                                                .forEach(key => Plotly.Fx.hover(plotRefsMap[key], points))
-                                        }}
-                                        onUnhover={event => {
-                                            Object
-                                                .keys(plotRefsMap)
-                                                .filter(key => key !== detail.name)
-                                                .forEach(key => {
-                                                    Plotly.Fx.hover(plotRefsMap[key], [])
-                                                })
-                                        }}
-                                    />
-                                </Wrapper>
-                            </>
-                        ))
-                    )}
+                <Grid item xs={12}>
+                    <Grid container spacing={2}>
+                        {Boolean(queryDetails) && (
+                            Object.values(queryDetails).map(detail => {
+                                return (
+                                    <Grid item xs={6} key={detail.name}>
+                                        <Box sx={{pt: 3}}/>
+                                        <Wrapper sx={{pt: 1}} title={detail.name}>
+                                            <Plot
+                                                onInitialized={(figure, graphDiv) => {
+                                                    setPlotRefsMap(prevState => ({
+                                                        ...prevState,
+                                                        [detail.name]: graphDiv
+                                                    }))
+                                                }}
+                                                data={detail.data}
+                                                layout={detail.layout}
+                                                useResizeHandler
+                                                config={{displayModeBar: false, doubleClick: false}}
+                                                style={{width: '100%', height: '100%'}}
+                                                onHover={(e) => onPlotHover(e, detail)}
+                                                onUnhover={(e) => onPlotUnhover(e, detail)}
+                                                onRelayout={OnPlotRelayout}
+                                            />
+                                        </Wrapper>
+                                    </Grid>
+                                );
+                            })
+                        )}
+
+                    </Grid>
                 </Grid>
             </Grid>
         </>

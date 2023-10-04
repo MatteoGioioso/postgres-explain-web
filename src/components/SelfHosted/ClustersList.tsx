@@ -25,6 +25,7 @@ const ClustersList = () => {
 
     useEffect(() => {
         setRefreshInterval(AUTO_REFRESH_INTERVALS[2])
+        fetchClusterList()
     }, [])
 
     function onCardClick(cluster) {

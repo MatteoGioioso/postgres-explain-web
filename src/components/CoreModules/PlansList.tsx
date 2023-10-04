@@ -1,4 +1,4 @@
-import {Box, List, ListItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
+import {Box, List, ListItem, ListItemIcon, ListItemText, Theme, Typography} from "@mui/material";
 import {GenericDetailsPopover} from "./GenericDetailsPopover";
 import {CopyToClipboardButton} from "./CopyToClipboard";
 import Highlight from "react-highlight";
@@ -6,12 +6,14 @@ import {ConsoleSqlOutlined, DeleteOutlined} from "@ant-design/icons";
 import React from "react";
 import {formatDate} from "./utils";
 import {QueryPlanListItem} from "./types";
+import {SxProps} from "@mui/system";
 
 interface PlansListProps {
     items: QueryPlanListItem[]
     clusterId?: string
-    onClick?: (item: QueryPlanListItem) => void
+    onClick: (item: QueryPlanListItem) => void
     onDelete?: (item: QueryPlanListItem) => void
+    sx?: SxProps<Theme>
 }
 
 export function PlansList(props: PlansListProps) {
@@ -25,7 +27,7 @@ export function PlansList(props: PlansListProps) {
 
     return (
         <List
-            sx={{width: '100%', bgcolor: 'background.paper', height: '75vh', overflow: 'auto'}}
+            sx={{width: '100%', bgcolor: 'background.paper', height: '75vh', overflow: 'auto', ...props.sx}}
         >
             {props.items.map(item => (
                 <ListItem key={item.id} alignItems='flex-start'>
@@ -47,9 +49,11 @@ export function PlansList(props: PlansListProps) {
                         }
                         secondary={formatDate(item.period_start)}
                     />
-                    <ListItemIcon sx={{pr: 4}}>
-                        <DeleteOutlined onClick={() => props.onDelete(item)} />
-                    </ListItemIcon>
+                    {Boolean(props.onDelete) && (
+                        <ListItemIcon sx={{pr: 4}}>
+                            <DeleteOutlined onClick={() => props.onDelete(item)} />
+                        </ListItemIcon>
+                    )}
                     <GenericDetailsPopover
                         name={"query"}
                         content={

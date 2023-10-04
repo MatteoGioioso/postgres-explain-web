@@ -1,4 +1,4 @@
-import {Instance} from "../SelfHosted/proto/info.pb";
+import {Database, Instance} from "../SelfHosted/proto/info.pb";
 import {Formik} from "formik";
 import {Button, FormHelperText, Grid, Stack, TextField} from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
@@ -9,10 +9,11 @@ import {FormikHelpers} from "formik/dist/types";
 
 interface QueryFormProps {
     clusterInstancesList: Instance[]
+    databasesList: Database[]
     onSubmit: (values: any, formikHelpers: FormikHelpers<any>) => void | Promise<any>
 }
 
-export const QueryForm = ({clusterInstancesList, onSubmit}: QueryFormProps) => {
+export const QueryForm = ({clusterInstancesList, databasesList, onSubmit}: QueryFormProps) => {
     return (
         <Formik
             initialValues={{
@@ -87,8 +88,8 @@ export const QueryForm = ({clusterInstancesList, onSubmit}: QueryFormProps) => {
                                                 inputProps={{}}
                                                 error={Boolean(touched.database && errors.database)}
                                             >
-                                                {[].map(database => (
-                                                    <MenuItem key={database.id} value={database.id}>
+                                                {databasesList.map(database => (
+                                                    <MenuItem key={database.name} value={database.name}>
                                                         {database.name}
                                                     </MenuItem>
                                                 ))}

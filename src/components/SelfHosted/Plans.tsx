@@ -52,7 +52,11 @@ const Plans = () => {
                     <Wrapper sx={{pt: 2, pr: 2}} title="Custom query">
                         {Boolean(clusterInstancesList?.length) && (
                             <Box sx={{p: 3}}>
-                                <QueryForm clusterInstancesList={clusterInstancesList} onSubmit={onSubmitCustomQuery}/>
+                                <QueryForm
+                                    databasesList={[]}
+                                    clusterInstancesList={clusterInstancesList}
+                                    onSubmit={onSubmitCustomQuery}
+                                />
                             </Box>
                         )}
                     </Wrapper>

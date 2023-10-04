@@ -11,7 +11,7 @@ export type SaveQueryPlanRequest = {
   period_start_to?: GoogleProtobufTimestamp.Timestamp
   instance_name?: string
   cluster_name?: string
-  query_id?: string
+  query_sha?: string
   query_fingerprint?: string
   query?: string
   database?: string

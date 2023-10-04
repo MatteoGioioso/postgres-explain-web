@@ -245,7 +245,7 @@ export class ActivitiesService {
             margin: {
                 t: 10, b: 40
             },
-            showlegend: true,
+            showlegend: false,
             height: 150,
             hovermode: 'x unified',
             yaxis: {
@@ -258,7 +258,6 @@ export class ActivitiesService {
                 ],
                 type: 'date',
             },
-            legend: {traceorder: 'reversed', x: 1, y: 0.5},
         } as Layout
 
         const blocksHit = this.getMetricsFromQueryDetails(
@@ -495,12 +494,5 @@ export class ActivitiesService {
 
     private hideZeroValuesFromHoverbox(trace: Trace): 'none' | 'y+name' {
         return trace.y_values_float?.map(val => val === 0 ? 'none' : 'y+name') as unknown as 'none' | 'y+name';
-    }
-
-    private pastelColors(): string {
-        const r = (Math.round(Math.random() * 127) + 127).toString(16);
-        const g = (Math.round(Math.random() * 127) + 127).toString(16);
-        const b = (Math.round(Math.random() * 127) + 127).toString(16);
-        return '#' + r + g + b;
     }
 }
